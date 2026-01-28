@@ -187,6 +187,8 @@ public abstract class GameEngine extends JPanel implements ActionListener {
         Vector2 offset = camera.getRenderOffset();
         g.translate(-(int)offset.x, -(int)offset.y);
 
+        if (objectManager != null) objectManager.draw((Graphics2D) g);
+
         draw((Graphics2D) g);
 
         g.translate((int)offset.x, (int)offset.y);
@@ -200,6 +202,7 @@ public abstract class GameEngine extends JPanel implements ActionListener {
         camera.update(deltaTime);
 
         update();
+        if (objectManager != null) objectManager.update(deltaTime);
         repaint();
 
 
