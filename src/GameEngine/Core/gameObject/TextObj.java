@@ -1,0 +1,141 @@
+package GameEngine.Core.gameObject;
+
+import GameEngine.Core.util.Vector2;
+
+import java.awt.*;
+
+public class TextObj extends GameObject {
+    private String text;
+    private Color color;
+    private Font font;
+    private TextAlignment alignment = TextAlignment.LEFT;
+
+    // Text-Alignment Optionen
+    public enum TextAlignment {
+        LEFT, CENTER, RIGHT
+    }
+
+    public TextObj(String text, Vector2 pos, Color color, Font font, int renderOrder) {
+        this.renderOrder = renderOrder;
+        this.text = text;
+        this.transform.position = pos;
+        this.color = color;
+        this.font = font;
+    }
+
+    // Vereinfachter Konstruktor mit Defaults
+    public TextObj(String text, Vector2 pos) {
+        this(text, pos, Color.WHITE, new Font("Arial", Font.PLAIN, 16), 0);
+    }
+
+    // Konstruktor ohne renderOrder
+    public TextObj(String text, Vector2 pos, Color color, Font font) {
+        this(text, pos, color, font, 0);
+    }
+
+    @Override
+    public void update(double deltaTime) {
+        // Kann für Animationen genutzt werden
+    }
+
+    // Setters
+    public void setColor(Color color) {
+        this.color = color;
+    }
+
+    public void setFont(Font font) {
+        this.font = font;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public void setText(int text) {
+        this.text = Integer.toString(text);
+    }
+
+    public void setText(float text) {
+        this.text = String.format("%.2f", text); // 2 Dezimalstellen
+    }
+
+    public void setText(double text) {
+        this.text = String.format("%.2f", text);
+    }
+
+    public void setPosition(Vector2 pos) {
+        this.transform.position = pos;
+    }
+
+    public void setAlignment(TextAlignment alignment) {
+        this.alignment = alignment;
+    }
+
+    // Getters
+    public String getText() {
+        return text;
+    }
+
+    public Color getColor() {
+        return color;
+    }
+
+    public Font getFont() {
+        return font;
+    }
+
+    /**
+     * Gibt die Breite des Textes in Pixeln zurück
+     */
+    public int getTextWidth(Graphics2D g) {
+        FontMetrics fm = g.getFontMetrics(font);
+        return fm.stringWidth(text);
+    }
+
+    /**
+     * Gibt die Höhe des Textes in Pixeln zurück
+     */
+    public int getTextHeight(Graphics2D g) {
+        FontMetrics fm = g.getFontMetrics(font);
+        return fm.getHeight();
+    }
+
+    /**
+     * Zentriert den Text an einer Position
+     */
+    public void centerAt(Vector2 pos, Graphics2D g) {
+        FontMetrics fm = g.getFontMetrics(font);
+        int textWidth = fm.stringWidth(text);
+        int textHeight = fm.getHeight();
+
+        this.transform.position.x = pos.x - textWidth / 2f;
+        this.transform.position.y = pos.y + textHeight / 4f;
+    }
+
+    @Override
+    public void draw(Graphics2D g) {
+        g.setColor(color);
+        g.setFont(font);
+
+        float drawX = transform.position.x;
+        float drawY = transform.position.y;
+
+        // Alignment anwenden
+        if (alignment == TextAlignment.CENTER) {
+            FontMetrics fm = g.getFontMetrics(font);
+            int textWidth = fm.stringWidth(text);
+            drawX -= textWidth / 2f;
+        } else if (alignment == TextAlignment.RIGHT) {
+            FontMetrics fm = g.getFontMetrics(font);
+            int textWidth = fm.stringWidth(text);
+            drawX -= textWidth;
+        }
+
+        g.drawString(text, drawX, drawY);
+    }
+
+    @Override
+    public void onCollision(GameObject collider) {
+        // Text hat keine Kollision
+    }
+}
