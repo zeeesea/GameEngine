@@ -1,7 +1,6 @@
 package GameEngine.Tools.SpriteEditor;
 
 import GameEngine.Core.util.Console.Console;
-import GameEngine.Core.util.Console.ConsoleColor;
 import GameEngine.Core.util.Console.ConsoleTag;
 
 import java.awt.*;
