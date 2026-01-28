@@ -78,6 +78,9 @@ public abstract class GameEngine extends JPanel implements ActionListener {
     }
 
     //<editor-fold desc="Setter/Toggle Methods">
+    public static void launch(GameEngine engine) {
+        new GameEngineFrame(engine);
+    }
     protected void setWindowSize(int width, int height) {
         SCREEN_WIDTH = width;
         SCREEN_HEIGHT = height;
@@ -120,6 +123,7 @@ public abstract class GameEngine extends JPanel implements ActionListener {
         }
         Console.log(ConsoleTag.SYSTEM, "Setting Fullscreen to " + fullscreen);
     }
+
     protected void setFPS(int fps) {
         FPS = fps;
     }
