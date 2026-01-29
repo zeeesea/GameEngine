@@ -4,6 +4,8 @@ import GameEngine.Core.gameObject.GameObject;
 import GameEngine.Core.gameObject.Transform;
 import GameEngine.Core.gameObject.collider.BoxCollider2D;
 import GameEngine.Core.input.*;
+import GameEngine.Core.util.MathUtils;
+import GameEngine.Core.util.Vector2;
 
 import java.awt.*;
 import java.util.function.Consumer;
@@ -16,6 +18,7 @@ public class ButtonObj extends GameObject {
     private Font font;
     private boolean lastHoverState;
     private Consumer<Boolean> onHoverChange;
+
 
 
     public ButtonObj(Rectangle rect, Color color, Runnable onClick, String textString, Font font, Color textColor) {
@@ -104,6 +107,8 @@ public class ButtonObj extends GameObject {
     public Color getColor() {
         return color;
     }
+
+
 
     @Override
     public void draw(Graphics2D g) {

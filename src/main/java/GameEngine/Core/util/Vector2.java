@@ -38,8 +38,14 @@ public class Vector2 {
     public Vector2 add(Vector2 other) {
         return new Vector2(this.x + other.x, this.y + other.y);
     }
+    public Vector2 add(float xy) {
+        return add(new Vector2(xy));
+    }
     public Vector2 subtract(Vector2 other) {
         return new Vector2(this.x - other.x, this.y - other.y);
+    }
+    public Vector2 subtract(float xy) {
+        return subtract(new Vector2(xy));
     }
     public Vector2 multiply(float scalar) {
         return new Vector2(this.x * scalar, this.y * scalar);
@@ -86,6 +92,14 @@ public class Vector2 {
     }
     public float toAngleDegrees() {
         return (float) Math.toDegrees(Math.atan2(y, x));
+    }
+    public boolean smallerThan(Vector2 other) {
+        if (other == null) return false;
+        return x < other.x && y < other.y;
+    }
+    public boolean biggerThan(Vector2 other) {
+        if (other == null) return false;
+        return x > other.x && y > other.y;
     }
 
     public Vector2 directionTo(Vector2 target) {
