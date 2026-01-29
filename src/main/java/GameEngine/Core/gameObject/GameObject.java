@@ -76,7 +76,7 @@ public abstract class GameObject {
         draw(g);
     }
 
-    public void init() {}
+    public abstract void init();
     public abstract void update(double deltaTime);
     public abstract void draw(Graphics2D g);
     public abstract void onCollision(GameObject collider);
