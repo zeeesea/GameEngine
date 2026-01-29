@@ -1,11 +1,7 @@
 <h1>🎮 GameEngine</h1>
 
-
-
 A lightweight, easy-to-use 2D Java Game Engine
 Includes a built-in Sprite Editor, Animation System, and intuitive GameObject System for fast development.
-
-
 
 <h2>✨ Features </h2>
 
@@ -176,7 +172,7 @@ public class Player extends GameObject {
 }
 ```
 
-Add to game (in the ```java extends GameEngine ``` file:
+Add to game (in the "... extends GameEngine" file:
 ```java
 objectManager.add(new Player());
 ```
