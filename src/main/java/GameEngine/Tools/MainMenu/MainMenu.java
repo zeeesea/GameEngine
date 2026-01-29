@@ -2,7 +2,7 @@ package GameEngine.Tools.MainMenu;
 
 import GameEngine.Core.GameEngine;
 import GameEngine.Core.GameEngineFrame;
-import GameEngine.Core.gameObject.*;
+import GameEngine.Core.gameObject.Obj.ButtonObj;
 import GameEngine.Core.scenes.SceneManager;
 import GameEngine.Tools.SpriteEditor.SpriteEditor;
 

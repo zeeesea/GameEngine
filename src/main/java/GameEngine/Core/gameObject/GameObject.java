@@ -490,6 +490,9 @@ public abstract class GameObject {
                         transform.position.y > getScreenHeight() - transform.scale.y
                 );
     }
+    protected boolean wasMousePressedLastFrame() {
+        return wasMousePressedLastFrame;
+    }
     protected void clampPositionToScreen() {
         transform.position = transform.position.clamp(
                 0, getScreenWidth() - transform.scale.x,

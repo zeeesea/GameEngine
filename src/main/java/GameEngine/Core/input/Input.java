@@ -128,6 +128,9 @@ public class Input {
         int i = c.getIndex();
         return !currentKeys[i] && lastKeys[i];
     }
+    public static boolean getKeyLast(KeyCode c) {
+        return lastKeys[c.index];
+    }
 
     public static void setKey(KeyCode c, boolean b) {
         currentKeys[c.index] = b;
@@ -150,6 +153,9 @@ public class Input {
     public static boolean getMouseButtonDown(MouseCode c) {
         int i = c.index;
         return currentMouse[i] && !lastMouse[i];
+    }
+    public static boolean getMouseLast(MouseCode c) {
+        return lastMouse[c.index];
     }
 
     public static boolean getMouseButtonUp(MouseCode c) {

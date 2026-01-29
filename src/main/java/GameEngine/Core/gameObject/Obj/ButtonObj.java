@@ -1,9 +1,12 @@
-package GameEngine.Core.gameObject;
+package GameEngine.Core.gameObject.Obj;
 
+import GameEngine.Core.gameObject.GameObject;
+import GameEngine.Core.gameObject.Transform;
 import GameEngine.Core.gameObject.collider.BoxCollider2D;
 import GameEngine.Core.input.*;
 
 import java.awt.*;
+import java.util.function.Consumer;
 
 public class ButtonObj extends GameObject {
     private final Runnable onClick;
@@ -11,6 +14,9 @@ public class ButtonObj extends GameObject {
     private TextObj text;
     private String textString;
     private Font font;
+    private boolean lastHoverState;
+    private Consumer<Boolean> onHoverChange;
+
 
     public ButtonObj(Rectangle rect, Color color, Runnable onClick, String textString, Font font, Color textColor) {
         transform = new Transform(rect);
@@ -32,22 +38,27 @@ public class ButtonObj extends GameObject {
     }
 
     public ButtonObj(Rectangle rect, Runnable onClick, String textString) {
-        transform = new Transform(rect);
-        this.onClick = onClick;
-        this.color = Color.white;
-        this.font = new Font("Arial", Font.BOLD, 30);
-        this.textString = textString;
-
-        this.text = new TextObj(
+        this(
+                rect,
+                Color.white,
+                onClick,
                 textString,
-                getCenterPosition(),
-                Color.black,
-                font,
-                renderOrder + 1
+                new Font("Arial", Font.BOLD, 30),
+                Color.BLACK
         );
+    }
 
-        // Collider
-        collider = new BoxCollider2D(this);
+    public ButtonObj(Rectangle rect, Color color, Runnable onClick, Consumer<Boolean> onHoverChange, String textString, Font font, Color textColor) {
+        this(
+                rect,
+                color,
+                onClick,
+                textString,
+                font,
+                textColor
+        );
+        this.onHoverChange = onHoverChange;
+
     }
 
     @Override
@@ -60,6 +71,11 @@ public class ButtonObj extends GameObject {
         if (!active) return; // Nur updaten wenn aktiv
 
         boolean hovering = collider.collidesWithPoint(Input.getMousePosition());
+        if (onHoverChange != null && hovering != lastHoverState) {
+            onHoverChange.accept(hovering);
+            lastHoverState = hovering;
+        }
+
         if (hovering && Input.getMouseButtonDown(Input.MouseCode.LEFT)) {
             onClick.run();
         }

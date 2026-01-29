@@ -1,5 +1,6 @@
-package GameEngine.Core.gameObject;
+package GameEngine.Core.gameObject.Obj;
 
+import GameEngine.Core.gameObject.GameObject;
 import GameEngine.Core.input.Input;
 import GameEngine.Core.util.Vector2;
 
@@ -203,9 +204,10 @@ public class SliderObj extends GameObject {
     public void update(double deltaTime) {
         Vector2 mousePos = Input.getMousePosition();
         boolean mousePressed = Input.getMouseButton(Input.MouseCode.LEFT);
+        boolean wasPressed = Input.getMouseLast(Input.MouseCode.LEFT);
 
         if (mousePressed) {
-            if (!dragging && isMouseOver(mousePos)) {
+            if (!dragging && isMouseOver(mousePos) && !wasPressed) {
                 dragging = true;
             }
 

@@ -1,5 +1,6 @@
-package GameEngine.Core.gameObject;
+package GameEngine.Core.gameObject.Obj;
 
+import GameEngine.Core.gameObject.GameObject;
 import GameEngine.Core.util.Vector2;
 
 import java.awt.*;

@@ -51,6 +51,41 @@ public class Transform {
         scale.x = sx;
         scale.y = sy;
     }
+    public void scaleCentered(float factorX, float factorY) {
+        float oldWidth = scale.x;
+        float oldHeight = scale.y;
+
+        float newWidth = scale.x * factorX;
+        float newHeight = scale.y * factorY;
+
+        // Position anpassen, damit die Mitte gleich bleibt
+        position.x -= (newWidth - oldWidth) / 2f;
+        position.y -= (newHeight - oldHeight) / 2f;
+
+        scale.x = newWidth;
+        scale.y = newHeight;
+    }
+    public void scaleCentered(Vector2 factor) {
+        scaleCentered(factor.x, factor.y);
+    }
+    public void setScaleCentered(float sx, float sy) {
+        float deltaX = sx - scale.x;
+        float deltaY = sy - scale.y;
+
+        // Position anpassen, damit die Mitte gleich bleibt
+        position.x -= deltaX / 2f;
+        position.y -= deltaY / 2f;
+
+        // Scale setzen
+        scale.x = sx;
+        scale.y = sy;
+    }
+
+    public void setScaleCentered(Vector2 newScale) {
+        setScaleCentered(newScale.x, newScale.y);
+    }
+
+
 
     public Transform copy() {
         return new Transform(position.copy(), rotation, scale.copy());

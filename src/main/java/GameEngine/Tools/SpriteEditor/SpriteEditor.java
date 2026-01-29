@@ -1,7 +1,9 @@
 package GameEngine.Tools.SpriteEditor;
 
 import GameEngine.Core.*;
-import GameEngine.Core.gameObject.*;
+import GameEngine.Core.gameObject.Obj.ButtonObj;
+import GameEngine.Core.gameObject.Obj.SliderObj;
+import GameEngine.Core.gameObject.Obj.TextObj;
 import GameEngine.Core.input.Input;
 import GameEngine.Core.util.Vector2;
 
