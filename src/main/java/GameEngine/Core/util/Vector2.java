@@ -3,11 +3,17 @@ package GameEngine.Core.util;
 public class Vector2 {
     public float x, y;
 
-    public static final Vector2 zero =  new Vector2(0,0);
-    public static final Vector2 up = new Vector2(0,1);
-    public static final Vector2 down = new Vector2(0,-1);
-    public static final Vector2 left = new Vector2(-1,0);
-    public static final Vector2 right = new Vector2(1,0);
+    private static final Vector2 zero =  new Vector2(0,0);
+    private static final Vector2 up = new Vector2(0,1);
+    private static final Vector2 down = new Vector2(0,-1);
+    private static final Vector2 left = new Vector2(-1,0);
+    private static final Vector2 right = new Vector2(1,0);
+
+    public static Vector2 zero() { return zero.copy(); }
+    public static Vector2 up() { return up.copy(); }
+    public static Vector2 down() { return down.copy(); }
+    public static Vector2 left() { return left.copy(); }
+    public static Vector2 right() { return right.copy(); }
 
     public Vector2(float x, float y) {
         this.x = x;
