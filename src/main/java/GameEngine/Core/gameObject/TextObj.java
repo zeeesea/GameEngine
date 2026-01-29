@@ -34,6 +34,11 @@ public class TextObj extends GameObject {
     }
 
     @Override
+    public void init() {
+
+    }
+
+    @Override
     public void update(double deltaTime) {
         // Kann für Animationen genutzt werden
     }

@@ -195,6 +195,11 @@ public class SliderObj extends GameObject {
     // ===== UPDATE & DRAW =====
 
     @Override
+    public void init() {
+
+    }
+
+    @Override
     public void update(double deltaTime) {
         Vector2 mousePos = Input.getMousePosition();
         boolean mousePressed = Input.getMouseButton(Input.MouseCode.LEFT);

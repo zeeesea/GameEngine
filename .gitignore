@@ -14,6 +14,9 @@ target/
 *.iws
 *.ipr
 
+# Ignore specific source/test folder
+/src/main/java/TEST_IGNORE/
+
 ############################
 # Eclipse
 ############################

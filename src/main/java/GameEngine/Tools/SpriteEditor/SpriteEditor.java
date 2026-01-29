@@ -11,7 +11,7 @@ import java.util.Stack;
 public class SpriteEditor extends GameEngine {
 
     public static void main(String[] args) {
-        new GameEngineFrame(new SpriteEditor());
+        GameEngine.launch(new SpriteEditor());
     }
 
     private class Action {
@@ -787,8 +787,6 @@ public class SpriteEditor extends GameEngine {
 
     @Override
     protected void update() {
-        objectManager.update(deltaTime);
-
         // Animation Preview
         if (currentMode == EditorMode.ANIMATION && isPlaying && totalFrames > 1) {
             animationTimer += deltaTime;
@@ -965,8 +963,6 @@ public class SpriteEditor extends GameEngine {
         g.fillRect(paletteX + 70, paletteY - 20, 40, 15);
         g.setColor(Color.WHITE);
         g.drawRect(paletteX + 70, paletteY - 20, 40, 15);
-
-        objectManager.draw(g);
     }
 
     private class ColorButton extends ButtonObj {

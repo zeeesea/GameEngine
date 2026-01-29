@@ -51,6 +51,11 @@ public class ButtonObj extends GameObject {
     }
 
     @Override
+    public void init() {
+
+    }
+
+    @Override
     public void update(double deltaTime) {
         if (!active) return; // Nur updaten wenn aktiv
 
@@ -108,6 +113,9 @@ public class ButtonObj extends GameObject {
         if (text != null) {
             text.setActive(active);
         }
+    }
+    public void toggleActive() {
+        setActive(!active);
     }
 
     @Override
