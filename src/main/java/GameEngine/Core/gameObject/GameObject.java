@@ -493,12 +493,13 @@ public abstract class GameObject {
     }
     protected boolean isOutOfScreen() {
         return (
-                transform.position.x + transform.scale.x / 2 > getScreenSize().x ||
-                        transform.position.y + transform.scale.y / 2 > getScreenSize().y ||
-                        transform.position.x + transform.scale.x < 0 ||
-                        transform.position.y + transform.scale.y < 0
-        );
+                        transform.position.x < 0 ||
+                        transform.position.y < 0 ||
+                        transform.position.x > getScreenWidth() - transform.scale.x ||
+                        transform.position.y > getScreenHeight() - transform.scale.y
+                );
     }
+
     protected void clampPositionToScreen() {
         transform.position = transform.position.clamp(
                 0, getScreenWidth() - transform.scale.x,
