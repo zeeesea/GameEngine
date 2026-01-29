@@ -31,12 +31,12 @@ public abstract class GameObject {
     private Float customSpriteScale = null;
     protected static SpriteManager spriteManager;
 
-    // ===== SPRITE CACHE (pro Instanz) =====
-    private Map<String, Color[][]> spriteCache = new HashMap<>();
+    // ===== SPRITE CACHE (per instance) =====
+    private final Map<String, Color[][]> spriteCache = new HashMap<>();
 
     // ===== ANIMATION SYSTEM =====
     protected static AnimationManager animationManager;
-    private Map<String, Animation> animations = new HashMap<>();
+    private final Map<String, Animation> animations = new HashMap<>();
     private Animation currentAnimation = null;
     private String currentAnimationName = null;
 
@@ -374,20 +374,7 @@ public abstract class GameObject {
         int spriteHeight = currentFrame[0].length;
         float pixelSize = getEffectiveSpriteScale();
 
-        for (int py = 0; py < spriteHeight; py++) {
-            for (int px = 0; px < spriteWidth; px++) {
-                Color color = currentFrame[px][py];
-                if (color.getAlpha() == 0) continue;
-
-                g.setColor(color);
-                g.fillRect(
-                        (int)(x + px * pixelSize),
-                        (int)(y + py * pixelSize),
-                        (int)Math.ceil(pixelSize),
-                        (int)Math.ceil(pixelSize)
-                );
-            }
-        }
+        drawSpriteColors(x, y, spriteWidth, spriteHeight, pixelSize);
     }
 
     private void drawSpriteRotated(float x, float y, float rotation) {
@@ -404,6 +391,12 @@ public abstract class GameObject {
         AffineTransform oldTransform = g.getTransform();
         g.rotate(Math.toRadians(rotation), centerX, centerY);
 
+        drawSpriteColors(x, y, spriteWidth, spriteHeight, pixelSize);
+
+        g.setTransform(oldTransform);
+    }
+
+    private void drawSpriteColors(float x, float y, int spriteWidth, int spriteHeight, float pixelSize) {
         for (int py = 0; py < spriteHeight; py++) {
             for (int px = 0; px < spriteWidth; px++) {
                 Color color = currentFrame[px][py];
@@ -418,8 +411,6 @@ public abstract class GameObject {
                 );
             }
         }
-
-        g.setTransform(oldTransform);
     }
 
     protected void drawSpriteAt(float x, float y) {
@@ -554,7 +545,7 @@ public abstract class GameObject {
     protected void drawGridByCount(Color color, int columns, int rows, int thickness) {
         g.setColor(color);
         g.setStroke(new BasicStroke(thickness));
-        drawGrid(new Vector2(getScreenWidth()/columns, getScreenHeight()/rows));
+        drawGrid(new Vector2((float) getScreenWidth() /columns, (float) getScreenHeight() /rows));
     }
     private void drawGrid(Vector2 cellSize) {
         for (int i = 0; i < getScreenWidth(); i += cellSize.xToInt()) {
@@ -575,8 +566,7 @@ public abstract class GameObject {
         if (collider instanceof BoxCollider2D) {
             Rectangle bounds = ((BoxCollider2D) collider).getBounds();
             g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
-        } else if (collider instanceof CircleCollider2D) {
-            CircleCollider2D c = (CircleCollider2D) collider;
+        } else if (collider instanceof CircleCollider2D c) {
             Vector2 center = c.getCenter();
             float radius = c.getRadius();
             g.fillOval((int)(center.x - radius), (int)(center.y - radius), (int)(radius*2), (int)(radius*2));
