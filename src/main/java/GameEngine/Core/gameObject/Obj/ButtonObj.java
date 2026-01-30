@@ -1,93 +1,146 @@
 package GameEngine.Core.gameObject.Obj;
 
+import GameEngine.Core.gameObject.FuncInt.*;
 import GameEngine.Core.gameObject.GameObject;
 import GameEngine.Core.gameObject.Transform;
 import GameEngine.Core.gameObject.collider.BoxCollider2D;
 import GameEngine.Core.input.*;
 import GameEngine.Core.util.MathUtils;
 import GameEngine.Core.util.Vector2;
+import org.w3c.dom.css.Rect;
 
 import java.awt.*;
-import java.util.function.Consumer;
 
 public class ButtonObj extends GameObject {
-    private Runnable onClick;
     private Color color;
     private TextObj text;
-    private String textString;
-    private Font font;
+
     private boolean lastHoverState;
-    private Consumer<Boolean> onHoverChange;
-    private Consumer<ButtonObj> onClickButton;
 
-    public ButtonObj(Rectangle rect, Color color, Consumer<ButtonObj> onClickButton, String textString, Font font, Color textColor) {
+    private FuncInt onClick;
+    private FuncIntOne<ButtonObj> onClickOne;
+    private FuncInt onHover;
+    private FuncIntOne<ButtonObj> onHoverOne;
+    private FuncIntTwo<ButtonObj, Boolean> onHoverTwo;
+
+    private ButtonObj(Rectangle rect) {
         transform = new Transform(rect);
-        this.onClickButton = onClickButton;
-        this.color = color;
-        this.font = font;
-        this.textString = textString;
-
-        this.text = new TextObj(
-                textString,
-                getCenterPosition(),
-                textColor,
-                font,
-                renderOrder + 1
-        );
-
-        // Collider
         collider = new BoxCollider2D(this);
     }
-    public ButtonObj(Rectangle rect, Color color, Runnable onClickButton, String textString, Font font, Color textColor) {
-        transform = new Transform(rect);
-        this.onClick = onClick;
-        this.color = color;
-        this.font = font;
-        this.textString = textString;
 
-        this.text = new TextObj(
-                textString,
-                getCenterPosition(),
-                textColor,
-                font,
-                renderOrder + 1
-        );
-
-        // Collider
+    /**
+     * Konstruktor für verschachtelte Klassen (ColorButton, ToolButton)
+     */
+    protected ButtonObj(Builder builder) {
+        transform = new Transform(builder.rect);
         collider = new BoxCollider2D(this);
-    }
-    public ButtonObj(Rectangle rect, Runnable onClick, String textString) {
-        this(
-                rect,
-                Color.white,
-                onClick,
-                textString,
-                new Font("Arial", Font.BOLD, 30),
-                Color.BLACK
-        );
-    }
-    public ButtonObj(Rectangle rect, Color color, Runnable onClick, Consumer<Boolean> onHoverChange, String textString, Font font, Color textColor) {
-        this(
-                rect,
-                color,
-                onClick,
-                textString,
-                font,
-                textColor
-        );
-        this.onHoverChange = onHoverChange;
 
+        this.color = builder.color;
+        this.tag = builder.tag;
+        this.onClick = builder.onClick;
+        this.onClickOne = builder.onClickOne;
+        this.onHover = builder.onHover;
+        this.onHoverOne = builder.onHoverOne;
+        this.onHoverTwo = builder.onHoverTwo;
+
+        this.text = new TextObj.Builder(builder.text)
+                .position(this.getCenterPosition())
+                .color(builder.textColor)
+                .font(builder.font)
+                .renderOrder(this.renderOrder + 1)
+                .alignment(TextObj.TextAlignment.CENTER)
+                .build();
     }
-    public ButtonObj(Rectangle rect, Color color, Consumer<ButtonObj> onClickButton, Consumer<Boolean> onHoverChange, String textString, Font font, Color textColor) {
-        this(
-                rect,
-                color,
-                onClickButton,
-                textString,
-                font,
-                textColor
-        );
-        this.onHoverChange = onHoverChange;
+
+    public static class Builder {
+        private Rectangle rect = new Rectangle(0,0, 100, 100);
+        private Color color = Color.WHITE;
+        private String text = "";
+        private Font font = new Font("Arial", Font.BOLD, 30);
+        private Color textColor = Color.BLACK;
+        private String tag = "Button";
+
+        private FuncInt onClick;
+        private FuncIntOne<ButtonObj> onClickOne;
+        private FuncInt onHover;
+        private FuncIntOne<ButtonObj> onHoverOne;
+        private FuncIntTwo<ButtonObj, Boolean> onHoverTwo;
+
+        public Builder() {}
+        public Builder rect(Rectangle rect) {
+            this.rect = rect;
+            return this;
+        }
+        public Builder pos(Vector2 pos) {
+            rect.x = pos.xToInt();
+            rect.y = pos.yToInt();
+            return this;
+        }
+        public Builder size(Vector2 size) {
+            rect.width = size.xToInt();
+            rect.height = size.yToInt();
+            return this;
+        }
+        public Builder color(Color color) {
+            this.color = color;
+            return this;
+        }
+        public Builder text(String text) {
+            this.text = text;
+            return this;
+        }
+        public Builder tag(String tag) {
+            this.tag = tag;
+            return this;
+        }
+        public Builder font(Font font) {
+            this.font = font;
+            return this;
+        }
+        public Builder textColor(Color textColor) {
+            this.textColor = textColor;
+            return this;
+        }
+        public Builder onClick(FuncInt onClick) {
+            this.onClick = onClick;
+            return this;
+        }
+        public Builder onClick(FuncIntOne<ButtonObj> onClickButton) {
+            this.onClickOne = onClickButton;
+            return this;
+        }
+        public Builder onHover(FuncInt onHover) {
+            this.onHover = onHover;
+            return this;
+        }
+        public Builder onHover(FuncIntOne<ButtonObj> onHoverOne) {
+            this.onHoverOne = onHoverOne;
+            return this;
+        }
+        public Builder onHover(FuncIntTwo<ButtonObj, Boolean> onHoverTwo) {
+            this.onHoverTwo = onHoverTwo;
+            return this;
+        }
+        public ButtonObj build() {
+            ButtonObj b = new ButtonObj(rect);
+            b.color = color;
+            b.tag = tag;
+
+            b.onClick = onClick;
+            b.onClickOne = onClickOne;
+            b.onHover = onHover;
+            b.onHoverOne = onHoverOne;
+            b.onHoverTwo = onHoverTwo;
+
+            b.text = new TextObj.Builder(text)
+                    .position(b.getCenterPosition())
+                    .color(textColor)
+                    .font(font)
+                    .renderOrder(b.renderOrder + 1)
+                    .alignment(TextObj.TextAlignment.CENTER)
+                    .build();
+            return b;
+        }
 
     }
 
@@ -97,41 +150,34 @@ public class ButtonObj extends GameObject {
     }
 
     @Override
-    public void update(double deltaTime) {
+    public void update(double deltaTime)  {
         if (!active) return; // Nur updaten wenn aktiv
 
         boolean hovering = collider.collidesWithPoint(Input.getMousePosition());
-        if (onHoverChange != null && hovering != lastHoverState) {
-            onHoverChange.accept(hovering);
+        if (hovering != lastHoverState) {
+            hovering(hovering);
             lastHoverState = hovering;
         }
 
         if (hovering && Input.getMouseButtonDown(Input.MouseCode.LEFT)) {
-            if (onClick != null) onClick.run();
-            if (onClickButton != null) onClickButton.accept(this);
+            onClick();
         }
 
-        // Textposition immer in der Mitte halten
         if (text != null) {
             text.setPosition(getCenterPosition());
         }
     }
 
-    public TextObj getText() {
-        return text;
+    private void hovering(boolean hovering) {
+        if (onHover != null) onHover.call();
+        if (onHoverOne != null) onHoverOne.call(this);
+        if (onHoverTwo != null) onHoverTwo.call(this, hovering);
     }
-    public void setText(String newText) {
-        this.textString = newText;
-        if (text != null) {
-            text.setText(newText);
-        }
+    private void onClick() {
+        if (onClick != null) onClick.call();
+        if (onClickOne != null) onClickOne.call(this);
     }
-    public void setColor(Color newColor) {
-        this.color = newColor;
-    }
-    public Color getColor() {
-        return color;
-    }
+
     @Override
     public void setActive(boolean active) {
         this.active = active;
@@ -144,6 +190,36 @@ public class ButtonObj extends GameObject {
         setActive(!active);
     }
 
+    public TextObj getTextObj() {
+        return text;
+    }
+    public String getText() {
+        if (text == null) return "";
+        return text.getText();
+    }
+    public void setText(String text) {
+        if (this.text != null) {
+            this.text.setText(text);
+        }
+    }
+    public Color getColor() {
+        return color;
+    }
+    public void setColor(Color color) {
+        this.color = color;
+    }
+    public void setTextColor(Color textColor) {
+        if (this.text != null) {
+            text.setColor(textColor);
+        }
+    }
+    public void setTextAlignment(TextObj.TextAlignment alignment) {
+        if (this.text != null) {
+            this.text.setAlignment(alignment);
+        }
+    }
+
+
 
     @Override
     public void draw(Graphics2D g) {
@@ -152,12 +228,10 @@ public class ButtonObj extends GameObject {
         drawGOasFilledRect(color);
 
         if (text != null) {
-            FontMetrics fm = g.getFontMetrics(font);
-            int textWidth = fm.stringWidth(textString);
-            int textHeight = fm.getHeight();
-
-            text.transform.position.x -= (float) textWidth / 2;
-            text.transform.position.y += (float) textHeight / 4;
+            Vector2 pos = getCenterPosition();
+            float yOffset = (float) text.getTextHeight(g)/4;
+            pos.y = pos.y + yOffset;
+            text.setPosition(pos);
             text.draw(g);
         }
     }

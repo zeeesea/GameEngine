@@ -593,6 +593,9 @@ public abstract class GameObject {
     public boolean equalsClassOf(Class<?> other) {
         return this.getClass().equals(other);
     }
+    public boolean equalsTagOf(GameObject other) {
+        return tag.equals(other.tag);
+    }
     public void draggable(Input.MouseCode mouseButton) {
         boolean mousePressed = Input.getMouseButton(mouseButton);
         Vector2 mousePos = Input.getMousePosition();

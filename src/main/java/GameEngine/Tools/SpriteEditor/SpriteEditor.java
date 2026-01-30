@@ -1,6 +1,7 @@
 package GameEngine.Tools.SpriteEditor;
 
 import GameEngine.Core.*;
+import GameEngine.Core.gameObject.FuncInt.FuncInt;
 import GameEngine.Core.gameObject.Obj.ButtonObj;
 import GameEngine.Core.gameObject.Obj.SliderObj;
 import GameEngine.Core.gameObject.Obj.TextObj;
@@ -151,24 +152,24 @@ public class SpriteEditor extends GameEngine {
         int modeWidth = 120;
         int modeHeight = 35;
 
-        spriteModeButton = new ButtonObj(
-                new Rectangle(palette2X, modeY, modeWidth, modeHeight),
-                new Color(100, 150, 255),
-                () -> switchMode(EditorMode.SPRITE),
-                "Sprite Mode",
-                new Font("Arial", Font.BOLD, 14),
-                Color.WHITE
-        );
+        spriteModeButton = new ButtonObj.Builder()
+                .rect(new Rectangle(palette2X, modeY, modeWidth, modeHeight))
+                .color(new Color(100, 150, 255))
+                .text("Sprite Mode")
+                .font(new Font("Arial", Font.BOLD, 14))
+                .textColor(Color.WHITE)
+                .onClick(() -> switchMode(EditorMode.SPRITE))
+                .build();
         objectManager.add(spriteModeButton);
 
-        animationModeButton = new ButtonObj(
-                new Rectangle(palette2X + modeWidth + 10, modeY, modeWidth, modeHeight),
-                new Color(150, 100, 255),
-                () -> switchMode(EditorMode.ANIMATION),
-                "Animation",
-                new Font("Arial", Font.BOLD, 14),
-                Color.WHITE
-        );
+        animationModeButton = new ButtonObj.Builder()
+                .rect(new Rectangle(palette2X + modeWidth + 10, modeY, modeWidth, modeHeight))
+                .color(new Color(150, 100, 255))
+                .text("Animation")
+                .font(new Font("Arial", Font.BOLD, 14))
+                .textColor(Color.WHITE)
+                .onClick(() -> switchMode(EditorMode.ANIMATION))
+                .build();
         objectManager.add(animationModeButton);
     }
 
@@ -199,7 +200,7 @@ public class SpriteEditor extends GameEngine {
     private void updateUIVisibility() {
         boolean isSprite = currentMode == EditorMode.SPRITE;
 
-        // Sprite Mode Buttons - besser: setVisible statt setActive
+        // Sprite Mode Buttons
         setButtonVisible(saveButton, isSprite);
         setButtonVisible(loadButton, isSprite);
         setButtonVisible(newButton, isSprite);
@@ -223,9 +224,6 @@ public class SpriteEditor extends GameEngine {
     private void setButtonVisible(ButtonObj button, boolean visible) {
         if (button == null) return;
         button.setActive(visible);
-        if (button.getText() != null) {
-            button.getText().setActive(visible);
-        }
     }
 
     private void setupToolButtons() {
@@ -279,68 +277,61 @@ public class SpriteEditor extends GameEngine {
 
     private void setupTextElements() {
         // Titel
-        titleText = new TextObj(
-                "Sprite Editor",
-                new Vector2(SCREEN_WIDTH / 2f, 30),
-                Color.WHITE,
-                new Font("Arial", Font.BOLD, 32)
-        );
-        titleText.setAlignment(TextObj.TextAlignment.CENTER);
+        titleText = new TextObj.Builder("Sprite Editor")
+                .position(new Vector2(SCREEN_WIDTH / 2f, 30))
+                .color(Color.WHITE)
+                .font(new Font("Arial", Font.BOLD, 32))
+                .alignment(TextObj.TextAlignment.CENTER)
+                .build();
         objectManager.add(titleText);
 
         // Aktuelles Sprite/Animation
-        currentSpriteText = new TextObj(
-                "Current: " + currentSpriteName,
-                new Vector2(palette2X, paletteY + 20),
-                Color.CYAN,
-                new Font("Arial", Font.PLAIN, 14)
-        );
+        currentSpriteText = new TextObj.Builder("Current: " + currentSpriteName)
+                .position(new Vector2(palette2X, paletteY + 20))
+                .color(Color.CYAN)
+                .font(new Font("Arial", Font.PLAIN, 14))
+                .build();
         objectManager.add(currentSpriteText);
 
         // Current Tool
-        toolText = new TextObj(
-                "Tool: Brush",
-                new Vector2(palette2X, paletteY + 40),
-                Color.YELLOW,
-                new Font("Arial", Font.PLAIN, 14)
-        );
+        toolText = new TextObj.Builder("Tool: Brush")
+                .position(new Vector2(palette2X, paletteY + 40))
+                .color(Color.YELLOW)
+                .font(new Font("Arial", Font.PLAIN, 14))
+                .build();
         objectManager.add(toolText);
 
         // Frame Info (Animation Mode)
-        frameInfoText = new TextObj(
-                "Frame: 1/1",
-                new Vector2(palette2X, paletteY + 120),
-                Color.ORANGE,
-                new Font("Arial", Font.BOLD, 14)
-        );
+        frameInfoText = new TextObj.Builder("Frame: 1/1")
+                .position(new Vector2(palette2X, paletteY + 120))
+                .color(Color.ORANGE)
+                .font(new Font("Arial", Font.BOLD, 14))
+                .build();
         objectManager.add(frameInfoText);
 
         // FPS Info (Animation Mode)
-        fpsText = new TextObj(
-                "FPS: 10",
-                new Vector2(palette2X, paletteY + 155),
-                Color.WHITE,
-                new Font("Arial", Font.PLAIN, 14)
-        );
+        fpsText = new TextObj.Builder("FPS: 10")
+                .position(new Vector2(palette2X, paletteY + 155))
+                .color(Color.WHITE)
+                .font(new Font("Arial", Font.PLAIN, 14))
+                .build();
         objectManager.add(fpsText);
 
         // Brightness Label
-        brightnessText = new TextObj(
-                "Brightness: 100%",
-                new Vector2(paletteX, paletteY + 270),
-                Color.WHITE,
-                new Font("Arial", Font.PLAIN, 14)
-        );
+        brightnessText = new TextObj.Builder("Brightness: 100%")
+                .position(new Vector2(paletteX, paletteY + 270))
+                .color(Color.WHITE)
+                .font(new Font("Arial", Font.PLAIN, 14))
+                .build();
         objectManager.add(brightnessText);
 
         // Shortcuts Info
         String shortcuts = "B/E/F (Tools) | C (Clear) | Ctrl+S/O/N | Right Click (Undo) | Tab (Switch Mode) | Arrow Keys (Frames)";
-        shortcutsText = new TextObj(
-                shortcuts,
-                new Vector2(10, SCREEN_HEIGHT - 20),
-                Color.GRAY,
-                new Font("Arial", Font.PLAIN, 12)
-        );
+        shortcutsText = new TextObj.Builder(shortcuts)
+                .position(new Vector2(10, SCREEN_HEIGHT - 20))
+                .color(Color.GRAY)
+                .font(new Font("Arial", Font.PLAIN, 12))
+                .build();
         objectManager.add(shortcutsText);
     }
 
@@ -367,10 +358,16 @@ public class SpriteEditor extends GameEngine {
 
     private void setupBrightnessSlider() {
         int sliderY = paletteY + 290;
-        brightnessSlider = new SliderObj(paletteX, sliderY, 200, 20, 0f, 2f, 1f, this::onBrightnessChanged);
-        brightnessSlider.setGradient(Color.BLACK, Color.WHITE)
-                .setHandleColor(Color.YELLOW)
-                .setBorderColor(Color.WHITE);
+        brightnessSlider = new SliderObj.Builder()
+                .position(paletteX, sliderY)
+                .size(200, 20)
+                .range(0f, 2f)
+                .startValue(1f)
+                .gradient(Color.BLACK, Color.WHITE)
+                .handleColor(Color.YELLOW)
+                .borderColor(Color.WHITE)
+                .onValueChanged(this::onBrightnessChanged)
+                .build();
         objectManager.add(brightnessSlider);
     }
 
@@ -415,34 +412,34 @@ public class SpriteEditor extends GameEngine {
         int btnHeight = 40;
 
         // Sprite Mode Buttons
-        saveButton = new ButtonObj(
-                new Rectangle(paletteX, btnY, btnWidth, btnHeight),
-                Color.GREEN,
-                this::saveSprite,
-                "Save",
-                new Font("Arial", Font.BOLD, 20),
-                Color.BLACK
-        );
+        saveButton = new ButtonObj.Builder()
+                .rect(new Rectangle(paletteX, btnY, btnWidth, btnHeight))
+                .color(Color.GREEN)
+                .text("Save")
+                .font(new Font("Arial", Font.BOLD, 20))
+                .textColor(Color.BLACK)
+                .onClick(this::saveSprite)
+                .build();
         objectManager.add(saveButton);
 
-        loadButton = new ButtonObj(
-                new Rectangle(paletteX, btnY + 50, btnWidth, btnHeight),
-                Color.BLUE,
-                this::loadSprite,
-                "Load",
-                new Font("Arial", Font.BOLD, 20),
-                Color.WHITE
-        );
+        loadButton = new ButtonObj.Builder()
+                .rect(new Rectangle(paletteX, btnY + 50, btnWidth, btnHeight))
+                .color(Color.BLUE)
+                .text("Load")
+                .font(new Font("Arial", Font.BOLD, 20))
+                .textColor(Color.WHITE)
+                .onClick(this::loadSprite)
+                .build();
         objectManager.add(loadButton);
 
-        newButton = new ButtonObj(
-                new Rectangle(paletteX, btnY + 100, btnWidth, btnHeight),
-                Color.ORANGE,
-                this::newSprite,
-                "New",
-                new Font("Arial", Font.BOLD, 20),
-                Color.BLACK
-        );
+        newButton = new ButtonObj.Builder()
+                .rect(new Rectangle(paletteX, btnY + 100, btnWidth, btnHeight))
+                .color(Color.ORANGE)
+                .text("New")
+                .font(new Font("Arial", Font.BOLD, 20))
+                .textColor(Color.BLACK)
+                .onClick(this::newSprite)
+                .build();
         objectManager.add(newButton);
     }
 
@@ -453,97 +450,103 @@ public class SpriteEditor extends GameEngine {
         int smallBtnWidth = 55;
 
         // Animation Mode Buttons
-        saveAnimationButton = new ButtonObj(
-                new Rectangle(paletteX, btnY, btnWidth, btnHeight),
-                Color.GREEN,
-                this::saveAnimation,
-                "Save Anim",
-                new Font("Arial", Font.BOLD, 16),
-                Color.BLACK
-        );
+        saveAnimationButton = new ButtonObj.Builder()
+                .rect(new Rectangle(paletteX, btnY, btnWidth, btnHeight))
+                .color(Color.GREEN)
+                .text("Save Anim")
+                .font(new Font("Arial", Font.BOLD, 16))
+                .textColor(Color.BLACK)
+                .onClick(this::saveAnimation)
+                .build();
         objectManager.add(saveAnimationButton);
 
-        loadAnimationButton = new ButtonObj(
-                new Rectangle(paletteX, btnY + 50, btnWidth, btnHeight),
-                Color.BLUE,
-                this::loadAnimation,
-                "Load Anim",
-                new Font("Arial", Font.BOLD, 16),
-                Color.WHITE
-        );
+        loadAnimationButton = new ButtonObj.Builder()
+                .rect(new Rectangle(paletteX, btnY + 50, btnWidth, btnHeight))
+                .color(Color.BLUE)
+                .text("Load Anim")
+                .font(new Font("Arial", Font.BOLD, 16))
+                .textColor(Color.WHITE)
+                .onClick(this::loadAnimation)
+                .build();
         objectManager.add(loadAnimationButton);
 
-        newAnimationButton = new ButtonObj(
-                new Rectangle(paletteX, btnY + 100, btnWidth, btnHeight),
-                Color.ORANGE,
-                this::newAnimation,
-                "New Anim",
-                new Font("Arial", Font.BOLD, 16),
-                Color.BLACK
-        );
+        newAnimationButton = new ButtonObj.Builder()
+                .rect(new Rectangle(paletteX, btnY + 100, btnWidth, btnHeight))
+                .color(Color.ORANGE)
+                .text("New Anim")
+                .font(new Font("Arial", Font.BOLD, 16))
+                .textColor(Color.BLACK)
+                .onClick(this::newAnimation)
+                .build();
         objectManager.add(newAnimationButton);
 
         // Frame Controls
         int frameY = btnY + 150;
-        newFrameButton = new ButtonObj(
-                new Rectangle(paletteX, frameY, btnWidth, 35),
-                new Color(100, 200, 100),
-                this::newFrame,
-                "New Frame",
-                new Font("Arial", Font.BOLD, 14),
-                Color.BLACK
-        );
+        newFrameButton = new ButtonObj.Builder()
+                .rect(new Rectangle(paletteX, frameY, btnWidth, 35))
+                .color(new Color(100, 200, 100))
+                .text("New Frame")
+                .font(new Font("Arial", Font.BOLD, 14))
+                .textColor(Color.BLACK)
+                .onClick(this::newFrame)
+                .build();
         objectManager.add(newFrameButton);
 
-        deleteFrameButton = new ButtonObj(
-                new Rectangle(paletteX, frameY + 40, btnWidth, 35),
-                new Color(200, 100, 100),
-                this::deleteFrame,
-                "Delete Frame",
-                new Font("Arial", Font.BOLD, 14),
-                Color.WHITE
-        );
+        deleteFrameButton = new ButtonObj.Builder()
+                .rect(new Rectangle(paletteX, frameY + 40, btnWidth, 35))
+                .color(new Color(200, 100, 100))
+                .text("Delete Frame")
+                .font(new Font("Arial", Font.BOLD, 14))
+                .textColor(Color.WHITE)
+                .onClick(this::deleteFrame)
+                .build();
         objectManager.add(deleteFrameButton);
 
         // Navigation
         int navY = frameY + 85;
-        prevFrameButton = new ButtonObj(
-                new Rectangle(paletteX, navY, smallBtnWidth, 35),
-                new Color(150, 150, 200),
-                this::prevFrame,
-                "<<",
-                new Font("Arial", Font.BOLD, 18),
-                Color.WHITE
-        );
+        prevFrameButton = new ButtonObj.Builder()
+                .rect(new Rectangle(paletteX, navY, smallBtnWidth, 35))
+                .color(new Color(150, 150, 200))
+                .text("<<")
+                .font(new Font("Arial", Font.BOLD, 18))
+                .textColor(Color.WHITE)
+                .onClick(this::prevFrame)
+                .build();
         objectManager.add(prevFrameButton);
 
-        nextFrameButton = new ButtonObj(
-                new Rectangle(paletteX + smallBtnWidth + 10, navY, smallBtnWidth, 35),
-                new Color(150, 150, 200),
-                this::nextFrame,
-                ">>",
-                new Font("Arial", Font.BOLD, 18),
-                Color.WHITE
-        );
+        nextFrameButton = new ButtonObj.Builder()
+                .rect(new Rectangle(paletteX + smallBtnWidth + 10, navY, smallBtnWidth, 35))
+                .color(new Color(150, 150, 200))
+                .text(">>")
+                .font(new Font("Arial", Font.BOLD, 18))
+                .textColor(Color.WHITE)
+                .onClick(this::nextFrame)
+                .build();
         objectManager.add(nextFrameButton);
 
         // Play Button
-        playAnimationButton = new ButtonObj(
-                new Rectangle(paletteX, navY + 45, btnWidth, 35),
-                new Color(100, 255, 100),
-                this::togglePlayAnimation,
-                "Play",
-                new Font("Arial", Font.BOLD, 14),
-                Color.BLACK
-        );
+        playAnimationButton = new ButtonObj.Builder()
+                .rect(new Rectangle(paletteX, navY + 45, btnWidth, 35))
+                .color(new Color(100, 255, 100))
+                .text("Play")
+                .font(new Font("Arial", Font.BOLD, 14))
+                .textColor(Color.BLACK)
+                .onClick(this::togglePlayAnimation)
+                .build();
         objectManager.add(playAnimationButton);
 
         // FPS Slider
         int fpsY = paletteY + 175;
-        fpsSlider = new SliderObj(palette2X, fpsY, 150, 20, 1f, 30f, 10f, this::onFPSChanged);
-        fpsSlider.setGradient(Color.DARK_GRAY, Color.GREEN)
-                .setHandleColor(Color.ORANGE)
-                .setBorderColor(Color.WHITE);
+        fpsSlider = new SliderObj.Builder()
+                .position(palette2X, fpsY)
+                .size(150, 20)
+                .range(1f, 30f)
+                .startValue(10f)
+                .gradient(Color.DARK_GRAY, Color.GREEN)
+                .handleColor(Color.ORANGE)
+                .borderColor(Color.WHITE)
+                .onValueChanged(this::onFPSChanged)
+                .build();
         objectManager.add(fpsSlider);
     }
 
@@ -971,8 +974,14 @@ public class SpriteEditor extends GameEngine {
         private Color color;
         private boolean selected = false;
 
-        public ColorButton(Rectangle rect, Color color, Runnable onClick) {
-            super(rect, color, onClick, "", new Font("Arial", Font.PLAIN, 1), Color.BLACK);
+        public ColorButton(Rectangle rect, Color color, FuncInt onClick) {
+            super(new ButtonObj.Builder()
+                    .rect(rect)
+                    .color(color)
+                    .text("")
+                    .font(new Font("Arial", Font.PLAIN, 1))
+                    .textColor(Color.BLACK)
+                    .onClick(onClick));
             this.color = color;
 
             if (color.equals(Color.WHITE)) {
@@ -1010,8 +1019,14 @@ public class SpriteEditor extends GameEngine {
     private class ToolButton extends ButtonObj {
         private boolean selected = false;
 
-        public ToolButton(Rectangle rect, Color color, Runnable onClick, String label) {
-            super(rect, color, onClick, label, new Font("Arial", Font.BOLD, 18), Color.WHITE);
+        public ToolButton(Rectangle rect, Color color, FuncInt onClick, String label) {
+            super(new ButtonObj.Builder()
+                    .rect(rect)
+                    .color(color)
+                    .text(label)
+                    .font(new Font("Arial", Font.BOLD, 18))
+                    .textColor(Color.WHITE)
+                    .onClick(onClick));
         }
 
         public void setSelected(boolean selected) {

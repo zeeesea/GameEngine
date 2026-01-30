@@ -18,15 +18,15 @@ public class MainMenu extends GameEngine {
 
     @Override
     public void init() {
-        startSpriteEditorBtn = new ButtonObj(
-                new Rectangle(100, 100, 200, 60),
-                Color.BLUE,
-                this::openSpriteEditor,
-                "Sprite Editor",
-                new Font("Arial", Font.BOLD, 24),
-                Color.WHITE
-        );
-        objectManager.add(startSpriteEditorBtn);
+//        startSpriteEditorBtn = new ButtonObj(
+//                new Rectangle(100, 100, 200, 60),
+//                Color.BLUE,
+//                this::openSpriteEditor,
+//                "Sprite Editor",
+//                new Font("Arial", Font.BOLD, 24),
+//                Color.WHITE
+//        );
+//        objectManager.add(startSpriteEditorBtn);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class MainMenu extends GameEngine {
 
     private void openSpriteEditor() {
         //Open Sprite Editor
-        SceneManager.loadScene(new SpriteEditor());
+        //SceneManager.loadScene(new SpriteEditor());
     }
 
     @Override

@@ -1,11 +1,11 @@
 package GameEngine.Core.gameObject.Obj;
 
+import GameEngine.Core.gameObject.FuncInt.*;
 import GameEngine.Core.gameObject.GameObject;
 import GameEngine.Core.input.Input;
 import GameEngine.Core.util.Vector2;
 
 import java.awt.*;
-import java.util.function.Consumer;
 
 public class SliderObj extends GameObject {
     // Position und Größe
@@ -27,7 +27,7 @@ public class SliderObj extends GameObject {
 
     // Verhalten
     private boolean dragging = false;
-    private Consumer<Float> onValueChanged;
+    private FuncIntOne<Float> onValueChanged;
 
     // Text
     private boolean showValue = false;
@@ -35,30 +35,9 @@ public class SliderObj extends GameObject {
     private Font font = new Font("Arial", Font.PLAIN, 12);
 
     /**
-     * Basis-Konstruktor: Slider von 0 bis 1
+     * Private Konstruktor - nur über Builder zugänglich
      */
-    public SliderObj(int x, int y, int width, int height) {
-        this(x, y, width, height, 0f, 1f, 0.5f, null);
-    }
-
-    /**
-     * Konstruktor mit Custom Range
-     */
-    public SliderObj(int x, int y, int width, int height, float minValue, float maxValue) {
-        this(x, y, width, height, minValue, maxValue, minValue, null);
-    }
-
-    /**
-     * Konstruktor mit Custom Range und Start-Wert
-     */
-    public SliderObj(int x, int y, int width, int height, float minValue, float maxValue, float startValue) {
-        this(x, y, width, height, minValue, maxValue, startValue, null);
-    }
-
-    /**
-     * Vollständiger Konstruktor
-     */
-    public SliderObj(int x, int y, int width, int height, float minValue, float maxValue, float startValue, Consumer<Float> onValueChanged) {
+    private SliderObj(int x, int y, int width, int height, float minValue, float maxValue, float startValue) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -66,7 +45,121 @@ public class SliderObj extends GameObject {
         this.minValue = minValue;
         this.maxValue = maxValue;
         this.value = Math.max(minValue, Math.min(maxValue, startValue));
-        this.onValueChanged = onValueChanged;
+    }
+
+    /**
+     * Builder Pattern für SliderObj
+     */
+    public static class Builder {
+        // Required
+        private int x = 0;
+        private int y = 0;
+        private int width = 200;
+        private int height = 20;
+
+        // Optional mit Defaults
+        private float minValue = 0f;
+        private float maxValue = 1f;
+        private float startValue = 0.5f;
+        private Color backgroundColor = new Color(60, 60, 60);
+        private Color fillColor = new Color(100, 150, 255);
+        private Color handleColor = Color.YELLOW;
+        private Color borderColor = Color.WHITE;
+        private boolean showGradient = false;
+        private Color gradientStartColor = Color.BLACK;
+        private Color gradientEndColor = Color.WHITE;
+        private boolean showValue = false;
+        private String label = "";
+        private Font font = new Font("Arial", Font.PLAIN, 12);
+        private FuncIntOne<Float> onValueChanged;
+
+        public Builder() {}
+
+        public Builder position(int x, int y) {
+            this.x = x;
+            this.y = y;
+            return this;
+        }
+
+        public Builder size(int width, int height) {
+            this.width = width;
+            this.height = height;
+            return this;
+        }
+
+        public Builder range(float min, float max) {
+            this.minValue = min;
+            this.maxValue = max;
+            return this;
+        }
+
+        public Builder startValue(float value) {
+            this.startValue = value;
+            return this;
+        }
+
+        public Builder backgroundColor(Color color) {
+            this.backgroundColor = color;
+            return this;
+        }
+
+        public Builder fillColor(Color color) {
+            this.fillColor = color;
+            return this;
+        }
+
+        public Builder handleColor(Color color) {
+            this.handleColor = color;
+            return this;
+        }
+
+        public Builder borderColor(Color color) {
+            this.borderColor = color;
+            return this;
+        }
+
+        public Builder gradient(Color start, Color end) {
+            this.showGradient = true;
+            this.gradientStartColor = start;
+            this.gradientEndColor = end;
+            return this;
+        }
+
+        public Builder showValue(boolean show) {
+            this.showValue = show;
+            return this;
+        }
+
+        public Builder label(String label) {
+            this.label = label;
+            return this;
+        }
+
+        public Builder font(Font font) {
+            this.font = font;
+            return this;
+        }
+
+        public Builder onValueChanged(FuncIntOne<Float> callback) {
+            this.onValueChanged = callback;
+            return this;
+        }
+
+        public SliderObj build() {
+            SliderObj slider = new SliderObj(x, y, width, height, minValue, maxValue, startValue);
+            slider.backgroundColor = backgroundColor;
+            slider.fillColor = fillColor;
+            slider.handleColor = handleColor;
+            slider.borderColor = borderColor;
+            slider.showGradient = showGradient;
+            slider.gradientStartColor = gradientStartColor;
+            slider.gradientEndColor = gradientEndColor;
+            slider.showValue = showValue;
+            slider.label = label;
+            slider.font = font;
+            slider.onValueChanged = onValueChanged;
+            return slider;
+        }
     }
 
     // ===== SETTER METHODS =====
@@ -118,7 +211,7 @@ public class SliderObj extends GameObject {
         return this;
     }
 
-    public SliderObj setOnValueChanged(Consumer<Float> callback) {
+    public SliderObj setOnValueChanged(FuncIntOne<Float> callback) {
         this.onValueChanged = callback;
         return this;
     }
@@ -127,7 +220,7 @@ public class SliderObj extends GameObject {
         float oldValue = this.value;
         this.value = Math.max(minValue, Math.min(maxValue, value));
         if (oldValue != this.value && onValueChanged != null) {
-            onValueChanged.accept(this.value);
+            onValueChanged.call(this.value);
         }
         return this;
     }
