@@ -5,25 +5,23 @@ import GameEngine.Core.gameObject.GameObject;
 import GameEngine.Core.gameObject.Transform;
 import GameEngine.Core.gameObject.collider.BoxCollider2D;
 import GameEngine.Core.input.*;
-import GameEngine.Core.util.MathUtils;
 import GameEngine.Core.util.Vector2;
-import org.w3c.dom.css.Rect;
 
 import java.awt.*;
 
-public class ButtonObj extends GameObject {
+public class Button extends GameObject {
     private Color color;
-    private TextObj text;
+    private Text text;
 
     private boolean lastHoverState;
 
     private FuncInt onClick;
-    private FuncIntOne<ButtonObj> onClickOne;
+    private FuncIntOne<Button> onClickOne;
     private FuncInt onHover;
-    private FuncIntOne<ButtonObj> onHoverOne;
-    private FuncIntTwo<ButtonObj, Boolean> onHoverTwo;
+    private FuncIntOne<Button> onHoverOne;
+    private FuncIntTwo<Button, Boolean> onHoverTwo;
 
-    private ButtonObj(Rectangle rect) {
+    private Button(Rectangle rect) {
         transform = new Transform(rect);
         collider = new BoxCollider2D(this);
     }
@@ -31,7 +29,7 @@ public class ButtonObj extends GameObject {
     /**
      * Konstruktor für verschachtelte Klassen (ColorButton, ToolButton)
      */
-    protected ButtonObj(Builder builder) {
+    protected Button(Builder builder) {
         transform = new Transform(builder.rect);
         collider = new BoxCollider2D(this);
 
@@ -43,12 +41,12 @@ public class ButtonObj extends GameObject {
         this.onHoverOne = builder.onHoverOne;
         this.onHoverTwo = builder.onHoverTwo;
 
-        this.text = new TextObj.Builder(builder.text)
+        this.text = new Text.Builder(builder.text)
                 .position(this.getCenterPosition())
                 .color(builder.textColor)
                 .font(builder.font)
                 .renderOrder(this.renderOrder + 1)
-                .alignment(TextObj.TextAlignment.CENTER)
+                .alignment(Text.TextAlignment.CENTER)
                 .build();
     }
 
@@ -61,10 +59,10 @@ public class ButtonObj extends GameObject {
         private String tag = "Button";
 
         private FuncInt onClick;
-        private FuncIntOne<ButtonObj> onClickOne;
+        private FuncIntOne<Button> onClickOne;
         private FuncInt onHover;
-        private FuncIntOne<ButtonObj> onHoverOne;
-        private FuncIntTwo<ButtonObj, Boolean> onHoverTwo;
+        private FuncIntOne<Button> onHoverOne;
+        private FuncIntTwo<Button, Boolean> onHoverTwo;
 
         public Builder() {}
         public Builder rect(Rectangle rect) {
@@ -105,7 +103,7 @@ public class ButtonObj extends GameObject {
             this.onClick = onClick;
             return this;
         }
-        public Builder onClick(FuncIntOne<ButtonObj> onClickButton) {
+        public Builder onClick(FuncIntOne<Button> onClickButton) {
             this.onClickOne = onClickButton;
             return this;
         }
@@ -113,16 +111,16 @@ public class ButtonObj extends GameObject {
             this.onHover = onHover;
             return this;
         }
-        public Builder onHover(FuncIntOne<ButtonObj> onHoverOne) {
+        public Builder onHover(FuncIntOne<Button> onHoverOne) {
             this.onHoverOne = onHoverOne;
             return this;
         }
-        public Builder onHover(FuncIntTwo<ButtonObj, Boolean> onHoverTwo) {
+        public Builder onHover(FuncIntTwo<Button, Boolean> onHoverTwo) {
             this.onHoverTwo = onHoverTwo;
             return this;
         }
-        public ButtonObj build() {
-            ButtonObj b = new ButtonObj(rect);
+        public Button build() {
+            Button b = new Button(rect);
             b.color = color;
             b.tag = tag;
 
@@ -132,12 +130,12 @@ public class ButtonObj extends GameObject {
             b.onHoverOne = onHoverOne;
             b.onHoverTwo = onHoverTwo;
 
-            b.text = new TextObj.Builder(text)
+            b.text = new Text.Builder(text)
                     .position(b.getCenterPosition())
                     .color(textColor)
                     .font(font)
                     .renderOrder(b.renderOrder + 1)
-                    .alignment(TextObj.TextAlignment.CENTER)
+                    .alignment(Text.TextAlignment.CENTER)
                     .build();
             return b;
         }
@@ -190,7 +188,7 @@ public class ButtonObj extends GameObject {
         setActive(!active);
     }
 
-    public TextObj getTextObj() {
+    public Text getTextObj() {
         return text;
     }
     public String getText() {
@@ -213,7 +211,7 @@ public class ButtonObj extends GameObject {
             text.setColor(textColor);
         }
     }
-    public void setTextAlignment(TextObj.TextAlignment alignment) {
+    public void setTextAlignment(Text.TextAlignment alignment) {
         if (this.text != null) {
             this.text.setAlignment(alignment);
         }

@@ -5,7 +5,7 @@ import GameEngine.Core.util.Vector2;
 
 import java.awt.*;
 
-public class TextObj extends GameObject {
+public class Text extends GameObject {
     private String text;
     private Color color;
     private Font font;
@@ -53,14 +53,14 @@ public class TextObj extends GameObject {
             return this;
         }
 
-        public TextObj build() {
-            TextObj t = new TextObj(text, position, color, font, renderOrder);
+        public Text build() {
+            Text t = new Text(text, position, color, font, renderOrder);
             t.setAlignment(alignment);
             return t;
         }
     }
 
-    private TextObj(String text, Vector2 pos, Color color, Font font, int renderOrder) {
+    private Text(String text, Vector2 pos, Color color, Font font, int renderOrder) {
         this.renderOrder = renderOrder;
         this.text = text;
         this.transform.position = pos;

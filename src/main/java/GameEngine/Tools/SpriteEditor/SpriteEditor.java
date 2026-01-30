@@ -2,9 +2,9 @@ package GameEngine.Tools.SpriteEditor;
 
 import GameEngine.Core.*;
 import GameEngine.Core.gameObject.FuncInt.FuncInt;
-import GameEngine.Core.gameObject.Obj.ButtonObj;
-import GameEngine.Core.gameObject.Obj.SliderObj;
-import GameEngine.Core.gameObject.Obj.TextObj;
+import GameEngine.Core.gameObject.Obj.Button;
+import GameEngine.Core.gameObject.Obj.Slider;
+import GameEngine.Core.gameObject.Obj.Text;
 import GameEngine.Core.input.Input;
 import GameEngine.Core.util.Vector2;
 
@@ -96,41 +96,41 @@ public class SpriteEditor extends GameEngine {
     private ToolButton bucketButton;
 
     // Mode Buttons
-    private ButtonObj spriteModeButton;
-    private ButtonObj animationModeButton;
+    private Button spriteModeButton;
+    private Button animationModeButton;
 
     // Brightness Slider
-    private SliderObj brightnessSlider;
+    private Slider brightnessSlider;
 
     // Save/Load Buttons (Sprite Mode)
-    private ButtonObj saveButton;
-    private ButtonObj loadButton;
-    private ButtonObj newButton;
+    private Button saveButton;
+    private Button loadButton;
+    private Button newButton;
 
     // Animation Mode Buttons
-    private ButtonObj saveAnimationButton;
-    private ButtonObj loadAnimationButton;
-    private ButtonObj newAnimationButton;
-    private ButtonObj newFrameButton;
-    private ButtonObj deleteFrameButton;
-    private ButtonObj prevFrameButton;
-    private ButtonObj nextFrameButton;
-    private ButtonObj playAnimationButton;
+    private Button saveAnimationButton;
+    private Button loadAnimationButton;
+    private Button newAnimationButton;
+    private Button newFrameButton;
+    private Button deleteFrameButton;
+    private Button prevFrameButton;
+    private Button nextFrameButton;
+    private Button playAnimationButton;
 
     // Animation Preview
     private boolean isPlaying = false;
     private float animationTimer = 0f;
     private float frameDuration = 0.1f; // 10 FPS default
-    private SliderObj fpsSlider;
+    private Slider fpsSlider;
 
     // Text Elements
-    private TextObj titleText;
-    private TextObj currentSpriteText;
-    private TextObj shortcutsText;
-    private TextObj brightnessText;
-    private TextObj toolText;
-    private TextObj frameInfoText;
-    private TextObj fpsText;
+    private Text titleText;
+    private Text currentSpriteText;
+    private Text shortcutsText;
+    private Text brightnessText;
+    private Text toolText;
+    private Text frameInfoText;
+    private Text fpsText;
 
     @Override
     public void init() {
@@ -152,7 +152,7 @@ public class SpriteEditor extends GameEngine {
         int modeWidth = 120;
         int modeHeight = 35;
 
-        spriteModeButton = new ButtonObj.Builder()
+        spriteModeButton = new Button.Builder()
                 .rect(new Rectangle(palette2X, modeY, modeWidth, modeHeight))
                 .color(new Color(100, 150, 255))
                 .text("Sprite Mode")
@@ -162,7 +162,7 @@ public class SpriteEditor extends GameEngine {
                 .build();
         objectManager.add(spriteModeButton);
 
-        animationModeButton = new ButtonObj.Builder()
+        animationModeButton = new Button.Builder()
                 .rect(new Rectangle(palette2X + modeWidth + 10, modeY, modeWidth, modeHeight))
                 .color(new Color(150, 100, 255))
                 .text("Animation")
@@ -221,7 +221,7 @@ public class SpriteEditor extends GameEngine {
         fpsText.setActive(!isSprite);
     }
 
-    private void setButtonVisible(ButtonObj button, boolean visible) {
+    private void setButtonVisible(Button button, boolean visible) {
         if (button == null) return;
         button.setActive(visible);
     }
@@ -277,16 +277,16 @@ public class SpriteEditor extends GameEngine {
 
     private void setupTextElements() {
         // Titel
-        titleText = new TextObj.Builder("Sprite Editor")
+        titleText = new Text.Builder("Sprite Editor")
                 .position(new Vector2(SCREEN_WIDTH / 2f, 30))
                 .color(Color.WHITE)
                 .font(new Font("Arial", Font.BOLD, 32))
-                .alignment(TextObj.TextAlignment.CENTER)
+                .alignment(Text.TextAlignment.CENTER)
                 .build();
         objectManager.add(titleText);
 
         // Aktuelles Sprite/Animation
-        currentSpriteText = new TextObj.Builder("Current: " + currentSpriteName)
+        currentSpriteText = new Text.Builder("Current: " + currentSpriteName)
                 .position(new Vector2(palette2X, paletteY + 20))
                 .color(Color.CYAN)
                 .font(new Font("Arial", Font.PLAIN, 14))
@@ -294,7 +294,7 @@ public class SpriteEditor extends GameEngine {
         objectManager.add(currentSpriteText);
 
         // Current Tool
-        toolText = new TextObj.Builder("Tool: Brush")
+        toolText = new Text.Builder("Tool: Brush")
                 .position(new Vector2(palette2X, paletteY + 40))
                 .color(Color.YELLOW)
                 .font(new Font("Arial", Font.PLAIN, 14))
@@ -302,7 +302,7 @@ public class SpriteEditor extends GameEngine {
         objectManager.add(toolText);
 
         // Frame Info (Animation Mode)
-        frameInfoText = new TextObj.Builder("Frame: 1/1")
+        frameInfoText = new Text.Builder("Frame: 1/1")
                 .position(new Vector2(palette2X, paletteY + 120))
                 .color(Color.ORANGE)
                 .font(new Font("Arial", Font.BOLD, 14))
@@ -310,7 +310,7 @@ public class SpriteEditor extends GameEngine {
         objectManager.add(frameInfoText);
 
         // FPS Info (Animation Mode)
-        fpsText = new TextObj.Builder("FPS: 10")
+        fpsText = new Text.Builder("FPS: 10")
                 .position(new Vector2(palette2X, paletteY + 155))
                 .color(Color.WHITE)
                 .font(new Font("Arial", Font.PLAIN, 14))
@@ -318,7 +318,7 @@ public class SpriteEditor extends GameEngine {
         objectManager.add(fpsText);
 
         // Brightness Label
-        brightnessText = new TextObj.Builder("Brightness: 100%")
+        brightnessText = new Text.Builder("Brightness: 100%")
                 .position(new Vector2(paletteX, paletteY + 270))
                 .color(Color.WHITE)
                 .font(new Font("Arial", Font.PLAIN, 14))
@@ -327,7 +327,7 @@ public class SpriteEditor extends GameEngine {
 
         // Shortcuts Info
         String shortcuts = "B/E/F (Tools) | C (Clear) | Ctrl+S/O/N | Right Click (Undo) | Tab (Switch Mode) | Arrow Keys (Frames)";
-        shortcutsText = new TextObj.Builder(shortcuts)
+        shortcutsText = new Text.Builder(shortcuts)
                 .position(new Vector2(10, SCREEN_HEIGHT - 20))
                 .color(Color.GRAY)
                 .font(new Font("Arial", Font.PLAIN, 12))
@@ -358,7 +358,7 @@ public class SpriteEditor extends GameEngine {
 
     private void setupBrightnessSlider() {
         int sliderY = paletteY + 290;
-        brightnessSlider = new SliderObj.Builder()
+        brightnessSlider = new Slider.Builder()
                 .position(paletteX, sliderY)
                 .size(200, 20)
                 .range(0f, 2f)
@@ -412,7 +412,7 @@ public class SpriteEditor extends GameEngine {
         int btnHeight = 40;
 
         // Sprite Mode Buttons
-        saveButton = new ButtonObj.Builder()
+        saveButton = new Button.Builder()
                 .rect(new Rectangle(paletteX, btnY, btnWidth, btnHeight))
                 .color(Color.GREEN)
                 .text("Save")
@@ -422,7 +422,7 @@ public class SpriteEditor extends GameEngine {
                 .build();
         objectManager.add(saveButton);
 
-        loadButton = new ButtonObj.Builder()
+        loadButton = new Button.Builder()
                 .rect(new Rectangle(paletteX, btnY + 50, btnWidth, btnHeight))
                 .color(Color.BLUE)
                 .text("Load")
@@ -432,7 +432,7 @@ public class SpriteEditor extends GameEngine {
                 .build();
         objectManager.add(loadButton);
 
-        newButton = new ButtonObj.Builder()
+        newButton = new Button.Builder()
                 .rect(new Rectangle(paletteX, btnY + 100, btnWidth, btnHeight))
                 .color(Color.ORANGE)
                 .text("New")
@@ -450,7 +450,7 @@ public class SpriteEditor extends GameEngine {
         int smallBtnWidth = 55;
 
         // Animation Mode Buttons
-        saveAnimationButton = new ButtonObj.Builder()
+        saveAnimationButton = new Button.Builder()
                 .rect(new Rectangle(paletteX, btnY, btnWidth, btnHeight))
                 .color(Color.GREEN)
                 .text("Save Anim")
@@ -460,7 +460,7 @@ public class SpriteEditor extends GameEngine {
                 .build();
         objectManager.add(saveAnimationButton);
 
-        loadAnimationButton = new ButtonObj.Builder()
+        loadAnimationButton = new Button.Builder()
                 .rect(new Rectangle(paletteX, btnY + 50, btnWidth, btnHeight))
                 .color(Color.BLUE)
                 .text("Load Anim")
@@ -470,7 +470,7 @@ public class SpriteEditor extends GameEngine {
                 .build();
         objectManager.add(loadAnimationButton);
 
-        newAnimationButton = new ButtonObj.Builder()
+        newAnimationButton = new Button.Builder()
                 .rect(new Rectangle(paletteX, btnY + 100, btnWidth, btnHeight))
                 .color(Color.ORANGE)
                 .text("New Anim")
@@ -482,7 +482,7 @@ public class SpriteEditor extends GameEngine {
 
         // Frame Controls
         int frameY = btnY + 150;
-        newFrameButton = new ButtonObj.Builder()
+        newFrameButton = new Button.Builder()
                 .rect(new Rectangle(paletteX, frameY, btnWidth, 35))
                 .color(new Color(100, 200, 100))
                 .text("New Frame")
@@ -492,7 +492,7 @@ public class SpriteEditor extends GameEngine {
                 .build();
         objectManager.add(newFrameButton);
 
-        deleteFrameButton = new ButtonObj.Builder()
+        deleteFrameButton = new Button.Builder()
                 .rect(new Rectangle(paletteX, frameY + 40, btnWidth, 35))
                 .color(new Color(200, 100, 100))
                 .text("Delete Frame")
@@ -504,7 +504,7 @@ public class SpriteEditor extends GameEngine {
 
         // Navigation
         int navY = frameY + 85;
-        prevFrameButton = new ButtonObj.Builder()
+        prevFrameButton = new Button.Builder()
                 .rect(new Rectangle(paletteX, navY, smallBtnWidth, 35))
                 .color(new Color(150, 150, 200))
                 .text("<<")
@@ -514,7 +514,7 @@ public class SpriteEditor extends GameEngine {
                 .build();
         objectManager.add(prevFrameButton);
 
-        nextFrameButton = new ButtonObj.Builder()
+        nextFrameButton = new Button.Builder()
                 .rect(new Rectangle(paletteX + smallBtnWidth + 10, navY, smallBtnWidth, 35))
                 .color(new Color(150, 150, 200))
                 .text(">>")
@@ -525,7 +525,7 @@ public class SpriteEditor extends GameEngine {
         objectManager.add(nextFrameButton);
 
         // Play Button
-        playAnimationButton = new ButtonObj.Builder()
+        playAnimationButton = new Button.Builder()
                 .rect(new Rectangle(paletteX, navY + 45, btnWidth, 35))
                 .color(new Color(100, 255, 100))
                 .text("Play")
@@ -537,7 +537,7 @@ public class SpriteEditor extends GameEngine {
 
         // FPS Slider
         int fpsY = paletteY + 175;
-        fpsSlider = new SliderObj.Builder()
+        fpsSlider = new Slider.Builder()
                 .position(palette2X, fpsY)
                 .size(150, 20)
                 .range(1f, 30f)
@@ -970,12 +970,12 @@ public class SpriteEditor extends GameEngine {
         g.drawRect(paletteX + 70, paletteY - 20, 40, 15);
     }
 
-    private class ColorButton extends ButtonObj {
+    private class ColorButton extends Button {
         private Color color;
         private boolean selected = false;
 
         public ColorButton(Rectangle rect, Color color, FuncInt onClick) {
-            super(new ButtonObj.Builder()
+            super(new Button.Builder()
                     .rect(rect)
                     .color(color)
                     .text("")
@@ -1016,11 +1016,11 @@ public class SpriteEditor extends GameEngine {
         }
     }
 
-    private class ToolButton extends ButtonObj {
+    private class ToolButton extends Button {
         private boolean selected = false;
 
         public ToolButton(Rectangle rect, Color color, FuncInt onClick, String label) {
-            super(new ButtonObj.Builder()
+            super(new Button.Builder()
                     .rect(rect)
                     .color(color)
                     .text(label)

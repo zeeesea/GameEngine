@@ -7,7 +7,7 @@ import GameEngine.Core.util.Vector2;
 
 import java.awt.*;
 
-public class SliderObj extends GameObject {
+public class Slider extends GameObject {
     // Position und Größe
     private int x, y, width, height;
 
@@ -37,7 +37,7 @@ public class SliderObj extends GameObject {
     /**
      * Private Konstruktor - nur über Builder zugänglich
      */
-    private SliderObj(int x, int y, int width, int height, float minValue, float maxValue, float startValue) {
+    private Slider(int x, int y, int width, int height, float minValue, float maxValue, float startValue) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -145,8 +145,8 @@ public class SliderObj extends GameObject {
             return this;
         }
 
-        public SliderObj build() {
-            SliderObj slider = new SliderObj(x, y, width, height, minValue, maxValue, startValue);
+        public Slider build() {
+            Slider slider = new Slider(x, y, width, height, minValue, maxValue, startValue);
             slider.backgroundColor = backgroundColor;
             slider.fillColor = fillColor;
             slider.handleColor = handleColor;
@@ -164,59 +164,59 @@ public class SliderObj extends GameObject {
 
     // ===== SETTER METHODS =====
 
-    public SliderObj setBackgroundColor(Color color) {
+    public Slider setBackgroundColor(Color color) {
         this.backgroundColor = color;
         return this;
     }
 
-    public SliderObj setFillColor(Color color) {
+    public Slider setFillColor(Color color) {
         this.fillColor = color;
         return this;
     }
 
-    public SliderObj setHandleColor(Color color) {
+    public Slider setHandleColor(Color color) {
         this.handleColor = color;
         return this;
     }
 
-    public SliderObj setBorderColor(Color color) {
+    public Slider setBorderColor(Color color) {
         this.borderColor = color;
         return this;
     }
 
-    public SliderObj setGradient(Color startColor, Color endColor) {
+    public Slider setGradient(Color startColor, Color endColor) {
         this.showGradient = true;
         this.gradientStartColor = startColor;
         this.gradientEndColor = endColor;
         return this;
     }
 
-    public SliderObj removeGradient() {
+    public Slider removeGradient() {
         this.showGradient = false;
         return this;
     }
 
-    public SliderObj setShowValue(boolean show) {
+    public Slider setShowValue(boolean show) {
         this.showValue = show;
         return this;
     }
 
-    public SliderObj setLabel(String label) {
+    public Slider setLabel(String label) {
         this.label = label;
         return this;
     }
 
-    public SliderObj setFont(Font font) {
+    public Slider setFont(Font font) {
         this.font = font;
         return this;
     }
 
-    public SliderObj setOnValueChanged(FuncIntOne<Float> callback) {
+    public Slider setOnValueChanged(FuncIntOne<Float> callback) {
         this.onValueChanged = callback;
         return this;
     }
 
-    public SliderObj setValue(float value) {
+    public Slider setValue(float value) {
         float oldValue = this.value;
         this.value = Math.max(minValue, Math.min(maxValue, value));
         if (oldValue != this.value && onValueChanged != null) {
@@ -225,32 +225,32 @@ public class SliderObj extends GameObject {
         return this;
     }
 
-    public SliderObj setMinValue(float min) {
+    public Slider setMinValue(float min) {
         this.minValue = min;
         if (value < min) setValue(min);
         return this;
     }
 
-    public SliderObj setMaxValue(float max) {
+    public Slider setMaxValue(float max) {
         this.maxValue = max;
         if (value > max) setValue(max);
         return this;
     }
 
-    public SliderObj setRange(float min, float max) {
+    public Slider setRange(float min, float max) {
         this.minValue = min;
         this.maxValue = max;
         setValue(value); // Clamp to new range
         return this;
     }
 
-    public SliderObj setPosition(int x, int y) {
+    public Slider setPosition(int x, int y) {
         this.x = x;
         this.y = y;
         return this;
     }
 
-    public SliderObj setSize(int width, int height) {
+    public Slider setSize(int width, int height) {
         this.width = width;
         this.height = height;
         return this;

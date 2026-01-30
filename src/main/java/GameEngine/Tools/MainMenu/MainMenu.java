@@ -2,9 +2,7 @@ package GameEngine.Tools.MainMenu;
 
 import GameEngine.Core.GameEngine;
 import GameEngine.Core.GameEngineFrame;
-import GameEngine.Core.gameObject.Obj.ButtonObj;
-import GameEngine.Core.scenes.SceneManager;
-import GameEngine.Tools.SpriteEditor.SpriteEditor;
+import GameEngine.Core.gameObject.Obj.Button;
 
 import java.awt.*;
 
@@ -14,7 +12,7 @@ public class MainMenu extends GameEngine {
         new GameEngineFrame(new MainMenu());
     }
 
-    ButtonObj startSpriteEditorBtn;
+    Button startSpriteEditorBtn;
 
     @Override
     public void init() {
