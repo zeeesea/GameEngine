@@ -11,17 +11,34 @@ import java.awt.*;
 import java.util.function.Consumer;
 
 public class ButtonObj extends GameObject {
-    private final Runnable onClick;
+    private Runnable onClick;
     private Color color;
     private TextObj text;
     private String textString;
     private Font font;
     private boolean lastHoverState;
     private Consumer<Boolean> onHoverChange;
+    private Consumer<ButtonObj> onClickButton;
 
+    public ButtonObj(Rectangle rect, Color color, Consumer<ButtonObj> onClickButton, String textString, Font font, Color textColor) {
+        transform = new Transform(rect);
+        this.onClickButton = onClickButton;
+        this.color = color;
+        this.font = font;
+        this.textString = textString;
 
+        this.text = new TextObj(
+                textString,
+                getCenterPosition(),
+                textColor,
+                font,
+                renderOrder + 1
+        );
 
-    public ButtonObj(Rectangle rect, Color color, Runnable onClick, String textString, Font font, Color textColor) {
+        // Collider
+        collider = new BoxCollider2D(this);
+    }
+    public ButtonObj(Rectangle rect, Color color, Runnable onClickButton, String textString, Font font, Color textColor) {
         transform = new Transform(rect);
         this.onClick = onClick;
         this.color = color;
@@ -39,7 +56,6 @@ public class ButtonObj extends GameObject {
         // Collider
         collider = new BoxCollider2D(this);
     }
-
     public ButtonObj(Rectangle rect, Runnable onClick, String textString) {
         this(
                 rect,
@@ -50,12 +66,23 @@ public class ButtonObj extends GameObject {
                 Color.BLACK
         );
     }
-
     public ButtonObj(Rectangle rect, Color color, Runnable onClick, Consumer<Boolean> onHoverChange, String textString, Font font, Color textColor) {
         this(
                 rect,
                 color,
                 onClick,
+                textString,
+                font,
+                textColor
+        );
+        this.onHoverChange = onHoverChange;
+
+    }
+    public ButtonObj(Rectangle rect, Color color, Consumer<ButtonObj> onClickButton, Consumer<Boolean> onHoverChange, String textString, Font font, Color textColor) {
+        this(
+                rect,
+                color,
+                onClickButton,
                 textString,
                 font,
                 textColor
@@ -80,7 +107,8 @@ public class ButtonObj extends GameObject {
         }
 
         if (hovering && Input.getMouseButtonDown(Input.MouseCode.LEFT)) {
-            onClick.run();
+            if (onClick != null) onClick.run();
+            if (onClickButton != null) onClickButton.accept(this);
         }
 
         // Textposition immer in der Mitte halten
@@ -92,22 +120,29 @@ public class ButtonObj extends GameObject {
     public TextObj getText() {
         return text;
     }
-
     public void setText(String newText) {
         this.textString = newText;
         if (text != null) {
             text.setText(newText);
         }
     }
-
     public void setColor(Color newColor) {
         this.color = newColor;
     }
-
     public Color getColor() {
         return color;
     }
-
+    @Override
+    public void setActive(boolean active) {
+        this.active = active;
+        // Text NICHT auf null setzen, nur aktivieren/deaktivieren
+        if (text != null) {
+            text.setActive(active);
+        }
+    }
+    public void toggleActive() {
+        setActive(!active);
+    }
 
 
     @Override
@@ -125,18 +160,6 @@ public class ButtonObj extends GameObject {
             text.transform.position.y += (float) textHeight / 4;
             text.draw(g);
         }
-    }
-
-    @Override
-    public void setActive(boolean active) {
-        this.active = active;
-        // Text NICHT auf null setzen, nur aktivieren/deaktivieren
-        if (text != null) {
-            text.setActive(active);
-        }
-    }
-    public void toggleActive() {
-        setActive(!active);
     }
 
     @Override

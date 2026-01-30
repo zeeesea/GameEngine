@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.List;
 
 public abstract class GameObject {
+    //<editor-fold desc="VARIABLES">
     public Transform transform = new Transform();
     public Collider2D collider = null;
     public boolean active = true;
@@ -44,33 +45,73 @@ public abstract class GameObject {
     private boolean dragging = false;
     private Vector2 dragStartOffset;
     private boolean wasMousePressedLastFrame = false;
+    //</editor-fold>
 
     public GameObject() {
         init();
     }
 
+    //<editor-fold desc="GETTERS/SETTERS">
     public static void setSpriteManager(SpriteManager manager) {
         spriteManager = manager;
     }
-
     public static void setAnimationManager(AnimationManager manager) {
         animationManager = manager;
     }
-
     public void setGameObjectManager(GameObjectManager gameObjectManager) {
         this.gameObjectManager = gameObjectManager;
     }
-
     public GameObjectManager getGameObjectManager() {
         return gameObjectManager;
     }
-
-    protected static GameEngine engine;
-
     public static void setEngine(GameEngine e) {
         engine = e;
     }
+    protected static GameEngine engine;
+    protected int getScreenWidth() {
+        return engine.getScreenWidth();
+    }
+    protected int getScreenHeight() {
+        return engine.getScreenHeight();
+    }
+    protected Vector2 getScreenSize() {
+        return engine.getScreenSize();
+    }
+    protected int getFPS() {
+        return engine.getFPS();
+    }
+    public Vector2 getCenterPosition() {
+        return new Vector2(
+                transform.position.x + transform.scale.x / 2,
+                transform.position.y + transform.scale.y / 2
+        );
+    }
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+    protected Camera getCamera() {
+        return engine.getCamera();
+    }
+    protected void setCameraFollowTarget() {
+        engine.getCamera().setFollowTarget(this);
+    }
+    protected boolean isOutOfScreen() {
+        return (
+                transform.position.x < 0 ||
+                        transform.position.y < 0 ||
+                        transform.position.x > getScreenWidth() - transform.scale.x ||
+                        transform.position.y > getScreenHeight() - transform.scale.y
+        );
+    }
+    protected boolean isDragging() {
+        return dragging;
+    }
+    protected boolean wasMousePressedLastFrame() {
+        return wasMousePressedLastFrame;
+    }
+    //</editor-fold>
 
+    //<editor-fold desc="ABSTRACT METHODS">
     public void callDraw(Graphics2D g) {
         this.g = g;
         draw(g);
@@ -80,12 +121,10 @@ public abstract class GameObject {
     public abstract void update(double deltaTime);
     public abstract void draw(Graphics2D g);
     public abstract void onCollision(GameObject collider);
+    //</editor-fold>
 
-    public void destroy() {
-        gameObjectManager.remove(this);
-    }
-
-    // ===== SPRITE METHODS =====
+    //<editor-fold desc="VISUAL">
+    //<editor-fold desc="SRITE METHODS">
 
     /**
      * Lädt ein Sprite und setzt es als Default (nur einmal laden)
@@ -220,7 +259,9 @@ public abstract class GameObject {
         return currentFrame != null;
     }
 
-    // ===== ANIMATION METHODS =====
+    //</editor-fold>
+
+    //<editor-fold desc="ANIMATION METHODS">
 
     /**
      * Lädt und registriert eine Animation
@@ -339,6 +380,9 @@ public abstract class GameObject {
         }
     }
 
+    //</editor-fold>
+
+    //<editor-fold desc="DRAW METHODS">
     /**
      * Zeichnet das GameObject als Sprite mit Rotation
      */
@@ -445,80 +489,6 @@ public abstract class GameObject {
 
         drawSpriteAt(centerX - spriteWidth / 2, centerY - spriteHeight / 2, transform.rotation);
     }
-
-    // Helper Methods
-    protected int getScreenWidth() {
-        return engine.getScreenWidth();
-    }
-    protected int getScreenHeight() {
-        return engine.getScreenHeight();
-    }
-    protected Vector2 getScreenSize() {
-        return engine.getScreenSize();
-    }
-    protected int getFPS() {
-        return engine.getFPS();
-    }
-    public Vector2 getCenterPosition() {
-        return new Vector2(
-                transform.position.x + transform.scale.x / 2,
-                transform.position.y + transform.scale.y / 2
-        );
-    }
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-    protected void shakeCamera(float intensity, float duration) {
-        if (engine != null) {
-            engine.getCamera().shake(intensity, duration);
-        }
-    }
-    protected Camera getCamera() {
-        return engine.getCamera();
-    }
-    protected void setCameraFollowTarget() {
-        engine.getCamera().setFollowTarget(this);
-    }
-    protected void clearCameraFollowTarget() {
-        engine.getCamera().clearFollowTarget();
-    }
-    protected boolean isOutOfScreen() {
-        return (
-                        transform.position.x < 0 ||
-                        transform.position.y < 0 ||
-                        transform.position.x > getScreenWidth() - transform.scale.x ||
-                        transform.position.y > getScreenHeight() - transform.scale.y
-                );
-    }
-    protected boolean wasMousePressedLastFrame() {
-        return wasMousePressedLastFrame;
-    }
-    protected void clampPositionToScreen() {
-        transform.position = transform.position.clamp(
-                0, getScreenWidth() - transform.scale.x,
-                0, getScreenHeight() - transform.scale.y
-        );
-    }
-    public boolean collidesWith(GameObject gameObject) {
-        if (collider != null && gameObject.collider != null) {
-            return collider.intersects(gameObject.collider);
-        }
-        return gameObject.transform.position.x >= transform.position.x &&
-                gameObject.transform.position.x <= transform.position.x + transform.scale.x &&
-                gameObject.transform.position.y >= transform.position.y &&
-                gameObject.transform.position.y <= transform.position.y + transform.scale.y;
-    }
-    public boolean collidesWith(Vector2 point) {
-        if (collider != null) {
-            return collider.collidesWithPoint(point);
-        }
-        return point.x >= transform.position.x &&
-                point.x <= transform.position.x + transform.scale.x &&
-                point.y >= transform.position.y &&
-                point.y <= transform.position.y + transform.scale.y;
-    }
-
-    //Drawing Methods
     protected void drawGOasFilledRect(Color color) {
         g.setColor(color);
         g.fillRect((int)transform.position.x, (int)transform.position.y, (int)transform.scale.x, (int)transform.scale.y);
@@ -576,6 +546,45 @@ public abstract class GameObject {
 
         g.setComposite(original);
     }
+    //</editor-fold>
+    //</editor-fold>
+
+    //<editor-fold desc="HELPER METHODS">
+    protected void shakeCamera(float intensity, float duration) {
+        if (engine != null) {
+            engine.getCamera().shake(intensity, duration);
+        }
+    }
+    public void destroy() {
+        gameObjectManager.remove(this);
+    }
+    protected void clearCameraFollowTarget() {
+        engine.getCamera().clearFollowTarget();
+    }
+    protected void clampPositionToScreen() {
+        transform.position = transform.position.clamp(
+                0, getScreenWidth() - transform.scale.x,
+                0, getScreenHeight() - transform.scale.y
+        );
+    }
+    public boolean collidesWith(GameObject gameObject) {
+        if (collider != null && gameObject.collider != null) {
+            return collider.intersects(gameObject.collider);
+        }
+        return gameObject.transform.position.x >= transform.position.x &&
+                gameObject.transform.position.x <= transform.position.x + transform.scale.x &&
+                gameObject.transform.position.y >= transform.position.y &&
+                gameObject.transform.position.y <= transform.position.y + transform.scale.y;
+    }
+    public boolean collidesWith(Vector2 point) {
+        if (collider != null) {
+            return collider.collidesWithPoint(point);
+        }
+        return point.x >= transform.position.x &&
+                point.x <= transform.position.x + transform.scale.x &&
+                point.y >= transform.position.y &&
+                point.y <= transform.position.y + transform.scale.y;
+    }
 
     @Override
     public String toString() {
@@ -603,13 +612,12 @@ public abstract class GameObject {
 
         wasMousePressedLastFrame = mousePressed;
     }
-    protected boolean isDragging() {
-        return dragging;
-    }
     protected boolean wasJustReleased(Input.MouseCode mouseButton) {
         return !Input.getMouseButton(mouseButton) && wasMousePressedLastFrame;
     }
+    //</editor-fold>
 
+    //<editor-fold desc="EVENT METHODS">
     public void onKeyPressed(int keyCode) {}
     public void onKeyReleased(int keyCode) {}
     public void onMousePressed(int x, int y, int button) {}
@@ -618,4 +626,5 @@ public abstract class GameObject {
     public void onWindowMinimized() {}
     public void onWindowRestored() {}
     public void onWindowResized(int width, int height) {}
+    //</editor-fold>
 }
