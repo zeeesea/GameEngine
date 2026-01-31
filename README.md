@@ -99,7 +99,7 @@ import java.awt.*;
 public class Main extends GameEngine {
 
     public static void main(String[] args) {
-        new GameEngineFrame(new Main());
+        GameEngine.launch(new Main());
     }
 
     @Override
@@ -109,7 +109,7 @@ public class Main extends GameEngine {
 
     @Override
     protected void update() {
-        // Called every frame
+        // Called every frame for logic updates
     }
 
     @Override
@@ -265,15 +265,18 @@ Camera cam = getCamera();
 
 UI Elements
 ```java
-ButtonObj playButton = new ButtonObj(
-    new Rectangle(100, 100, 200, 60),
-    Color.GREEN,
-    this::startGame,
-    "Play Game",
-    new Font("Arial", Font.BOLD, 24),
-    Color.BLACK
-);
-objectManager.add(playButton);
+Button btn = new Button.Builder()
+                .rect(new Rectangle(getScreenWidth()/2, getScreenHeight()/2, 50,50))
+                .color(new Color(100, 150, 255))
+                .text("1")
+                .onClick(this::clicked)
+                .onHover(this::onHoverChange)
+                .tag("btn")
+                .smoothHover(10,150)
+                .font(new Font("Arial", Font.BOLD, 14))
+                .textColor(Color.WHITE)
+                .build();
+objectManager.add(btn);
 ```
 
 
@@ -306,11 +309,7 @@ setFullScreen(true);
 setFPS(120);
 ```
 
-Custom sprite directory:
-```java
-GameObject.setSpriteManager(new SpriteManager("mysprites/"));
-GameObject.setAnimationManager(new AnimationManager("myanimations/"));
-```
+
 <h2>📁 Project Structure</h2>
 
 ```java
@@ -336,7 +335,6 @@ Console.log("Custom", "Message", ConsoleColor.CYAN);
 Draw debug info:
 ```java
 drawCollider();
-g.drawString("FPS: " + getFPS(), 10, 40);
 ```
 
 
