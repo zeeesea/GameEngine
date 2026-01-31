@@ -13,6 +13,7 @@ import GameEngine.Tools.SpriteEditor.SpriteManager;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 
 public abstract class GameEngine extends JPanel implements ActionListener {
 
@@ -30,7 +31,7 @@ public abstract class GameEngine extends JPanel implements ActionListener {
     protected java.util.Random random = new java.util.Random();
     protected boolean running = false;
     protected float deltaTime = 0;
-    private JFrame parentFrame;
+    private GameEngineFrame parentFrame;
     protected Camera camera;
     private boolean fullscreen;
     private long last;
@@ -49,7 +50,7 @@ public abstract class GameEngine extends JPanel implements ActionListener {
 
         setReferences();
     }
-    public void setParentFrame(JFrame frame) {
+    public void setParentFrame(GameEngineFrame frame) {
         parentFrame = frame;
 
         // WindowListener für Close, Minimize, Restore
@@ -141,6 +142,18 @@ public abstract class GameEngine extends JPanel implements ActionListener {
         SCREEN_HEIGHT = getHeight();
         Console.log(ConsoleTag.SYSTEM, "Window resized to " + width + "," + height);
         onWindowResized(width, height);
+    }
+    public void setIconFromSprite(String spriteName) {
+        parentFrame.setIconFromSprite(spriteName);
+    }
+    public void setIconFromFile(String filePath) {
+        parentFrame.setIconFromFile(filePath);
+    }
+    public void setIconFromPixels(Color[][] pixels) {
+        parentFrame.setIconFromPixels(pixels);
+    }
+    public void setMultipleIconsFromSprite(String spriteName) {
+        parentFrame.setMultipleIconsFromSprite(spriteName);
     }
     //</editor-fold>
 
