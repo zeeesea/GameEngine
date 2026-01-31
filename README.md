@@ -230,6 +230,12 @@ float distance = pos.distance(other);
 Vector2 normalized = pos.normalize();
 ```
 
+<h3>7️⃣ Timer</h3>
+
+```java
+Timer.create(this::METHOD,INTERVAL_SEC).start();
+```
+
 <h2>🎨 Sprites & Animations</h2>
 
 Load sprites:
@@ -338,4 +344,4 @@ drawCollider();
 ```
 
 
----- Repositiory created on Oct 26, 2025 by zeeesea ----
+---- © Repositiory created on Oct 26, 2025 by zeeesea ----
