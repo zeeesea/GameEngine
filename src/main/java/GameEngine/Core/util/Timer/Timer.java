@@ -7,6 +7,9 @@ import GameEngine.Core.util.Console.ConsoleTag;
 
 import java.awt.*;
 
+/**
+ * A GameEngine Util Class, which serves as a timer. When interval reached, it calls {@code callback}.
+ */
 public class Timer {
     private final FuncInt callback;
     private final float interval;
@@ -27,11 +30,25 @@ public class Timer {
         this.repeating = repeating;
     }
 
+    /**
+     * This method will create a timer with a specific callback and interval. Can be started with {@code start()}.
+     * @param callback The method that will be executed, e.g. this::example
+     * @param interval The interval in seconds between each call
+     * @return The created Timer Object
+     */
     public static Timer create(FuncInt callback, float interval) {
         Timer t = new Timer(callback, interval);
         if (system != null) system.addTimer(t);
         return t;
     }
+
+    /**
+     * This method will create a timer with a specific callback and interval. Can be started with {@code start()}.
+     * @param callback The method that will be executed, e.g. this::example
+     * @param interval The interval in seconds between each call
+     * @param repeating Should the timer repeat itself after reaching {@code interval}?
+     * @return The created Timer Object
+     */
     public static Timer create(FuncInt callback, float interval, boolean repeating) {
         Timer t =  new Timer(callback, interval, repeating);
         if (system != null) system.addTimer(t);
