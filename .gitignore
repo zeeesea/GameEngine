@@ -10,13 +10,15 @@ target/
 # IntelliJ IDEA
 ############################
 .idea/
-sprites/
+
+*.sprite
 *.iml
 *.iws
 *.ipr
 
 # Ignore specific source/test folder
 /src/main/java/TEST_IGNORE/
+/sprites/
 
 ############################
 # Eclipse
