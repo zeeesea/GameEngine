@@ -31,6 +31,7 @@ public class GameEngineFrame extends JFrame {
     }
     public GameEngineFrame(GameEngine panel) {
         Console.log(ConsoleTag.SYSTEM,"Setting up Game Engine Frame...");
+
         this.add(panel);
         this.setTitle("MY GAME");
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);

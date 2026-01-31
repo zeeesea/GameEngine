@@ -5,6 +5,8 @@ import GameEngine.Core.util.*;
 import GameEngine.Core.input.*;
 import GameEngine.Core.util.Console.Console;
 import GameEngine.Core.util.Console.ConsoleTag;
+import GameEngine.Core.util.Timer.Timer;
+import GameEngine.Core.util.Timer.TimerSystem;
 import GameEngine.Tools.SpriteEditor.AnimationManager;
 import GameEngine.Tools.SpriteEditor.SpriteManager;
 
@@ -36,6 +38,7 @@ public abstract class GameEngine extends JPanel implements ActionListener {
     protected GameObjectManager objectManager;
     protected SpriteManager spriteManager;
     protected AnimationManager animationManager;
+    protected TimerSystem timerSystem;
 
     //</editor-fold>
 
@@ -67,13 +70,16 @@ public abstract class GameEngine extends JPanel implements ActionListener {
         this.addMouseMotionListener(mouseListener);
 
         camera = new Camera(this);
-        if (objectManager == null) {objectManager = new GameObjectManager();}
-        if (spriteManager == null) {spriteManager = new SpriteManager();}
-        if (animationManager == null) {animationManager = new AnimationManager(spriteManager);}
+        if (objectManager == null) objectManager = new GameObjectManager();
+        if (spriteManager == null) spriteManager = new SpriteManager();
+        if (animationManager == null) animationManager = new AnimationManager(spriteManager);
+        if (timerSystem == null) timerSystem = new TimerSystem();
 
         GameObject.setEngine(this);
         GameObject.setSpriteManager(spriteManager);
         GameObject.setAnimationManager(animationManager);
+        Timer.setTimerSystem(timerSystem);
+        objectManager.setTimersystem(timerSystem);
         Console.log(ConsoleTag.SYSTEM, "Initialisation complete");
     }
 

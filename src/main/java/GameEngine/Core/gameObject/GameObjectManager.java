@@ -1,5 +1,6 @@
 package GameEngine.Core.gameObject;
 
+import GameEngine.Core.util.Timer.TimerSystem;
 import GameEngine.Core.util.Vector2;
 
 import java.awt.*;
@@ -11,6 +12,8 @@ public class GameObjectManager {
     private List<GameObject> gameObjects = new ArrayList<>();
     private List<GameObject> toAdd = new ArrayList<>();
     private List<GameObject> toRemove = new ArrayList<>();
+
+    private TimerSystem timersystem;
 
     public void add(GameObject obj) {
         toAdd.add(obj);
@@ -34,6 +37,8 @@ public class GameObjectManager {
                 obj.update(dt);
             }
         }
+
+        if (timersystem != null) timersystem.update(dt);
 
         if (toRemove.isEmpty()) return;
         for (GameObject obj : toRemove) {
@@ -66,6 +71,9 @@ public class GameObjectManager {
     }
     public List<GameObject> getAll() {
         return new ArrayList<>(gameObjects);
+    }
+    public void setTimersystem(TimerSystem timersystem) {
+        this.timersystem = timersystem;
     }
     public <T extends GameObject> List<T> getAll(Class<T> type) {
     List<T> result = new ArrayList<>();

@@ -20,7 +20,7 @@ public abstract class GameObject {
     //<editor-fold desc="VARIABLES">
     public Transform transform = new Transform();
     public Collider2D collider = null;
-    public boolean active = true;
+    protected boolean active = true;
     public int renderOrder = 0;
     public String tag = "GameObject";
     protected GameObjectManager gameObjectManager;
@@ -88,6 +88,9 @@ public abstract class GameObject {
     }
     public void setActive(boolean active) {
         this.active = active;
+    }
+    public boolean isActive() {
+        return active;
     }
     protected Camera getCamera() {
         return engine.getCamera();

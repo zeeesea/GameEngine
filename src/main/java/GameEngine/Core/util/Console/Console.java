@@ -29,7 +29,7 @@ public class Console {
     //================ BASIC =================//
 
     public static void log(String msg) {
-        logInternal(null, msg, ConsoleColor.RESET);
+        logInternal(ConsoleTag.DEBUG, msg, ConsoleColor.RESET);
     }
 
     public static void log(String tag, String msg) {
