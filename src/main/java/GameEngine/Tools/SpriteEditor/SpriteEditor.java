@@ -6,7 +6,9 @@ import GameEngine.Core.gameObject.Obj.Button;
 import GameEngine.Core.gameObject.Obj.Slider;
 import GameEngine.Core.gameObject.Obj.Text;
 import GameEngine.Core.input.Input;
+import GameEngine.Core.scenes.SceneManager;
 import GameEngine.Core.util.Vector2;
+import GameEngine.Tools.MainMenu.MainMenu;
 
 import java.awt.*;
 import java.util.Stack;
@@ -100,6 +102,7 @@ public class SpriteEditor extends GameEngine {
     // Mode Buttons
     private Button spriteModeButton;
     private Button animationModeButton;
+    private Button backToMenuButton;
 
     // Brightness Slider
     private Slider brightnessSlider;
@@ -175,6 +178,16 @@ public class SpriteEditor extends GameEngine {
                 .onClick(() -> switchMode(EditorMode.ANIMATION))
                 .build();
         objectManager.add(animationModeButton);
+
+        backToMenuButton = new Button.Builder()
+                .rect(new Rectangle(10, 10, 150, 40))
+                .color(Color.WHITE)
+                .text("Back to Menu")
+                .font(new Font("Arial", Font.BOLD, 16))
+                .textColor(Color.BLACK)
+                .onClick(() -> SceneManager.loadScene(new MainMenu()))
+                .build();
+        objectManager.add(backToMenuButton);
     }
 
     private void switchMode(EditorMode mode) {

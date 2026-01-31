@@ -3,6 +3,8 @@ package GameEngine.Core.util.Console;
 import GameEngine.Core.gameObject.GameObject;
 import GameEngine.Core.util.Vector2;
 
+import java.time.LocalDateTime;
+
 public class Console {
 
     private Console() {}
@@ -11,6 +13,11 @@ public class Console {
 
     private static void logInternal(ConsoleTag tag, String msg, ConsoleColor color) {
         StringBuilder sb = new StringBuilder();
+
+        LocalDateTime l = LocalDateTime.now();
+        String time = "(" +
+                String.format("%02d:%02d:%02d", l.getHour(), l.getMinute(), l.getSecond()) +
+                ") ";
 
         if (tag != null) {
             sb.append("[").append(tag.name()).append("] ");
@@ -23,21 +30,26 @@ public class Console {
 
         if (color == null) color = ConsoleColor.RESET;
 
-        System.out.println(color.code() + sb + ConsoleColor.RESET.code());
+        System.out.println(
+                ConsoleColor.DARK_GRAY.code() + time +
+                        ConsoleColor.RESET.code() +
+                        color.code() + sb +
+                        ConsoleColor.RESET.code()
+        );
     }
 
     //================ BASIC =================//
 
     public static void log(String msg) {
-        logInternal(ConsoleTag.DEBUG, msg, ConsoleColor.RESET);
+        logInternal(ConsoleTag.DEBUG, msg, null);
     }
 
     public static void log(String tag, String msg) {
-        System.out.println("[" + tag + "] " + msg);
+        logInternal(null, "[" + tag + "] " + msg, ConsoleColor.RESET);
     }
 
     public static void log(String tag, String msg, ConsoleColor color) {
-        System.out.println(color.code() + "[" + tag + "] " + msg + ConsoleColor.RESET.code());
+        logInternal(null, "[" + tag + "] " + msg, color);
     }
 
     //================ TAG =================//

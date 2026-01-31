@@ -3,6 +3,9 @@ package GameEngine.Tools.MainMenu;
 import GameEngine.Core.GameEngine;
 import GameEngine.Core.GameEngineFrame;
 import GameEngine.Core.gameObject.Obj.Button;
+import GameEngine.Core.scenes.SceneManager;
+import GameEngine.Core.util.Console.Console;
+import GameEngine.Tools.SpriteEditor.SpriteEditor;
 
 import java.awt.*;
 
@@ -16,15 +19,16 @@ public class MainMenu extends GameEngine {
 
     @Override
     public void init() {
-//        startSpriteEditorBtn = new ButtonObj(
-//                new Rectangle(100, 100, 200, 60),
-//                Color.BLUE,
-//                this::openSpriteEditor,
-//                "Sprite Editor",
-//                new Font("Arial", Font.BOLD, 24),
-//                Color.WHITE
-//        );
-//        objectManager.add(startSpriteEditorBtn);
+        startSpriteEditorBtn = new Button.Builder()
+                .rect(new Rectangle(100, 100, 200, 60))
+                .color(Color.BLUE)
+                .text("Sprite Editor")
+                .font(new Font("Arial", Font.BOLD, 24))
+                .textColor(Color.WHITE)
+                .onClick(this::openSpriteEditor)
+                .build();
+
+        objectManager.add(startSpriteEditorBtn);
     }
 
     @Override
@@ -34,7 +38,7 @@ public class MainMenu extends GameEngine {
 
     private void openSpriteEditor() {
         //Open Sprite Editor
-        //SceneManager.loadScene(new SpriteEditor());
+        SceneManager.loadScene(new SpriteEditor());
     }
 
     @Override

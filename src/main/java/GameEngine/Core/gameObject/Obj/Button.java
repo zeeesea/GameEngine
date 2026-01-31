@@ -173,12 +173,11 @@ public class Button extends GameObject {
     public void init() {}
     @Override
     public void update(double deltaTime)  {
+        if (!active) return;
         updateState(deltaTime);
         updateHover(deltaTime);
     }
     private void updateState(double deltaTime) {
-        if (!active) return; // Only update if active
-
         boolean hovering = collider.collidesWithPoint(Input.getMousePosition());
         if (hovering != lastHoverState) {
             hovering(hovering);

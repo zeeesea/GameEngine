@@ -28,8 +28,12 @@ public class GameEngineFrame extends JFrame {
         panel.setParentFrame(this);
         SceneManager.setFrame(this);
 
-        panel.init();
-        panel.start();
+        // WICHTIG: Starte den SceneManager Game Loop
+        SceneManager.startGameLoop();
+
+        // Lade die erste Scene
+        SceneManager.loadScene(panel);
+
         Console.log(ConsoleTag.SYSTEM,"Game Engine Frame setup complete");
     }
 
@@ -47,14 +51,17 @@ public class GameEngineFrame extends JFrame {
         panel.setParentFrame(this);
         SceneManager.setFrame(this);
 
-        panel.init();
-        panel.start();
+        // WICHTIG: Starte den SceneManager Game Loop
+        SceneManager.startGameLoop();
+
+        // Lade die erste Scene
+        SceneManager.loadScene(panel);
+
         Console.log(ConsoleTag.SYSTEM,"Game Engine Frame setup complete");
     }
 
     /**
      * Setzt das Icon des Fensters aus einem gespeicherten Sprite
-     * @param spriteName Name des Sprites (muss in sprites/single/ existieren)
      */
     public void setIconFromSprite(String spriteName) {
         SpriteManager spriteManager = new SpriteManager();
@@ -70,10 +77,6 @@ public class GameEngineFrame extends JFrame {
         Console.log(ConsoleTag.SYSTEM, "Icon set from sprite: " + spriteName);
     }
 
-    /**
-     * Setzt das Icon des Fensters aus einer Bilddatei
-     * @param imagePath Pfad zur Bilddatei (z.B. "resources/icon.png")
-     */
     public void setIconFromFile(String imagePath) {
         try {
             Image icon = Toolkit.getDefaultToolkit().getImage(imagePath);
@@ -85,19 +88,12 @@ public class GameEngineFrame extends JFrame {
         }
     }
 
-    /**
-     * Setzt das Icon direkt aus einem Color[][] Array
-     * @param pixels Das Pixel-Array des Sprites
-     */
     public void setIconFromPixels(Color[][] pixels) {
         BufferedImage icon = createImageFromPixels(pixels);
         this.setIconImage(icon);
         Console.log(ConsoleTag.SYSTEM, "Icon set from pixel array");
     }
 
-    /**
-     * Konvertiert ein Color[][] Array zu einem BufferedImage
-     */
     private BufferedImage createImageFromPixels(Color[][] pixels) {
         int width = pixels.length;
         int height = pixels[0].length;
@@ -114,10 +110,6 @@ public class GameEngineFrame extends JFrame {
         return image;
     }
 
-    /**
-     * Setzt mehrere Icons in verschiedenen Größen (für beste Darstellung)
-     * Windows zeigt verschiedene Größen in Taskleiste (16x16) und Alt+Tab (32x32, 48x48)
-     */
     public void setMultipleIconsFromSprite(String spriteName) {
         SpriteManager spriteManager = new SpriteManager();
         Color[][] pixels = spriteManager.loadSprite(spriteName);
@@ -129,31 +121,23 @@ public class GameEngineFrame extends JFrame {
 
         BufferedImage originalIcon = createImageFromPixels(pixels);
 
-        // Erstelle verschiedene Größen für optimale Darstellung
         java.util.List<Image> icons = new java.util.ArrayList<>();
-        icons.add(scaleImage(originalIcon, 16, 16));   // Taskleiste klein
-        icons.add(scaleImage(originalIcon, 20, 20));   // Taskleiste Windows 10
-        icons.add(scaleImage(originalIcon, 24, 24));   // Taskleiste macOS
-        icons.add(scaleImage(originalIcon, 32, 32));   // Alt+Tab
-        icons.add(scaleImage(originalIcon, 48, 48));   // Fenster-Header
-        icons.add(scaleImage(originalIcon, 64, 64));   // Hochauflösende Displays
+        icons.add(scaleImage(originalIcon, 16, 16));
+        icons.add(scaleImage(originalIcon, 20, 20));
+        icons.add(scaleImage(originalIcon, 24, 24));
+        icons.add(scaleImage(originalIcon, 32, 32));
+        icons.add(scaleImage(originalIcon, 48, 48));
+        icons.add(scaleImage(originalIcon, 64, 64));
 
         this.setIconImages(icons);
         Console.log(ConsoleTag.SYSTEM, "Multiple icons set from sprite: " + spriteName);
     }
 
-    /**
-     * Skaliert ein BufferedImage auf eine neue Größe
-     */
     private BufferedImage scaleImage(BufferedImage original, int width, int height) {
         BufferedImage scaled = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = scaled.createGraphics();
 
-        // Für Pixel-Art: Nearest Neighbor (keine Glättung)
         g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-
-        // Alternative für normale Bilder (mit Glättung):
-        // g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
         g.drawImage(original, 0, 0, width, height, null);
         g.dispose();

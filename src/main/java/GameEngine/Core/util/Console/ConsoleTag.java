@@ -11,7 +11,8 @@ public enum ConsoleTag {
     PHYSICS(ConsoleColor.WHITE),
     INPUT(ConsoleColor.CYAN),
     AUDIO(ConsoleColor.PURPLE),
-    DEBUG(ConsoleColor.WHITE);
+    DEBUG(ConsoleColor.WHITE),
+    SCENE(ConsoleColor.GREEN);
 
     private final ConsoleColor defaultColor;
 

@@ -13,14 +13,13 @@ import GameEngine.Tools.SpriteEditor.SpriteManager;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
 
 public abstract class GameEngine extends JPanel implements ActionListener {
 
     //<editor-fold desc="Variables">
     // Standard-Einstellungen
-    protected static int SCREEN_WIDTH = 1536; //80% of FHD
-    protected static int SCREEN_HEIGHT = 864; //80% of FHD
+    protected static int SCREEN_WIDTH = 1536;
+    protected static int SCREEN_HEIGHT = 864;
     protected static int FPS = 60;
 
     // Input-States
@@ -29,17 +28,19 @@ public abstract class GameEngine extends JPanel implements ActionListener {
 
     // Other
     protected java.util.Random random = new java.util.Random();
-    protected boolean running = false;
     protected float deltaTime = 0;
     private GameEngineFrame parentFrame;
     protected Camera camera;
     private boolean fullscreen;
-    private long last;
 
     protected GameObjectManager objectManager;
     protected SpriteManager spriteManager;
     protected AnimationManager animationManager;
     protected TimerSystem timerSystem;
+
+    // Listener-Referenzen speichern
+    private InputKeyListener keyListener;
+    private InputMouseListener mouseListener;
 
     //</editor-fold>
 
@@ -50,21 +51,19 @@ public abstract class GameEngine extends JPanel implements ActionListener {
 
         setReferences();
     }
+
     public void setParentFrame(GameEngineFrame frame) {
         parentFrame = frame;
-
-        // WindowListener für Close, Minimize, Restore
         frame.addWindowListener(new WindowEventListener(this));
-
-        // ComponentListener für Resize
         frame.addComponentListener(new WindowResizeListener(this));
     }
 
     private void setReferences() {
         Console.log(ConsoleTag.SYSTEM, "Initializing Game Engine...");
-        //Add Listeners
-        InputKeyListener keyListener = new InputKeyListener(this);
-        InputMouseListener mouseListener = new InputMouseListener(this);
+
+        // Listener
+        keyListener = new InputKeyListener(this);
+        mouseListener = new InputMouseListener(this);
 
         this.addKeyListener(keyListener);
         this.addMouseListener(mouseListener);
@@ -84,29 +83,60 @@ public abstract class GameEngine extends JPanel implements ActionListener {
         Console.log(ConsoleTag.SYSTEM, "Initialisation complete");
     }
 
+    /**
+     * WICHTIG: Diese Methode wird vom SceneManager aufgerufen!
+     * Nicht direkt verwenden!
+     */
+    public void updateFromSceneManager(float deltaTime) {
+        this.deltaTime = deltaTime;
+
+        Input.updateSmoothInput(deltaTime);
+        camera.update(deltaTime);
+
+        update();
+        if (objectManager != null) objectManager.update(deltaTime);
+        repaint();
+
+        Input.update();
+    }
+
+    public InputKeyListener getKeyListener() {
+        return keyListener;
+    }
+
+    public InputMouseListener getMouseListener() {
+        return mouseListener;
+    }
+
     //<editor-fold desc="Setter/Toggle Methods">
     public static void launch(GameEngine engine) {
         new GameEngineFrame(engine);
     }
+
     protected void setWindowSize(int width, int height) {
         SCREEN_WIDTH = width;
         SCREEN_HEIGHT = height;
 
         this.setPreferredSize(new Dimension(width, height));
-        this.revalidate(); // Panel anpassen
+        this.revalidate();
 
         if (parentFrame != null) {
-            parentFrame.pack(); // JFrame an Panel-Größe anpassen
-            parentFrame.setLocationRelativeTo(null); // optional: zentrieren
+            parentFrame.pack();
+            parentFrame.setLocationRelativeTo(null);
         }
     }
+
     protected void setWindowTitle(String title) {
-        parentFrame.setTitle(title);
+        if (parentFrame != null) {
+            parentFrame.setTitle(title);
+        }
     }
+
     protected void setResizable(boolean resizable) {
         if (parentFrame == null) return;
         parentFrame.setResizable(resizable);
     }
+
     protected void setFullScreen(boolean fullScreen) {
         if (parentFrame == null) return;
 
@@ -119,6 +149,7 @@ public abstract class GameEngine extends JPanel implements ActionListener {
         }
         this.fullscreen = fullScreen;
     }
+
     protected void toggleFullscreen() {
         if (parentFrame == null) return;
 
@@ -134,26 +165,36 @@ public abstract class GameEngine extends JPanel implements ActionListener {
     protected void setFPS(int fps) {
         FPS = fps;
     }
-    public void setRunning(boolean running) {
-        this.running = running;
-    }
+
     public void callWindowResized(int width, int height) {
         SCREEN_WIDTH = getWidth();
         SCREEN_HEIGHT = getHeight();
         Console.log(ConsoleTag.SYSTEM, "Window resized to " + width + "," + height);
         onWindowResized(width, height);
     }
+
     public void setIconFromSprite(String spriteName) {
-        parentFrame.setIconFromSprite(spriteName);
+        if (parentFrame != null) {
+            parentFrame.setIconFromSprite(spriteName);
+        }
     }
+
     public void setIconFromFile(String filePath) {
-        parentFrame.setIconFromFile(filePath);
+        if (parentFrame != null) {
+            parentFrame.setIconFromFile(filePath);
+        }
     }
+
     public void setIconFromPixels(Color[][] pixels) {
-        parentFrame.setIconFromPixels(pixels);
+        if (parentFrame != null) {
+            parentFrame.setIconFromPixels(pixels);
+        }
     }
+
     public void setMultipleIconsFromSprite(String spriteName) {
-        parentFrame.setMultipleIconsFromSprite(spriteName);
+        if (parentFrame != null) {
+            parentFrame.setMultipleIconsFromSprite(spriteName);
+        }
     }
     //</editor-fold>
 
@@ -161,49 +202,37 @@ public abstract class GameEngine extends JPanel implements ActionListener {
     public int getScreenWidth() {
         return SCREEN_WIDTH;
     }
+
     public int getScreenHeight() {
         return SCREEN_HEIGHT;
     }
+
     public Vector2 getScreenSize() {
         return new Vector2(SCREEN_WIDTH, SCREEN_HEIGHT);
     }
+
     public int getFPS() {
         if (deltaTime == 0) return 0;
         return Math.round(1f / deltaTime);
     }
+
     public float getDeltaTime() {
         return deltaTime;
     }
+
     public JFrame getParentFrame() {
         return parentFrame;
     }
+
     public Camera getCamera() {
         return camera;
     }
+
     public boolean isFullscreen() {
         return fullscreen;
     }
-    public boolean isRunning() {
-        return running;
-    }
     //</editor-fold>
 
-
-    public void start() {
-        running = true;
-
-        new Thread(() -> {
-            last = System.nanoTime();
-            while (running) {
-
-                updateGameEngine();
-
-                try {
-                    Thread.sleep(1000 / FPS); // Sleep in ms
-                } catch (InterruptedException ignored) {}
-            }
-        }).start();
-    }
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -216,21 +245,6 @@ public abstract class GameEngine extends JPanel implements ActionListener {
 
         g.translate((int)offset.x, (int)offset.y);
     }
-    private void updateGameEngine() {
-        long now = System.nanoTime();
-        deltaTime = (now - last) / 1_000_000_000f;
-        last = now;
-
-        Input.updateSmoothInput(deltaTime);
-        camera.update(deltaTime);
-
-        update();
-        if (objectManager != null) objectManager.update(deltaTime);
-        repaint();
-
-
-        Input.update();
-    }
 
     //<editor-fold desc="Template Methods">
     public abstract void init();
@@ -239,27 +253,47 @@ public abstract class GameEngine extends JPanel implements ActionListener {
 
     public void actionPerformed(ActionEvent e) {
     }
+
     public void onKeyPressed(int keyCode) {
-        objectManager.onKeyPressed(keyCode);
-    }
-    public void onKeyReleased(int keyCode) {
-        objectManager.onKeyReleased(keyCode);
-    }
-    public void onMousePressed(int x, int y, int button) {
-        objectManager.onMousePressed(x, y, button);
-    }
-    public void onWindowClosing() {
-        objectManager.onWindowClosing();
-    }
-    public void onWindowMinimized() {
-        objectManager.onWindowMinimized();
-    }
-    public void onWindowRestored() {
-        objectManager.onWindowRestored();
-    }
-    public void onWindowResized(int width, int height) {
-        objectManager.onWindowResized(width, height);
+        if (objectManager != null) {
+            objectManager.onKeyPressed(keyCode);
+        }
     }
 
+    public void onKeyReleased(int keyCode) {
+        if (objectManager != null) {
+            objectManager.onKeyReleased(keyCode);
+        }
+    }
+
+    public void onMousePressed(int x, int y, int button) {
+        if (objectManager != null) {
+            objectManager.onMousePressed(x, y, button);
+        }
+    }
+
+    public void onWindowClosing() {
+        if (objectManager != null) {
+            objectManager.onWindowClosing();
+        }
+    }
+
+    public void onWindowMinimized() {
+        if (objectManager != null) {
+            objectManager.onWindowMinimized();
+        }
+    }
+
+    public void onWindowRestored() {
+        if (objectManager != null) {
+            objectManager.onWindowRestored();
+        }
+    }
+
+    public void onWindowResized(int width, int height) {
+        if (objectManager != null) {
+            objectManager.onWindowResized(width, height);
+        }
+    }
     //</editor-fold>
 }
