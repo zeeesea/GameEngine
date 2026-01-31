@@ -338,3 +338,6 @@ Draw debug info:
 drawCollider();
 g.drawString("FPS: " + getFPS(), 10, 40);
 ```
+
+
+---- Repositiory created on Oct 26, 2025 by zeeesea ----
