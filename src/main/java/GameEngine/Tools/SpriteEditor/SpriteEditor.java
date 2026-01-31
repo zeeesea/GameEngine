@@ -17,6 +17,8 @@ public class SpriteEditor extends GameEngine {
         GameEngine.launch(new SpriteEditor());
     }
 
+    //<editor-fold desc="VARIABLES">
+
     private class Action {
         Vector2 pos;
         Color color;
@@ -131,6 +133,7 @@ public class SpriteEditor extends GameEngine {
     private Text toolText;
     private Text frameInfoText;
     private Text fpsText;
+    //</editor-fold>
 
     @Override
     public void init() {
@@ -147,6 +150,7 @@ public class SpriteEditor extends GameEngine {
         updateUIVisibility();
     }
 
+    //<editor-fold desc="SETUP">
     private void setupModeButtons() {
         int modeY = 80;
         int modeWidth = 120;
@@ -371,41 +375,6 @@ public class SpriteEditor extends GameEngine {
         objectManager.add(brightnessSlider);
     }
 
-    private void onBrightnessChanged(float value) {
-        brightness = value;
-        updateSelectedColor();
-        brightnessText.setText(String.format("Brightness: %d%%", (int)(brightness * 100)));
-    }
-
-    private void updateSelectedColor() {
-        selectedColor = applyBrightness(baseColor, brightness);
-    }
-
-    private Color applyBrightness(Color color, float brightness) {
-        if (brightness < 1.0f) {
-            int r = (int)(color.getRed() * brightness);
-            int g = (int)(color.getGreen() * brightness);
-            int b = (int)(color.getBlue() * brightness);
-            return new Color(
-                    Math.max(0, Math.min(255, r)),
-                    Math.max(0, Math.min(255, g)),
-                    Math.max(0, Math.min(255, b)),
-                    color.getAlpha()
-            );
-        } else {
-            float factor = brightness - 1.0f;
-            int r = color.getRed() + (int)((255 - color.getRed()) * factor);
-            int g = color.getGreen() + (int)((255 - color.getGreen()) * factor);
-            int b = color.getBlue() + (int)((255 - color.getBlue()) * factor);
-            return new Color(
-                    Math.max(0, Math.min(255, r)),
-                    Math.max(0, Math.min(255, g)),
-                    Math.max(0, Math.min(255, b)),
-                    color.getAlpha()
-            );
-        }
-    }
-
     private void setupFileButtons() {
         int btnY = paletteY + 340;
         int btnWidth = 120;
@@ -549,6 +518,14 @@ public class SpriteEditor extends GameEngine {
                 .build();
         objectManager.add(fpsSlider);
     }
+    //</editor-fold>
+
+    //<editor-fold desc="EVENTS">
+    private void onBrightnessChanged(float value) {
+        brightness = value;
+        updateSelectedColor();
+        brightnessText.setText(String.format("Brightness: %d%%", (int)(brightness * 100)));
+    }
 
     private void onFPSChanged(float value) {
         int fps = (int)value;
@@ -556,8 +533,33 @@ public class SpriteEditor extends GameEngine {
         fpsText.setText("FPS: " + fps);
     }
 
-    // ===== SPRITE MODE FUNCTIONS =====
+    private Color applyBrightness(Color color, float brightness) {
+        if (brightness < 1.0f) {
+            int r = (int)(color.getRed() * brightness);
+            int g = (int)(color.getGreen() * brightness);
+            int b = (int)(color.getBlue() * brightness);
+            return new Color(
+                    Math.max(0, Math.min(255, r)),
+                    Math.max(0, Math.min(255, g)),
+                    Math.max(0, Math.min(255, b)),
+                    color.getAlpha()
+            );
+        } else {
+            float factor = brightness - 1.0f;
+            int r = color.getRed() + (int)((255 - color.getRed()) * factor);
+            int g = color.getGreen() + (int)((255 - color.getGreen()) * factor);
+            int b = color.getBlue() + (int)((255 - color.getBlue()) * factor);
+            return new Color(
+                    Math.max(0, Math.min(255, r)),
+                    Math.max(0, Math.min(255, g)),
+                    Math.max(0, Math.min(255, b)),
+                    color.getAlpha()
+            );
+        }
+    }
+    //</editor-fold>
 
+    //<editor-fold desc="SPRITE MODE METHODS">
     private void saveSprite() {
         String name = javax.swing.JOptionPane.showInputDialog(
                 null,
@@ -608,9 +610,9 @@ public class SpriteEditor extends GameEngine {
         updateCurrentNameText();
         actionsStack.clear();
     }
+    //</editor-fold>
 
-    // ===== ANIMATION MODE FUNCTIONS =====
-
+    //<editor-fold desc="ANIMATION MODE METHODS">
     private void saveAnimation() {
         String name = javax.swing.JOptionPane.showInputDialog(
                 null,
@@ -789,7 +791,9 @@ public class SpriteEditor extends GameEngine {
             }
         }
     }
+    //</editor-fold>
 
+    //<editor-fold desc="UPDATE">
     @Override
     protected void update() {
         // Animation Preview
@@ -897,13 +901,19 @@ public class SpriteEditor extends GameEngine {
         }
     }
 
+    private void updateSelectedColor() {
+        selectedColor = applyBrightness(baseColor, brightness);
+    }
+
     private boolean colorsEqual(Color c1, Color c2) {
         return c1.getRed() == c2.getRed() &&
                 c1.getGreen() == c2.getGreen() &&
                 c1.getBlue() == c2.getBlue() &&
                 c1.getAlpha() == c2.getAlpha();
     }
+    //</editor-fold>
 
+    //<editor-fold desc="DRAW">
     private void drawLineBetween(int x0, int y0, int x1, int y1, Color color) {
         int dx = Math.abs(x1 - x0);
         int dy = Math.abs(y1 - y0);
@@ -969,7 +979,9 @@ public class SpriteEditor extends GameEngine {
         g.setColor(Color.WHITE);
         g.drawRect(paletteX + 70, paletteY - 20, 40, 15);
     }
+    //</editor-fold>
 
+    //<editor-fold desc="INNNER CLASSES/BUTTONS">
     private class ColorButton extends Button {
         private Color color;
         private boolean selected = false;
@@ -1050,4 +1062,5 @@ public class SpriteEditor extends GameEngine {
             }
         }
     }
+    //</editor-fold>
 }

@@ -10,25 +10,34 @@ import GameEngine.Core.util.Vector2;
 import java.awt.*;
 
 public class Button extends GameObject {
+    //<editor-fold desc="VARIABLES">
     private Color color;
     private Text text;
 
     private boolean lastHoverState;
 
+    //Smooth Hover (SH)
+    boolean SH_Enabled = false;
+    Vector2 SH_minSize;
+    Vector2 SH_maxSize;
+    Vector2 SH_size;
+    Vector2 SH_targetSize;
+    float SH_speed;
+    boolean SH_changingSize = false;
+
+    //Functional Interfaces
     private FuncInt onClick;
     private FuncIntOne<Button> onClickOne;
     private FuncInt onHover;
     private FuncIntOne<Button> onHoverOne;
     private FuncIntTwo<Button, Boolean> onHoverTwo;
+    //</editor-fold>
 
+    //<editor-fold desc="CONSTRUCTOR/BUILDER">
     private Button(Rectangle rect) {
         transform = new Transform(rect);
         collider = new BoxCollider2D(this);
     }
-
-    /**
-     * Konstruktor für verschachtelte Klassen (ColorButton, ToolButton)
-     */
     protected Button(Builder builder) {
         transform = new Transform(builder.rect);
         collider = new BoxCollider2D(this);
@@ -49,7 +58,6 @@ public class Button extends GameObject {
                 .alignment(Text.TextAlignment.CENTER)
                 .build();
     }
-
     public static class Builder {
         private Rectangle rect = new Rectangle(0,0, 100, 100);
         private Color color = Color.WHITE;
@@ -57,6 +65,10 @@ public class Button extends GameObject {
         private Font font = new Font("Arial", Font.BOLD, 30);
         private Color textColor = Color.BLACK;
         private String tag = "Button";
+
+        boolean SH_Enabled = false;
+        float SH_sizeIncrease;
+        float SH_speed;
 
         private FuncInt onClick;
         private FuncIntOne<Button> onClickOne;
@@ -99,6 +111,12 @@ public class Button extends GameObject {
             this.textColor = textColor;
             return this;
         }
+        public Builder smoothHover(float SH_sizeIncrease, float SH_speed) {
+            this.SH_sizeIncrease = SH_sizeIncrease;
+            this.SH_speed = SH_speed;
+            SH_Enabled = true;
+            return this;
+        }
         public Builder onClick(FuncInt onClick) {
             this.onClick = onClick;
             return this;
@@ -124,6 +142,13 @@ public class Button extends GameObject {
             b.color = color;
             b.tag = tag;
 
+            b.SH_Enabled = SH_Enabled;
+            Vector2 v = new Vector2(rect.width,  rect.height);
+            b.SH_minSize = v.copy();
+            b.SH_size = v.copy();
+            b.SH_maxSize = v.add(SH_sizeIncrease);
+            b.SH_speed = SH_speed;
+
             b.onClick = onClick;
             b.onClickOne = onClickOne;
             b.onHover = onHover;
@@ -141,15 +166,18 @@ public class Button extends GameObject {
         }
 
     }
+    //</editor-fold>
 
+    //<editor-fold desc="CLICK/HOVER LOGIC">
     @Override
-    public void init() {
-
-    }
-
+    public void init() {}
     @Override
     public void update(double deltaTime)  {
-        if (!active) return; // Nur updaten wenn aktiv
+        updateState(deltaTime);
+        updateHover(deltaTime);
+    }
+    private void updateState(double deltaTime) {
+        if (!active) return; // Only update if active
 
         boolean hovering = collider.collidesWithPoint(Input.getMousePosition());
         if (hovering != lastHoverState) {
@@ -165,8 +193,28 @@ public class Button extends GameObject {
             text.setPosition(getCenterPosition());
         }
     }
+    private void updateHover(double deltaTime) {
+        if (!SH_changingSize || !SH_Enabled) return;
+
+        Vector2 step = new Vector2(SH_speed * (float)deltaTime);
+
+        if (SH_size.x < SH_targetSize.x) {
+            SH_size = SH_size.add(step);
+        } else if (SH_size.x > SH_targetSize.x) {
+            SH_size = SH_size.subtract(step);
+        }
+
+        SH_size = SH_size.clamp(SH_minSize.xToInt(), SH_maxSize.xToInt());
+
+        if (SH_size.equals(SH_targetSize)) {
+            SH_changingSize = false;
+        }
+
+        transform.setScaleCentered(SH_size);
+    }
 
     private void hovering(boolean hovering) {
+        if (SH_Enabled) changeHoverState(hovering);
         if (onHover != null) onHover.call();
         if (onHoverOne != null) onHoverOne.call(this);
         if (onHoverTwo != null) onHoverTwo.call(this, hovering);
@@ -175,7 +223,9 @@ public class Button extends GameObject {
         if (onClick != null) onClick.call();
         if (onClickOne != null) onClickOne.call(this);
     }
+    //</editor-fold>
 
+    //<editor-fold desc="SETTER/GETTER/HELPER">
     @Override
     public void setActive(boolean active) {
         this.active = active;
@@ -186,6 +236,14 @@ public class Button extends GameObject {
     }
     public void toggleActive() {
         setActive(!active);
+    }
+    private void changeHoverState(boolean b) {
+        SH_changingSize = true;
+        if (b) {
+            SH_targetSize = SH_maxSize.copy();
+        } else {
+            SH_targetSize = SH_minSize.copy();
+        }
     }
 
     public Text getTextObj() {
@@ -216,8 +274,12 @@ public class Button extends GameObject {
             this.text.setAlignment(alignment);
         }
     }
-
-
+    public boolean isSmoothHoveringEnabled() {
+        return SH_Enabled;
+    }
+    public void setSmoothHoveringEnabled(boolean smoothHoveringEnabled) {
+        this.SH_Enabled = smoothHoveringEnabled;
+    }
 
     @Override
     public void draw(Graphics2D g) {
@@ -236,4 +298,5 @@ public class Button extends GameObject {
 
     @Override
     public void onCollision(GameObject collider) {}
+    //</editor-fold>
 }

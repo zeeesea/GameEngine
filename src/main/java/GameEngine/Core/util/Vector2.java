@@ -3,6 +3,7 @@ package GameEngine.Core.util;
 public class Vector2 {
     public float x, y;
 
+    //<editor-fold desc="FINAL VEC2s">
     private static final Vector2 zero =  new Vector2(0,0);
     private static final Vector2 up = new Vector2(0,1);
     private static final Vector2 down = new Vector2(0,-1);
@@ -14,7 +15,9 @@ public class Vector2 {
     public static Vector2 down() { return down.copy(); }
     public static Vector2 left() { return left.copy(); }
     public static Vector2 right() { return right.copy(); }
+    //</editor-fold>
 
+    //<editor-fold desc="CONSTRUCTORS">
     public Vector2(float x, float y) {
         this.x = x;
         this.y = y;
@@ -27,7 +30,9 @@ public class Vector2 {
         this.x = xy;
         this.y = xy;
     }
+    //</editor-fold>
 
+    //<editor-fold desc="HELPER METHODS">
     public int xToInt() {
         return Math.round(x);
     }
@@ -101,12 +106,14 @@ public class Vector2 {
         if (other == null) return false;
         return x > other.x && y > other.y;
     }
-
     public Vector2 directionTo(Vector2 target) {
         return target.subtract(this).normalize();
     }
     public Vector2 copy() {
         return new Vector2(this.x, this.y);
+    }
+    public Vector2 clone() {
+        return copy();
     }
     public void set(float x, float y) {
         this.x = x;
@@ -153,4 +160,5 @@ public class Vector2 {
                 (float) Math.sin(angleRad)
         );
     }
+    //</editor-fold>
 }

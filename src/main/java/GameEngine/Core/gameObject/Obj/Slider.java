@@ -8,6 +8,7 @@ import GameEngine.Core.util.Vector2;
 import java.awt.*;
 
 public class Slider extends GameObject {
+    //<editor-fold desc="VARIABLES">
     // Position und Größe
     private int x, y, width, height;
 
@@ -33,9 +34,11 @@ public class Slider extends GameObject {
     private boolean showValue = false;
     private String label = "";
     private Font font = new Font("Arial", Font.PLAIN, 12);
+    //</editor-fold>
 
+    //<editor-fold desc="CONSTRUCTOR/BUILDER">
     /**
-     * Private Konstruktor - nur über Builder zugänglich
+     * Private Konstruktor
      */
     private Slider(int x, int y, int width, int height, float minValue, float maxValue, float startValue) {
         this.x = x;
@@ -161,9 +164,9 @@ public class Slider extends GameObject {
             return slider;
         }
     }
+    //</editor-fold>
 
-    // ===== SETTER METHODS =====
-
+    //<editor-fold desc="SETTER">
     public Slider setBackgroundColor(Color color) {
         this.backgroundColor = color;
         return this;
@@ -255,9 +258,9 @@ public class Slider extends GameObject {
         this.height = height;
         return this;
     }
+    //</editor-fold>
 
-    // ===== GETTER METHODS =====
-
+    //<editor-fold desc="GETTER METHODS">
     public float getValue() {
         return value;
     }
@@ -285,9 +288,9 @@ public class Slider extends GameObject {
     public boolean isDragging() {
         return dragging;
     }
+    //</editor-fold>
 
-    // ===== UPDATE & DRAW =====
-
+    //<editor-fold desc="UPDATE/DRAW">
     @Override
     public void init() {
 
@@ -388,4 +391,5 @@ public class Slider extends GameObject {
 
     @Override
     public void onCollision(GameObject collider) {}
+    //</editor-fold>
 }

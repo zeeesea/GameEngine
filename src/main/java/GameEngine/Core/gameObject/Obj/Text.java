@@ -6,6 +6,7 @@ import GameEngine.Core.util.Vector2;
 import java.awt.*;
 
 public class Text extends GameObject {
+    //<editor-fold desc="VARIABLES">
     private String text;
     private Color color;
     private Font font;
@@ -15,9 +16,11 @@ public class Text extends GameObject {
     public enum TextAlignment {
         LEFT, CENTER, RIGHT
     }
+    //</editor-fold>
 
+    //<editor-fold desc="CONSTRUCTOR/BUILDER">
     public static class Builder {
-        private String text;
+        private final String text;
         private Vector2 position = new Vector2(0, 0);
         private Color color = Color.WHITE;
         private Font font = new Font("Arial", Font.PLAIN, 16);
@@ -67,18 +70,17 @@ public class Text extends GameObject {
         this.color = color;
         this.font = font;
     }
+    //</editor-fold>
 
     @Override
     public void init() {
 
     }
-
     @Override
     public void update(double deltaTime) {
-        // Kann für Animationen genutzt werden
     }
 
-    // Setters
+    //<editor-fold desc="SETTERS">
     public void setColor(Color color) {
         this.color = color;
     }
@@ -103,8 +105,9 @@ public class Text extends GameObject {
     public void setAlignment(TextAlignment alignment) {
         this.alignment = alignment;
     }
+    //</editor-fold>
 
-    // Getters
+    //<editor-fold desc="GETTERS">
     public String getText() {
         return text;
     }
@@ -114,7 +117,9 @@ public class Text extends GameObject {
     public Font getFont() {
         return font;
     }
+    //</editor-fold>
 
+    //<editor-fold desc="HELPER METHODS">
     /**
      * Gibt die Breite des Textes in Pixeln zurück
      */
@@ -167,4 +172,5 @@ public class Text extends GameObject {
     public void onCollision(GameObject collider) {
         // Text hat keine Kollision
     }
+    //</editor-fold>
 }
