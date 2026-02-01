@@ -7,6 +7,7 @@ import GameEngine.Core.gameObject.Obj.Slider;
 import GameEngine.Core.gameObject.Obj.Text;
 import GameEngine.Core.input.Input;
 import GameEngine.Core.scenes.SceneManager;
+import GameEngine.Core.util.ColorPicker;
 import GameEngine.Core.util.Vector2;
 import GameEngine.Tools.MainMenu.MainMenu;
 
@@ -82,8 +83,8 @@ public class SpriteEditor extends GameEngine {
             new Color(128, 128, 128),
             new Color(0, 128, 0),
             new Color(128, 0, 128),
-            new Color(255, 192, 203),
-            new Color(64, 64, 64)
+            new Color(174, 66, 85),
+            null
     };
 
     // UI
@@ -183,12 +184,7 @@ public class SpriteEditor extends GameEngine {
         objectManager.add(animationModeButton);
 
         backToMenuButton = new Button.Builder()
-                .rect(new Rectangle(10, 10, 150, 40))
-                .color(Color.WHITE)
-                .text("Back to Menu")
-                .font(new Font("Arial", Font.BOLD, 16))
-                .textColor(Color.BLACK)
-                .smoothHover(10,150)
+                .preset(Button.ButtonPreset.BACK_BUTTON)
                 .onClick(() -> SceneManager.loadScene(new MainMenu()))
                 .build();
         objectManager.add(backToMenuButton);
@@ -360,20 +356,36 @@ public class SpriteEditor extends GameEngine {
         colorButtons = new ColorButton[palette.length];
 
         for (int i = 0; i < palette.length; i++) {
+            final int index = i;
             int row = i / 4;
             int col = i % 4;
 
             int x = paletteX + col * (buttonSize + buttonSpacing);
             int y = paletteY + row * (buttonSize + buttonSpacing);
 
-            Color color = palette[i];
-            colorButtons[i] = new ColorButton(
-                    new Rectangle(x, y, buttonSize, buttonSize),
-                    color,
-                    () -> selectColor(color)
-            );
+            Color color = palette[index];
 
-            objectManager.add(colorButtons[i]);
+            if (color != null) {
+                colorButtons[index] = new ColorButton(
+                        new Rectangle(x, y, buttonSize, buttonSize),
+                        color,
+                        () -> selectColor(color)
+                );
+            } else {
+                colorButtons[index] = new ColorButton(
+                        new Rectangle(x, y, buttonSize, buttonSize),
+                        selectedColor,
+                        () -> ColorPicker.openColorPicker(picked -> {
+                            baseColor = picked;
+                            updateSelectedColor();
+                            colorButtons[index].setColor(picked);
+                            selectColor(picked);
+                        })
+                );
+                colorButtons[index].setCustom(true);
+            }
+
+            objectManager.add(colorButtons[index]);
         }
     }
 
@@ -797,6 +809,7 @@ public class SpriteEditor extends GameEngine {
         baseColor = color;
         updateSelectedColor();
         for (ColorButton btn : colorButtons) {
+            if (btn.isCustom) continue;
             btn.setSelected(btn.color.equals(baseColor));
         }
     }
@@ -1002,6 +1015,7 @@ public class SpriteEditor extends GameEngine {
     private class ColorButton extends Button {
         private Color color;
         private boolean selected = false;
+        private boolean isCustom = false;
 
         public ColorButton(Rectangle rect, Color color, FuncInt onClick) {
             super(new Button.Builder()
@@ -1017,6 +1031,13 @@ public class SpriteEditor extends GameEngine {
                 selected = true;
             }
         }
+        public void setCustom(boolean custom) {
+            this.isCustom = custom;
+        }
+
+        public void setColor(Color color) {
+            this.color = color;
+        }
 
         public void setSelected(boolean selected) {
             this.selected = selected;
@@ -1024,9 +1045,17 @@ public class SpriteEditor extends GameEngine {
 
         @Override
         public void draw(Graphics2D g) {
-            drawGOasFilledRect(color);
+            drawGOasFilledRect(color != null ? color : Color.DARK_GRAY);
 
-            if (selected) {
+            if (isCustom) {
+                g.setColor(Color.BLACK);
+                g.drawString("+",
+                        transform.position.xToInt() + transform.scale.xToInt() / 2 - 4,
+                        transform.position.yToInt() + transform.scale.yToInt() / 2 + 5
+                );
+            }
+
+            if (selected && !isCustom) {
                 g.setColor(Color.YELLOW);
                 g.setStroke(new BasicStroke(4));
             } else {
@@ -1043,6 +1072,7 @@ public class SpriteEditor extends GameEngine {
 
             g.setStroke(new BasicStroke(1));
         }
+
     }
 
     private class ToolButton extends Button {

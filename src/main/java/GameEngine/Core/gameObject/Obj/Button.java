@@ -5,7 +5,9 @@ import GameEngine.Core.gameObject.GameObject;
 import GameEngine.Core.gameObject.Transform;
 import GameEngine.Core.gameObject.collider.BoxCollider2D;
 import GameEngine.Core.input.*;
+import GameEngine.Core.scenes.SceneManager;
 import GameEngine.Core.util.Vector2;
+import GameEngine.Tools.MainMenu.MainMenu;
 
 import java.awt.*;
 
@@ -31,6 +33,10 @@ public class Button extends GameObject {
     private FuncInt onHover;
     private FuncIntOne<Button> onHoverOne;
     private FuncIntTwo<Button, Boolean> onHoverTwo;
+
+    public enum ButtonPreset {
+        BACK_BUTTON;
+    }
     //</editor-fold>
 
     //<editor-fold desc="CONSTRUCTOR/BUILDER">
@@ -151,6 +157,21 @@ public class Button extends GameObject {
 
         public Builder onHover(FuncIntTwo<Button, Boolean> onHoverTwo) {
             this.onHoverTwo = onHoverTwo;
+            return this;
+        }
+
+        public Builder preset(ButtonPreset preset) {
+            switch (preset) {
+                case BACK_BUTTON -> {
+                    rect(new Rectangle(10, 10, 150, 40));
+                    color(Color.WHITE);
+                    text("Back to Menu");
+                    font(new Font("Arial", Font.BOLD, 16));
+                    textColor(Color.BLACK);
+                    smoothHover(10, 150);
+                    tag("BackButton");
+                }
+            }
             return this;
         }
 

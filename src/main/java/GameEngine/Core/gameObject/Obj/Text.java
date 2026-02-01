@@ -148,6 +148,7 @@ public class Text extends GameObject {
 
     @Override
     public void draw(Graphics2D g) {
+        if (text == null || text.isEmpty()) return;
         g.setColor(color);
         g.setFont(font);
 
