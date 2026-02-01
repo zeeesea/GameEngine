@@ -1,14 +1,20 @@
 package GameEngine.Tools.UIGenerator;
 
 import GameEngine.Core.GameEngine;
+import GameEngine.Core.gameObject.GameObject;
 import GameEngine.Core.gameObject.Obj.Button;
+import GameEngine.Core.gameObject.Obj.Dropdown;
 import GameEngine.Core.gameObject.Obj.Text;
+import GameEngine.Core.gameObject.Obj.TextField;
 import GameEngine.Core.scenes.SceneManager;
+import GameEngine.Core.util.ColorPicker;
 import GameEngine.Core.util.Vector2;
 import GameEngine.Tools.MainMenu.MainMenu;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 
 public class UIGenerator extends GameEngine {
@@ -33,14 +39,18 @@ public class UIGenerator extends GameEngine {
     private int beginOffsetX = 25;
     private int beginOffsetY = topY;
 
-    //Buttons
+    //Tool Buttons
     private Button backToMenuButton;
     private Button selectObjectButton;
+    private Dropdown objectDropdown;
     private Button resetButton;
 
     //Detail Editor (General)
+    private GameObject currentObject;
     private Text detailEditorTitle;
-    private Button colorPicker;
+    private Button selectColorButton;
+    private TextField varNameField;
+    private TextField varTagField;
 
     //Tools
     private enum Tool {
@@ -66,18 +76,13 @@ public class UIGenerator extends GameEngine {
     private Tool currentTool = Tool.BUTTON;
 
 
-
-
-    //Detail Editor Buttons
-
-
     @Override
     public void init() {
         setTitle("UI Generator");
 
         setupBackButton();
         setupToolButtons();
-        setupDetailEditor();
+        setupGeneralDetailEditor();
     }
 
     //Setup
@@ -89,12 +94,15 @@ public class UIGenerator extends GameEngine {
         objectManager.add(backToMenuButton);
     }
     private void setupToolButtons() {
-        selectObjectButton = new Button.Builder()
+        String[] toolOptions = Arrays.stream(Tool.values()).map(Tool::getName).toArray(String[]::new);
+
+        objectDropdown = new Dropdown.Builder()
                 .rect(new Rectangle(beginOffsetX, beginOffsetY, (int)(toolWidth * (0.6f)), buttonHeight))
-                .text(Tool.BUTTON.name)
-                .onClick(this::selectObject)
+                .options(toolOptions)
+                .font(new Font("Arial", Font.BOLD, 20))
+                .onSelectionChanged(this::setTool)
                 .build();
-        objectManager.add(selectObjectButton);
+        objectManager.add(objectDropdown);
 
         resetButton = new Button.Builder()
                 .rect(new Rectangle(beginOffsetX + (int)(toolWidth * (0.7f)), beginOffsetY, (int)(toolWidth * (0.3f)), buttonHeight))
@@ -103,42 +111,83 @@ public class UIGenerator extends GameEngine {
                 .build();
         objectManager.add(resetButton);
     }
-    private void setupDetailEditor() {
+    private void setupGeneralDetailEditor() {
+        int detailEditorStartY = beginOffsetY + buttonHeight + spacingY + 40;
         detailEditorTitle = new Text.Builder("Detail Editor - " + currentTool.getName())
-                .position(new Vector2(beginOffsetX, beginOffsetY + buttonHeight + spacingY + 25))
+                .position(new Vector2(beginOffsetX, detailEditorStartY))
                 .font(new Font("Arial", Font.BOLD, 20))
                 .build();
         objectManager.add(detailEditorTitle);
+
+        varNameField = new TextField.Builder()
+                .pos(new Vector2(beginOffsetX, detailEditorStartY + 30))
+                .size(new Vector2((int)(toolWidth * (1.5/3.0)), buttonHeight))
+                .placeholder("Name")
+                .maxLength(30)
+                .font(new Font("Arial", Font.BOLD, 20))
+                .focusedColor(new Color(40, 40, 40))
+                .focusedBorderColor(new Color(191, 191, 191))
+                .onSubmit(this::setObjectText)
+                .onUnfocus(this::setObjectText)
+                .build();
+        objectManager.add(varNameField);
+
+        varTagField = new TextField.Builder()
+                .pos(new Vector2(beginOffsetX + (int)(toolWidth * (1.6/3.0)), detailEditorStartY + 30))
+                .size(new Vector2((int)(toolWidth * (1.0/3.0)), buttonHeight))
+                .placeholder("Tag")
+                .maxLength(30)
+                .font(new Font("Arial", Font.BOLD, 20))
+                .focusedColor(new Color(40, 40, 40))
+                .focusedBorderColor(new Color(191, 191, 191))
+                .onSubmit(this::setObjectText)
+                .onUnfocus(this::setObjectText)
+                .build();
+        objectManager.add(varTagField);
+
+        selectColorButton = new Button.Builder()
+                .rect(new Rectangle(beginOffsetX, detailEditorStartY + 30 + buttonHeight + 18, buttonHeight, buttonHeight))
+                .text("C")
+                .font(new Font("Arial", Font.BOLD, 30))
+                .onClick(this::selectColor)
+                .build();
+        objectManager.add(selectColorButton);
     }
 
-    //Update
-    private void toolChange(Tool currentTool) {
+    private void toolChange(Tool newTool) {
+        if (newTool == null) return;
+        currentTool = newTool;
         detailEditorTitle.setText("Detail Editor - " + currentTool.name);
     }
-
-    private void selectObject() {
-        String[] toolOptions = Arrays.stream(Tool.values())
-                .map(Tool::getName)
-                .toArray(String[]::new);
-        String selected = (String) javax.swing.JOptionPane.showInputDialog(
-                null,
-                "Select Sprite:",
-                "Load Sprite",
-                javax.swing.JOptionPane.PLAIN_MESSAGE,
-                null,
-                toolOptions,
-                toolOptions[0]
-        );
-        if (selected != null) {
-            Tool t = Tool.getToolWithName(selected);
-            if (t == null) return;
-            currentTool = t;
-        }
-
-        selectObjectButton.setText(currentTool.name);
-        toolChange(currentTool);
+    private void setTool(String toolName) {
+        Tool t = Tool.getToolWithName(toolName);
+        if (t == null) return;
+        toolChange(t);
     }
     private void resetObject() {}
+    private void selectColor() {
+        ColorPicker.openColorPicker(this::setColor);
+    }
+    private void setColor(Color color) {
+        if (currentObject == null) return;
+        if (currentObject.equalsClassOf(Button.class))
+        {
+            Button b = (Button) currentObject;
+            b.setColor(color);
+        }
+
+    }
+    private void setObjectText() {
+        setObjectText(varNameField.getText());
+    }
+    private void setObjectText(String text) {
+        if (text == null || currentObject == null) return;
+        if (currentObject.equalsClassOf(Button.class)) {
+            Button b = (Button) currentObject;
+            b.setText(text);
+        }
+    }
+
 
     @Override
     protected void update() {
