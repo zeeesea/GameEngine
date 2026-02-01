@@ -6,10 +6,10 @@
 
     <groupId>com.github.zeeesea</groupId>
     <artifactId>GameEngine</artifactId>
-    <version>1.0</version>
+    <version>v1.4</version>
 
     <name>GameEngine</name>
-    <description>A 2D Java Game Engine with Sprite Editor</description>
+    <description>A 2D Java Game Engine</description>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
