@@ -142,6 +142,9 @@ public class SpriteEditor extends GameEngine {
     public void init() {
         spriteManager = new SpriteManager();
         animationManager = new AnimationManager(spriteManager);
+
+        setTitle("Sprite Editor");
+
         clearSprite();
         setupToolButtons();
         setupColorButtons();
@@ -185,6 +188,7 @@ public class SpriteEditor extends GameEngine {
                 .text("Back to Menu")
                 .font(new Font("Arial", Font.BOLD, 16))
                 .textColor(Color.BLACK)
+                .smoothHover(10,150)
                 .onClick(() -> SceneManager.loadScene(new MainMenu()))
                 .build();
         objectManager.add(backToMenuButton);

@@ -43,8 +43,8 @@ public class CircleCollider2D extends Collider2D {
         Vector2 oldPos = owner.transform.position.copy();
         owner.transform.position = newPos;
         boolean collision = false;
-        if (owner.getGameObjectManager() != null) {
-            for (GameObject obj : owner.getGameObjectManager().getAll()) {
+        if (owner.getObjectManager() != null) {
+            for (GameObject obj : owner.getObjectManager().getAll()) {
                 if (obj == owner || obj.collider == null) continue;
                 if (ignoreTags != null) {
                     boolean skip = false;

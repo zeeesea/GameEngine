@@ -16,8 +16,9 @@ public class GameObjectManager {
     private TimerSystem timersystem;
 
     public void add(GameObject obj) {
+        obj.setObjectManager(this);
         toAdd.add(obj);
-        obj.setGameObjectManager(this);
+        obj.init();
     }
 
     public void remove(GameObject obj) {

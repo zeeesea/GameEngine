@@ -73,11 +73,15 @@ public class SpriteManager {
      * Lädt ein Sprite nach Name
      */
     public Color[][] loadSprite(String name) {
+        return loadSpriteFromPath(name, saveDirectory);
+    }
+
+    public Color[][] loadSpriteFromPath(String name, String path) {
         try {
             if (loadedSpriteCache.containsKey(name)) {
                 return loadedSpriteCache.get(name);
             }
-            String filename = saveDirectory + name + ".sprite";
+            String filename = path + name + ".sprite";
             ObjectInputStream in = new ObjectInputStream(new FileInputStream(filename));
             SavedSprite sprite = (SavedSprite) in.readObject();
             in.close();

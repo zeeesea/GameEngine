@@ -95,4 +95,17 @@ public class Transform {
     public String toString() {
         return "Transform(pos=" + position + ", rot=" + rotation + ", scale=" + scale + ")";
     }
+
+    public void setPositionCentered(Vector2 v) {
+        position = new Vector2(
+                v.x - scale.x / 2,
+                v.y - scale.y / 2
+        );
+    }
+    public void setPositionCentered(float x, float y) {
+        setPositionCentered(new Vector2(x, y));
+    }
+    public Vector2 getCenteredPosition() {
+        return new Vector2(position.x + scale.x, position.y + scale.y);
+    }
 }

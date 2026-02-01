@@ -61,7 +61,7 @@ public abstract class GameEngine extends JPanel implements ActionListener {
     private void setReferences() {
         Console.log(ConsoleTag.SYSTEM, "Initializing Game Engine...");
 
-        // Listener
+        // Listeners
         keyListener = new InputKeyListener(this);
         mouseListener = new InputMouseListener(this);
 
@@ -69,24 +69,23 @@ public abstract class GameEngine extends JPanel implements ActionListener {
         this.addMouseListener(mouseListener);
         this.addMouseMotionListener(mouseListener);
 
+        //Creating Managers
         camera = new Camera(this);
         if (objectManager == null) objectManager = new GameObjectManager();
         if (spriteManager == null) spriteManager = new SpriteManager();
         if (animationManager == null) animationManager = new AnimationManager(spriteManager);
         if (timerSystem == null) timerSystem = new TimerSystem();
 
+        //Setting References
         GameObject.setEngine(this);
         GameObject.setSpriteManager(spriteManager);
         GameObject.setAnimationManager(animationManager);
         Timer.setTimerSystem(timerSystem);
         objectManager.setTimersystem(timerSystem);
+
         Console.log(ConsoleTag.SYSTEM, "Initialisation complete");
     }
 
-    /**
-     * WICHTIG: Diese Methode wird vom SceneManager aufgerufen!
-     * Nicht direkt verwenden!
-     */
     public void updateFromSceneManager(float deltaTime) {
         this.deltaTime = deltaTime;
 
@@ -111,6 +110,11 @@ public abstract class GameEngine extends JPanel implements ActionListener {
     //<editor-fold desc="Setter/Toggle Methods">
     public static void launch(GameEngine engine) {
         new GameEngineFrame(engine);
+    }
+
+    protected void setTitle(String title) {
+        if (parentFrame == null) return;
+        parentFrame.setTitle(title);
     }
 
     protected void setWindowSize(int width, int height) {

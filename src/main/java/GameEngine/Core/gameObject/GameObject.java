@@ -23,7 +23,7 @@ public abstract class GameObject {
     protected boolean active = true;
     public int renderOrder = 0;
     public String tag = "GameObject";
-    protected GameObjectManager gameObjectManager;
+    protected GameObjectManager objectManager;
     private Graphics2D g;
 
     // ===== SPRITE SYSTEM =====
@@ -48,7 +48,6 @@ public abstract class GameObject {
     //</editor-fold>
 
     public GameObject() {
-        init();
     }
 
     //<editor-fold desc="GETTERS/SETTERS">
@@ -58,11 +57,11 @@ public abstract class GameObject {
     public static void setAnimationManager(AnimationManager manager) {
         animationManager = manager;
     }
-    public void setGameObjectManager(GameObjectManager gameObjectManager) {
-        this.gameObjectManager = gameObjectManager;
+    public void setObjectManager(GameObjectManager objectManager) {
+        this.objectManager = objectManager;
     }
-    public GameObjectManager getGameObjectManager() {
-        return gameObjectManager;
+    public GameObjectManager getObjectManager() {
+        return objectManager;
     }
     public static void setEngine(GameEngine e) {
         engine = e;
@@ -106,7 +105,7 @@ public abstract class GameObject {
                         transform.position.y > getScreenHeight() - transform.scale.y
         );
     }
-    protected boolean isDragging() {
+    public boolean isDragging() {
         return dragging;
     }
     protected boolean wasMousePressedLastFrame() {
@@ -559,7 +558,7 @@ public abstract class GameObject {
         }
     }
     public void destroy() {
-        gameObjectManager.remove(this);
+        objectManager.remove(this);
     }
     protected void clearCameraFollowTarget() {
         engine.getCamera().clearFollowTarget();

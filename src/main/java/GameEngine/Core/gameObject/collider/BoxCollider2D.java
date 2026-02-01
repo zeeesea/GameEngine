@@ -44,9 +44,9 @@ public class BoxCollider2D extends Collider2D {
                 owner.transform.scale.yToInt()
         );
 
-        if (owner.getGameObjectManager() == null) return false;
+        if (owner.getObjectManager() == null) return false;
 
-        for (GameObject obj : owner.getGameObjectManager().getAll()) {
+        for (GameObject obj : owner.getObjectManager().getAll()) {
             if (obj == owner || obj.collider == null) continue;
 
             // Tags ignorieren

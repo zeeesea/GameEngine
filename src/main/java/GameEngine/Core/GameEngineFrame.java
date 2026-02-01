@@ -10,6 +10,10 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class GameEngineFrame extends JFrame {
+
+    private String defaultIconpath = "src/main/java/GameEngine/Assets/Sprites/Logo/";
+
+
     public GameEngineFrame(GameEngine panel, String title, boolean fullscreen) {
         Console.log(ConsoleTag.SYSTEM,"Setting up Game Engine Frame...");
 
@@ -51,6 +55,7 @@ public class GameEngineFrame extends JFrame {
         panel.setParentFrame(this);
         SceneManager.setFrame(this);
 
+        setIconFromPixels(panel.spriteManager.loadSpriteFromPath("defaultIcon", defaultIconpath));
         // WICHTIG: Starte den SceneManager Game Loop
         SceneManager.startGameLoop();
 

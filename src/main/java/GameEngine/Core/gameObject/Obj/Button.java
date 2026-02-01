@@ -17,13 +17,13 @@ public class Button extends GameObject {
     private boolean lastHoverState;
 
     //Smooth Hover (SH)
-    boolean SH_Enabled = false;
-    Vector2 SH_minSize;
-    Vector2 SH_maxSize;
-    Vector2 SH_size;
-    Vector2 SH_targetSize;
-    float SH_speed;
-    boolean SH_changingSize = false;
+    private boolean SH_Enabled = false;
+    private Vector2 SH_minSize;
+    private Vector2 SH_maxSize;
+    private Vector2 SH_size;
+    private Vector2 SH_targetSize;
+    private float SH_speed;
+    private boolean SH_changingSize = false;
 
     //Functional Interfaces
     private FuncInt onClick;
@@ -38,6 +38,7 @@ public class Button extends GameObject {
         transform = new Transform(rect);
         collider = new BoxCollider2D(this);
     }
+
     protected Button(Builder builder) {
         transform = new Transform(builder.rect);
         collider = new BoxCollider2D(this);
@@ -58,6 +59,7 @@ public class Button extends GameObject {
                 .alignment(Text.TextAlignment.CENTER)
                 .build();
     }
+
     public static class Builder {
         private Rectangle rect = new Rectangle(0,0, 100, 100);
         private Color color = Color.WHITE;
@@ -77,76 +79,92 @@ public class Button extends GameObject {
         private FuncIntTwo<Button, Boolean> onHoverTwo;
 
         public Builder() {}
+
         public Builder rect(Rectangle rect) {
             this.rect = rect;
             return this;
         }
+
         public Builder pos(Vector2 pos) {
             rect.x = pos.xToInt();
             rect.y = pos.yToInt();
             return this;
         }
+
         public Builder size(Vector2 size) {
             rect.width = size.xToInt();
             rect.height = size.yToInt();
             return this;
         }
+
         public Builder color(Color color) {
             this.color = color;
             return this;
         }
+
         public Builder text(String text) {
             this.text = text;
             return this;
         }
+
         public Builder tag(String tag) {
             this.tag = tag;
             return this;
         }
+
         public Builder font(Font font) {
             this.font = font;
             return this;
         }
+
         public Builder textColor(Color textColor) {
             this.textColor = textColor;
             return this;
         }
+
         public Builder smoothHover(float SH_sizeIncrease, float SH_speed) {
             this.SH_sizeIncrease = SH_sizeIncrease;
             this.SH_speed = SH_speed;
             SH_Enabled = true;
             return this;
         }
+
         public Builder onClick(FuncInt onClick) {
             this.onClick = onClick;
             return this;
         }
+
         public Builder onClick(FuncIntOne<Button> onClickButton) {
             this.onClickOne = onClickButton;
             return this;
         }
+
         public Builder onHover(FuncInt onHover) {
             this.onHover = onHover;
             return this;
         }
+
         public Builder onHover(FuncIntOne<Button> onHoverOne) {
             this.onHoverOne = onHoverOne;
             return this;
         }
+
         public Builder onHover(FuncIntTwo<Button, Boolean> onHoverTwo) {
             this.onHoverTwo = onHoverTwo;
             return this;
         }
+
         public Button build() {
             Button b = new Button(rect);
             b.color = color;
             b.tag = tag;
 
-            b.SH_Enabled = SH_Enabled;
-            Vector2 v = new Vector2(rect.width,  rect.height);
+            Vector2 v = new Vector2(rect.width, rect.height);
             b.SH_minSize = v.copy();
             b.SH_size = v.copy();
             b.SH_maxSize = v.add(SH_sizeIncrease);
+            b.SH_targetSize = b.SH_minSize.copy();
+            b.SH_Enabled = SH_Enabled;
             b.SH_speed = SH_speed;
 
             b.onClick = onClick;
@@ -164,19 +182,20 @@ public class Button extends GameObject {
                     .build();
             return b;
         }
-
     }
     //</editor-fold>
 
     //<editor-fold desc="CLICK/HOVER LOGIC">
     @Override
     public void init() {}
+
     @Override
-    public void update(double deltaTime)  {
+    public void update(double deltaTime) {
         if (!active) return;
         updateState(deltaTime);
         updateHover(deltaTime);
     }
+
     private void updateState(double deltaTime) {
         boolean hovering = collider.collidesWithPoint(Input.getMousePosition());
         if (hovering != lastHoverState) {
@@ -192,20 +211,30 @@ public class Button extends GameObject {
             text.setPosition(getCenterPosition());
         }
     }
+
     private void updateHover(double deltaTime) {
-        if (!SH_changingSize || !SH_Enabled) return;
+        if (!SH_Enabled || !SH_changingSize) return;
 
         Vector2 step = new Vector2(SH_speed * (float)deltaTime);
 
         if (SH_size.x < SH_targetSize.x) {
-            SH_size = SH_size.add(step);
+            SH_size.x = Math.min(SH_size.x + step.x, SH_targetSize.x);
         } else if (SH_size.x > SH_targetSize.x) {
-            SH_size = SH_size.subtract(step);
+            SH_size.x = Math.max(SH_size.x - step.x, SH_targetSize.x);
         }
 
-        SH_size = SH_size.clamp(SH_minSize.xToInt(), SH_maxSize.xToInt());
+        if (SH_size.y < SH_targetSize.y) {
+            SH_size.y = Math.min(SH_size.y + step.y, SH_targetSize.y);
+        } else if (SH_size.y > SH_targetSize.y) {
+            SH_size.y = Math.max(SH_size.y - step.y, SH_targetSize.y);
+        }
 
-        if (SH_size.equals(SH_targetSize)) {
+        SH_size.x = Math.max(SH_minSize.x, Math.min(SH_maxSize.x, SH_size.x));
+        SH_size.y = Math.max(SH_minSize.y, Math.min(SH_maxSize.y, SH_size.y));
+
+        if (Math.abs(SH_size.x - SH_targetSize.x) < 0.1f &&
+                Math.abs(SH_size.y - SH_targetSize.y) < 0.1f) {
+            SH_size = SH_targetSize.copy();
             SH_changingSize = false;
         }
 
@@ -218,6 +247,7 @@ public class Button extends GameObject {
         if (onHoverOne != null) onHoverOne.call(this);
         if (onHoverTwo != null) onHoverTwo.call(this, hovering);
     }
+
     private void onClick() {
         if (onClick != null) onClick.call();
         if (onClickOne != null) onClickOne.call(this);
@@ -228,14 +258,15 @@ public class Button extends GameObject {
     @Override
     public void setActive(boolean active) {
         this.active = active;
-        // Text NICHT auf null setzen, nur aktivieren/deaktivieren
         if (text != null) {
             text.setActive(active);
         }
     }
+
     public void toggleActive() {
         setActive(!active);
     }
+
     private void changeHoverState(boolean b) {
         SH_changingSize = true;
         if (b) {
@@ -248,47 +279,55 @@ public class Button extends GameObject {
     public Text getTextObj() {
         return text;
     }
+
     public String getText() {
         if (text == null) return "";
         return text.getText();
     }
+
     public void setText(String text) {
         if (this.text != null) {
             this.text.setText(text);
         }
     }
+
     public Color getColor() {
         return color;
     }
+
     public void setColor(Color color) {
         this.color = color;
     }
+
     public void setTextColor(Color textColor) {
         if (this.text != null) {
             text.setColor(textColor);
         }
     }
+
     public void setTextAlignment(Text.TextAlignment alignment) {
         if (this.text != null) {
             this.text.setAlignment(alignment);
         }
     }
+
     public boolean isSmoothHoveringEnabled() {
         return SH_Enabled;
     }
+
     public void setSmoothHoveringEnabled(boolean smoothHoveringEnabled) {
         this.SH_Enabled = smoothHoveringEnabled;
     }
 
     @Override
     public void draw(Graphics2D g) {
-        if (!active) return; // Nur zeichnen wenn aktiv
+        if (!active) return;
 
         drawGOasFilledRect(color);
 
         if (text != null) {
             Vector2 pos = getCenterPosition();
-            float yOffset = (float) text.getTextHeight(g)/4;
+            float yOffset = (float) text.getTextHeight(g) / 4;
             pos.y = pos.y + yOffset;
             text.setPosition(pos);
             text.draw(g);
