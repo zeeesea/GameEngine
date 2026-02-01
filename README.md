@@ -16,13 +16,9 @@ Includes a built-in Sprite Editor, Animation System, and intuitive GameObject Sy
 
 🎯 Collision Detection – Box and Circle colliders with automatic handling
 
-📷 Camera System – Object follow, screen shake, smooth movement
-
 ⌨️ Input System – Keyboard & mouse input handling
 
 🎨 Console Logging – Colorful, tagged debugging output
-
-🔧 Fully Extensible – Override methods to customize behavior
 
 <h2>📦 Installation </h2>
 
