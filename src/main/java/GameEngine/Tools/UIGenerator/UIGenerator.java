@@ -41,7 +41,6 @@ public class UIGenerator extends GameEngine {
 
     //Tool Buttons
     private Button backToMenuButton;
-    private Button selectObjectButton;
     private Dropdown objectDropdown;
     private Button resetButton;
 
@@ -140,8 +139,8 @@ public class UIGenerator extends GameEngine {
                 .font(new Font("Arial", Font.BOLD, 20))
                 .focusedColor(new Color(40, 40, 40))
                 .focusedBorderColor(new Color(191, 191, 191))
-                .onSubmit(this::setObjectText)
-                .onUnfocus(this::setObjectText)
+                .onSubmit(this::setObjectTag)
+                .onUnfocus(this::setObjectTag)
                 .build();
         objectManager.add(varTagField);
 
@@ -186,6 +185,13 @@ public class UIGenerator extends GameEngine {
             Button b = (Button) currentObject;
             b.setText(text);
         }
+    }
+    private void setObjectTag() {
+        setObjectText(varTagField.getText());
+    }
+    private void setObjectTag(String text) {
+        if (text == null || currentObject == null) return;
+        currentObject.tag =  text;
     }
 
 

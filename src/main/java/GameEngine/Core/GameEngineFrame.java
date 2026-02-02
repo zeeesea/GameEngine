@@ -32,10 +32,10 @@ public class GameEngineFrame extends JFrame {
         panel.setParentFrame(this);
         SceneManager.setFrame(this);
 
-        // WICHTIG: Starte den SceneManager Game Loop
+        //setIconFromPixels(panel.spriteManager.loadSpriteFromPath("defaultIcon", defaultIconpath));
+
         SceneManager.startGameLoop();
 
-        // Lade die erste Scene
         SceneManager.loadScene(panel);
 
         Console.log(ConsoleTag.SYSTEM,"Game Engine Frame setup complete");
@@ -55,8 +55,7 @@ public class GameEngineFrame extends JFrame {
         panel.setParentFrame(this);
         SceneManager.setFrame(this);
 
-        setIconFromPixels(panel.spriteManager.loadSpriteFromPath("defaultIcon", defaultIconpath));
-        // WICHTIG: Starte den SceneManager Game Loop
+        //setIconFromPixels(panel.spriteManager.loadSpriteFromPath("defaultIcon", defaultIconpath));
         SceneManager.startGameLoop();
 
         // Lade die erste Scene
