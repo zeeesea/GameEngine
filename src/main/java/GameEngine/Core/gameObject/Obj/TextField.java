@@ -8,6 +8,7 @@ import GameEngine.Core.util.Vector2;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.geom.RoundRectangle2D;
 
 public class TextField extends GameObject {
     //<editor-fold desc="VARIABLES">
@@ -26,6 +27,7 @@ public class TextField extends GameObject {
     private Font font = new Font("Arial", Font.PLAIN, 16);
     private int padding = 10;
     private int textOffsetX = 0;
+    private int cornerRadius = 0;
 
 
     // Cursor
@@ -68,6 +70,7 @@ public class TextField extends GameObject {
         private Color textColor = Color.WHITE;
         private Color placeholderColor = Color.GRAY;
         private Font font = new Font("Arial", Font.PLAIN, 16);
+        private int cornerRadius = 0;
 
         private InputFilter inputFilter = InputFilter.ALL;
 
@@ -145,6 +148,11 @@ public class TextField extends GameObject {
             return this;
         }
 
+        public Builder cornerRadius(int radius) {
+            this.cornerRadius = Math.max(0, radius);
+            return this;
+        }
+
         public Builder inputFilter(InputFilter filter) {
             this.inputFilter = filter;
             return this;
@@ -182,6 +190,7 @@ public class TextField extends GameObject {
             tf.textColor = textColor;
             tf.placeholderColor = placeholderColor;
             tf.font = font;
+            tf.cornerRadius = cornerRadius;
             tf.inputFilter = inputFilter;
             tf.onTextChanged = onTextChanged;
             tf.onSubmit = onSubmit;
@@ -453,6 +462,14 @@ public class TextField extends GameObject {
     public void setPlaceholder(String placeholder) {
         this.placeholder = placeholder;
     }
+
+    public int getCornerRadius() {
+        return cornerRadius;
+    }
+
+    public void setCornerRadius(int radius) {
+        this.cornerRadius = Math.max(0, radius);
+    }
     //</editor-fold>
 
     //<editor-fold desc="DRAW">
@@ -465,14 +482,38 @@ public class TextField extends GameObject {
         int w = transform.scale.xToInt();
         int h = transform.scale.yToInt();
 
+        // Anti-Aliasing für runde Ecken
+        if (cornerRadius > 0) {
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        }
+
         // Background
         g.setColor(focused ? focusedColor : backgroundColor);
-        g.fillRect(x, y, w, h);
+        if (cornerRadius > 0) {
+            RoundRectangle2D bgRect = new RoundRectangle2D.Float(
+                    x, y, w, h, cornerRadius * 2, cornerRadius * 2
+            );
+            g.fill(bgRect);
+        } else {
+            g.fillRect(x, y, w, h);
+        }
 
         // Border
         g.setColor(focused ? focusedBorderColor : borderColor);
         g.setStroke(new BasicStroke(focused ? 2 : 1));
-        g.drawRect(x, y, w, h);
+        if (cornerRadius > 0) {
+            RoundRectangle2D borderRect = new RoundRectangle2D.Float(
+                    x, y, w, h, cornerRadius * 2, cornerRadius * 2
+            );
+            g.draw(borderRect);
+        } else {
+            g.drawRect(x, y, w, h);
+        }
+
+        // Anti-Aliasing wieder ausschalten für Text
+        if (cornerRadius > 0) {
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+        }
 
         // --- clip to the inner padded area so text never overflows visually ---
         Shape originalClip = g.getClip();

@@ -7,6 +7,7 @@ import GameEngine.Core.input.Input;
 import GameEngine.Core.util.Vector2;
 
 import java.awt.*;
+import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,6 +27,7 @@ public class Dropdown extends GameObject {
     private int padding = 10;
     private int itemHeight = 30;
     private int maxVisibleItems = 5;
+    private int cornerRadius = 0;
 
     private int hoveredIndex = -1;
     private boolean lastMouseState = false;
@@ -38,7 +40,7 @@ public class Dropdown extends GameObject {
     //<editor-fold desc="CONSTRUCTOR/BUILDER">
     private Dropdown(Rectangle rect) {
         transform = new Transform(rect);
-        renderOrder = 101;
+        renderOrder = 100;
     }
 
     public static class Builder {
@@ -53,6 +55,7 @@ public class Dropdown extends GameObject {
         private Color textColor = Color.WHITE;
         private Font font = new Font("Arial", Font.PLAIN, 14);
         private int maxVisibleItems = 5;
+        private int cornerRadius = 0;
 
         private FuncIntOne<Integer> onIndexChanged;
         private FuncIntOne<String> onSelectionChanged;
@@ -73,6 +76,7 @@ public class Dropdown extends GameObject {
         public Builder textColor(Color color) { this.textColor = color; return this; }
         public Builder font(Font font) { this.font = font; return this; }
         public Builder maxVisibleItems(int count) { this.maxVisibleItems = count; return this; }
+        public Builder cornerRadius(int radius) { this.cornerRadius = Math.max(0, radius); return this; }
         public Builder onIndexChanged(FuncIntOne<Integer> callback) { this.onIndexChanged = callback; return this; }
         public Builder onSelectionChanged(FuncIntOne<String> callback) { this.onSelectionChanged = callback; return this; }
         public Builder onItemSelected(FuncIntTwo<Integer, String> callback) { this.onItemSelected = callback; return this; }
@@ -89,6 +93,7 @@ public class Dropdown extends GameObject {
             dd.font = font;
             dd.itemHeight = rect.height;
             dd.maxVisibleItems = maxVisibleItems;
+            dd.cornerRadius = cornerRadius;
             dd.onIndexChanged = onIndexChanged;
             dd.onSelectionChanged = onSelectionChanged;
             dd.onItemSelected = onItemSelected;
@@ -127,21 +132,25 @@ public class Dropdown extends GameObject {
     }
 
     private void updateExpanded(Vector2 mousePos, boolean mousePressed) {
-        boolean clickedOutside = mousePressed && !lastMouseState && !isMouseOverDropdown(mousePos);
+        boolean isOverDropdown = isMouseOverDropdown(mousePos);
 
-        if (clickedOutside) {
+        // Schließe Dropdown wenn außerhalb geklickt wurde
+        if (!isOverDropdown && mousePressed && !lastMouseState) {
             expanded = false;
             hoveredIndex = -1;
             return;
         }
 
+        // Update hovering
         hoveredIndex = getHoveredItemIndex(mousePos);
 
+        // Wähle Item aus wenn geklickt
         if (hoveredIndex >= 0 && mousePressed && !lastMouseState) {
             selectItem(hoveredIndex);
             expanded = false;
         }
     }
+    //</editor-fold>
 
     private boolean isMouseInsideMain(Vector2 point) {
         return point.x >= transform.position.x &&
@@ -214,6 +223,12 @@ public class Dropdown extends GameObject {
         }
     }
     public void clearOptions() { options.clear(); selectedIndex = 0; }
+
+    public int getCornerRadius() { return cornerRadius; }
+    public void setCornerRadius(int radius) { this.cornerRadius = Math.max(0, radius); }
+
+    public boolean isExpanded() { return expanded; }
+    public void setExpanded(boolean expanded) { this.expanded = expanded; }
     //</editor-fold>
 
     //<editor-fold desc="DRAW">
@@ -233,11 +248,14 @@ public class Dropdown extends GameObject {
     }
 
     private void drawMainBox(Graphics2D g, int x, int y, int width) {
-        g.setColor(backgroundColor);
-        g.fillRect(x, y, width, itemHeight);
-
-        g.setColor(borderColor);
-        g.drawRect(x, y, width, itemHeight);
+        if (cornerRadius > 0) {
+            drawRoundedBox(g, x, y, width, itemHeight, backgroundColor, borderColor);
+        } else {
+            g.setColor(backgroundColor);
+            g.fillRect(x, y, width, itemHeight);
+            g.setColor(borderColor);
+            g.drawRect(x, y, width, itemHeight);
+        }
 
         g.setFont(font);
         g.setColor(textColor);
@@ -260,18 +278,28 @@ public class Dropdown extends GameObject {
             if (i >= visibleItems) break;
 
             int itemY = y + i * itemHeight;
+            Color itemBg;
 
             if (i == hoveredIndex) {
-                g.setColor(hoverColor);
+                itemBg = hoverColor;
             } else if (i == selectedIndex) {
-                g.setColor(selectedColor);
+                itemBg = selectedColor;
             } else {
-                g.setColor(backgroundColor);
+                itemBg = backgroundColor;
             }
-            g.fillRect(x, itemY, width, itemHeight);
 
-            g.setColor(borderColor);
-            g.drawRect(x, itemY, width, itemHeight);
+            // Bestimme ob erste oder letzte Item für abgerundete Ecken
+            boolean isFirst = (i == 0);
+            boolean isLast = (i == Math.min(options.size() - 1, visibleItems - 1));
+
+            if (cornerRadius > 0 && (isFirst || isLast)) {
+                drawRoundedDropdownItem(g, x, itemY, width, itemHeight, itemBg, borderColor, isFirst, isLast);
+            } else {
+                g.setColor(itemBg);
+                g.fillRect(x, itemY, width, itemHeight);
+                g.setColor(borderColor);
+                g.drawRect(x, itemY, width, itemHeight);
+            }
 
             g.setFont(font);
             g.setColor(textColor);
@@ -279,6 +307,78 @@ public class Dropdown extends GameObject {
             int textY = itemY + (itemHeight + fm.getAscent()) / 2 - 2;
             g.drawString(options.get(i), x + padding, textY);
         }
+    }
+
+    private void drawRoundedBox(Graphics2D g, int x, int y, int width, int height, Color fillColor, Color borderColor) {
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        RoundRectangle2D roundRect = new RoundRectangle2D.Float(
+                x, y, width, height, cornerRadius * 2, cornerRadius * 2
+        );
+
+        g.setColor(fillColor);
+        g.fill(roundRect);
+        g.setColor(borderColor);
+        g.draw(roundRect);
+
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+    }
+
+    private void drawRoundedDropdownItem(Graphics2D g, int x, int y, int width, int height,
+                                         Color fillColor, Color borderColor, boolean isFirst, boolean isLast) {
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        if (isFirst && !isLast) {
+            // Nur oben abgerundet
+            g.setColor(fillColor);
+            g.fillRect(x, y + cornerRadius, width, height - cornerRadius);
+            RoundRectangle2D roundedTop = new RoundRectangle2D.Float(
+                    x, y, width, cornerRadius * 2, cornerRadius * 2, cornerRadius * 2
+            );
+            g.fill(roundedTop);
+
+            g.setColor(borderColor);
+
+            g.drawLine(x, y + cornerRadius, x, y + height);
+            g.drawLine(x + width, y + cornerRadius, x + width, y + height);
+            g.drawLine(x, y + height, x + width, y + height);
+
+            g.drawLine(x, y + cornerRadius, x, y + height);
+            g.drawLine(x + width, y + cornerRadius, x + width, y + height);
+            g.drawLine(x, y + height, x + width, y + height);
+            g.drawArc(x, y, cornerRadius * 2, cornerRadius * 2, 90, 90); // links oben
+            g.drawArc(x + width - cornerRadius * 2, y, cornerRadius * 2, cornerRadius * 2, 0, 90); // rechts oben
+            g.drawLine(x + cornerRadius, y, x + width - cornerRadius, y);
+
+        } else if (isLast && !isFirst) {
+
+
+            // Nur unten abgerundet
+            g.setColor(fillColor);
+            g.fillRect(x, y, width, height - cornerRadius);
+            RoundRectangle2D roundedBottom = new RoundRectangle2D.Float(
+                    x, y + height - cornerRadius * 2, width, cornerRadius * 2, cornerRadius * 2, cornerRadius * 2
+            );
+            g.fill(roundedBottom);
+
+            g.setColor(borderColor);
+            g.drawLine(x, y, x, y + height - cornerRadius);
+            g.drawLine(x + width, y, x + width, y + height - cornerRadius);
+
+            g.drawLine(x, y, x, y + height - cornerRadius);
+            g.drawLine(x + width, y, x + width, y + height - cornerRadius);
+            g.drawLine(x, y, x + width, y);
+            g.drawArc(x, y + height - cornerRadius * 2, cornerRadius * 2, cornerRadius * 2, 180, 90); // links unten
+            g.drawArc(x + width - cornerRadius * 2, y + height - cornerRadius * 2,
+                    cornerRadius * 2, cornerRadius * 2, 270, 90); // rechts unten
+            g.drawLine(x + cornerRadius, y + height, x + width - cornerRadius, y + height);
+
+        } else if (isFirst && isLast) {
+            // Komplett abgerundet
+            drawRoundedBox(g, x, y, width, height, fillColor, borderColor);
+        }
+
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
     }
 
     private void drawArrow(Graphics2D g, int x, int y, boolean up) {

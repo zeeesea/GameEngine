@@ -77,14 +77,14 @@ public class GameObjectManager {
         this.timersystem = timersystem;
     }
     public <T extends GameObject> List<T> getAll(Class<T> type) {
-    List<T> result = new ArrayList<>();
-    for (GameObject obj : gameObjects) {
-        if (type.isInstance(obj)) {
-            result.add(type.cast(obj));
+        List<T> result = new ArrayList<>();
+        for (GameObject obj : gameObjects) {
+            if (type.isInstance(obj)) {
+                result.add(type.cast(obj));
+            }
         }
+        return result;
     }
-    return result;
-}
 
     public void checkCollisions() {
         for (int i = 0; i < gameObjects.size(); i++) {

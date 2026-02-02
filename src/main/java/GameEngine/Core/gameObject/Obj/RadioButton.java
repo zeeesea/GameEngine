@@ -157,18 +157,9 @@ public class RadioButton extends GameObject {
     @Override
     public void update(double deltaTime) {
         if (!active) return;
-
-        Vector2 mousePos = Input.getMousePosition();
-        hovering = isMouseInsideCircle(mousePos);
-
-        boolean mousePressed = Input.getMouseButton(Input.MouseCode.LEFT);
-
-        if (hovering && mousePressed && !lastMouseState) {
-            setSelected(true);
-        }
-
-        lastMouseState = mousePressed;
+        hovering = isMouseInsideCircle(Input.getMousePosition());
     }
+
 
     private boolean isMouseInsideCircle(Vector2 point) {
         float centerX = transform.position.x + circleSize / 2f;
@@ -198,6 +189,17 @@ public class RadioButton extends GameObject {
             deselect();
         }
     }
+
+    @Override
+    public void onMousePressed(int x, int y, int button) {
+        //if (button != Input.MouseCode.LEFT) return;
+
+        Vector2 mousePos = new Vector2(x, y);
+        if (isMouseInsideCircle(mousePos)) {
+            setSelected(true);
+        }
+    }
+
 
     private void deselect() {
         if (!selected) return;

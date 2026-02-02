@@ -6,6 +6,7 @@ import GameEngine.Core.input.Input;
 import GameEngine.Core.util.Vector2;
 
 import java.awt.*;
+import java.awt.geom.RoundRectangle2D;
 
 public class Slider extends GameObject {
     //<editor-fold desc="VARIABLES">
@@ -25,6 +26,7 @@ public class Slider extends GameObject {
     private boolean showGradient = false;
     private Color gradientStartColor = Color.BLACK;
     private Color gradientEndColor = Color.WHITE;
+    private int cornerRadius = 0;
 
     // Verhalten
     private boolean dragging = false;
@@ -74,6 +76,7 @@ public class Slider extends GameObject {
         private boolean showValue = false;
         private String label = "";
         private Font font = new Font("Arial", Font.PLAIN, 12);
+        private int cornerRadius = 0;
         private FuncIntOne<Float> onValueChanged;
 
         public Builder() {}
@@ -143,6 +146,11 @@ public class Slider extends GameObject {
             return this;
         }
 
+        public Builder cornerRadius(int radius) {
+            this.cornerRadius = Math.max(0, radius);
+            return this;
+        }
+
         public Builder onValueChanged(FuncIntOne<Float> callback) {
             this.onValueChanged = callback;
             return this;
@@ -160,6 +168,7 @@ public class Slider extends GameObject {
             slider.showValue = showValue;
             slider.label = label;
             slider.font = font;
+            slider.cornerRadius = cornerRadius;
             slider.onValueChanged = onValueChanged;
             return slider;
         }
@@ -258,6 +267,15 @@ public class Slider extends GameObject {
         this.height = height;
         return this;
     }
+
+    public Slider setCornerRadius(int radius) {
+        this.cornerRadius = Math.max(0, radius);
+        return this;
+    }
+
+    public int getCornerRadius() {
+        return cornerRadius;
+    }
     //</editor-fold>
 
     //<editor-fold desc="GETTER METHODS">
@@ -330,25 +348,57 @@ public class Slider extends GameObject {
 
     @Override
     public void draw(Graphics2D g) {
+        // Anti-Aliasing für runde Ecken
+        if (cornerRadius > 0) {
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        }
+
         // Hintergrund
         if (showGradient) {
             drawGradientBackground(g);
         } else {
-            // Hintergrund
-            g.setColor(backgroundColor);
-            g.fillRect(x, y, width, height);
+            if (cornerRadius > 0) {
+                // Hintergrund mit runden Ecken
+                g.setColor(backgroundColor);
+                RoundRectangle2D bgRect = new RoundRectangle2D.Float(
+                        x, y, width, height, cornerRadius * 2, cornerRadius * 2
+                );
+                g.fill(bgRect);
 
-            // Fill (bis zum aktuellen Wert)
-            int fillWidth = (int)(getNormalizedValue() * width);
-            g.setColor(fillColor);
-            g.fillRect(x, y, fillWidth, height);
+                // Fill (bis zum aktuellen Wert) mit runden Ecken
+                int fillWidth = (int)(getNormalizedValue() * width);
+                if (fillWidth > 0) {
+                    g.setColor(fillColor);
+                    // Clip auf den Fill-Bereich für saubere runde Ecken
+                    Shape oldClip = g.getClip();
+                    g.setClip(x, y, fillWidth, height);
+                    g.fill(bgRect);
+                    g.setClip(oldClip);
+                }
+            } else {
+                // Hintergrund ohne runde Ecken
+                g.setColor(backgroundColor);
+                g.fillRect(x, y, width, height);
+
+                // Fill (bis zum aktuellen Wert)
+                int fillWidth = (int)(getNormalizedValue() * width);
+                g.setColor(fillColor);
+                g.fillRect(x, y, fillWidth, height);
+            }
         }
 
         // Border
         g.setColor(borderColor);
-        g.drawRect(x, y, width, height);
+        if (cornerRadius > 0) {
+            RoundRectangle2D borderRect = new RoundRectangle2D.Float(
+                    x, y, width, height, cornerRadius * 2, cornerRadius * 2
+            );
+            g.draw(borderRect);
+        } else {
+            g.drawRect(x, y, width, height);
+        }
 
-        // Handle (Regler)
+        // Handle (Regler) - immer rechteckig
         int handleX = x + (int)(getNormalizedValue() * width);
         int handleWidth = 6;
         int handleHeight = height + 4;
@@ -357,6 +407,11 @@ public class Slider extends GameObject {
         g.fillRect(handleX - handleWidth/2, y - 2, handleWidth, handleHeight);
         g.setColor(borderColor);
         g.drawRect(handleX - handleWidth/2, y - 2, handleWidth, handleHeight);
+
+        // Anti-Aliasing wieder ausschalten
+        if (cornerRadius > 0) {
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+        }
 
         // Label
         if (!label.isEmpty()) {
@@ -377,15 +432,38 @@ public class Slider extends GameObject {
     }
 
     private void drawGradientBackground(Graphics2D g) {
-        for (int i = 0; i < width; i++) {
-            float t = i / (float) width;
+        if (cornerRadius > 0) {
+            // Gradient mit runden Ecken
+            for (int i = 0; i < width; i++) {
+                float t = i / (float) width;
 
-            int r = (int)(gradientStartColor.getRed() + t * (gradientEndColor.getRed() - gradientStartColor.getRed()));
-            int gr = (int)(gradientStartColor.getGreen() + t * (gradientEndColor.getGreen() - gradientStartColor.getGreen()));
-            int b = (int)(gradientStartColor.getBlue() + t * (gradientEndColor.getBlue() - gradientStartColor.getBlue()));
+                int r = (int)(gradientStartColor.getRed() + t * (gradientEndColor.getRed() - gradientStartColor.getRed()));
+                int gr = (int)(gradientStartColor.getGreen() + t * (gradientEndColor.getGreen() - gradientStartColor.getGreen()));
+                int b = (int)(gradientStartColor.getBlue() + t * (gradientEndColor.getBlue() - gradientStartColor.getBlue()));
 
-            g.setColor(new Color(r, gr, b));
-            g.drawLine(x + i, y, x + i, y + height);
+                g.setColor(new Color(r, gr, b));
+
+                // Clip für runde Ecken
+                Shape oldClip = g.getClip();
+                RoundRectangle2D clipRect = new RoundRectangle2D.Float(
+                        x, y, width, height, cornerRadius * 2, cornerRadius * 2
+                );
+                g.setClip(clipRect);
+                g.drawLine(x + i, y, x + i, y + height);
+                g.setClip(oldClip);
+            }
+        } else {
+            // Gradient ohne runde Ecken
+            for (int i = 0; i < width; i++) {
+                float t = i / (float) width;
+
+                int r = (int)(gradientStartColor.getRed() + t * (gradientEndColor.getRed() - gradientStartColor.getRed()));
+                int gr = (int)(gradientStartColor.getGreen() + t * (gradientEndColor.getGreen() - gradientStartColor.getGreen()));
+                int b = (int)(gradientStartColor.getBlue() + t * (gradientEndColor.getBlue() - gradientStartColor.getBlue()));
+
+                g.setColor(new Color(r, gr, b));
+                g.drawLine(x + i, y, x + i, y + height);
+            }
         }
     }
 

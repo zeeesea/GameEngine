@@ -5,9 +5,7 @@ import GameEngine.Core.gameObject.GameObject;
 import GameEngine.Core.gameObject.Transform;
 import GameEngine.Core.gameObject.collider.BoxCollider2D;
 import GameEngine.Core.input.*;
-import GameEngine.Core.scenes.SceneManager;
 import GameEngine.Core.util.Vector2;
-import GameEngine.Tools.MainMenu.MainMenu;
 
 import java.awt.*;
 
@@ -20,12 +18,15 @@ public class Button extends GameObject {
 
     //Smooth Hover (SH)
     private boolean SH_Enabled = false;
-    private Vector2 SH_minSize;
-    private Vector2 SH_maxSize;
-    private Vector2 SH_size;
-    private Vector2 SH_targetSize;
+    private Vector2 SH_baseSize; // Basis-Größe (unveränderlich)
+    private float SH_sizeIncrease;
+    private float SH_currentOffset = 0f; // Aktueller Offset
+    private float SH_targetOffset = 0f; // Ziel-Offset
     private float SH_speed;
     private boolean SH_changingSize = false;
+
+    //Round Corners
+    private int cornerRadius = 0;
 
     //Functional Interfaces
     private FuncInt onClick;
@@ -56,6 +57,7 @@ public class Button extends GameObject {
         this.onHover = builder.onHover;
         this.onHoverOne = builder.onHoverOne;
         this.onHoverTwo = builder.onHoverTwo;
+        this.cornerRadius = builder.cornerRadius;
 
         this.text = new Text.Builder(builder.text)
                 .position(this.getCenterPosition())
@@ -73,6 +75,7 @@ public class Button extends GameObject {
         private Font font = new Font("Arial", Font.BOLD, 30);
         private Color textColor = Color.BLACK;
         private String tag = "Button";
+        private int cornerRadius = 0;
 
         boolean SH_Enabled = false;
         float SH_sizeIncrease;
@@ -128,6 +131,11 @@ public class Button extends GameObject {
             return this;
         }
 
+        public Builder cornerRadius(int radius) {
+            this.cornerRadius = Math.max(0, radius);
+            return this;
+        }
+
         public Builder smoothHover(float SH_sizeIncrease, float SH_speed) {
             this.SH_sizeIncrease = SH_sizeIncrease;
             this.SH_speed = SH_speed;
@@ -169,6 +177,7 @@ public class Button extends GameObject {
                     font(new Font("Arial", Font.BOLD, 16));
                     textColor(Color.BLACK);
                     smoothHover(10, 150);
+                    cornerRadius(8);
                     tag("BackButton");
                 }
             }
@@ -179,14 +188,15 @@ public class Button extends GameObject {
             Button b = new Button(rect);
             b.color = color;
             b.tag = tag;
+            b.cornerRadius = cornerRadius;
 
-            Vector2 v = new Vector2(rect.width, rect.height);
-            b.SH_minSize = v.copy();
-            b.SH_size = v.copy();
-            b.SH_maxSize = v.add(SH_sizeIncrease);
-            b.SH_targetSize = b.SH_minSize.copy();
+            // Speichere die Basis-Größe für SmoothHover
+            b.SH_baseSize = new Vector2(rect.width, rect.height);
+            b.SH_sizeIncrease = SH_sizeIncrease;
             b.SH_Enabled = SH_Enabled;
             b.SH_speed = SH_speed;
+            b.SH_currentOffset = 0f;
+            b.SH_targetOffset = 0f;
 
             b.onClick = onClick;
             b.onClickOne = onClickOne;
@@ -236,30 +246,24 @@ public class Button extends GameObject {
     private void updateHover(double deltaTime) {
         if (!SH_Enabled || !SH_changingSize) return;
 
-        Vector2 step = new Vector2(SH_speed * (float)deltaTime);
+        float step = SH_speed * (float)deltaTime;
 
-        if (SH_size.x < SH_targetSize.x) {
-            SH_size.x = Math.min(SH_size.x + step.x, SH_targetSize.x);
-        } else if (SH_size.x > SH_targetSize.x) {
-            SH_size.x = Math.max(SH_size.x - step.x, SH_targetSize.x);
+        if (SH_currentOffset < SH_targetOffset) {
+            SH_currentOffset = Math.min(SH_currentOffset + step, SH_targetOffset);
+        } else if (SH_currentOffset > SH_targetOffset) {
+            SH_currentOffset = Math.max(SH_currentOffset - step, SH_targetOffset);
         }
 
-        if (SH_size.y < SH_targetSize.y) {
-            SH_size.y = Math.min(SH_size.y + step.y, SH_targetSize.y);
-        } else if (SH_size.y > SH_targetSize.y) {
-            SH_size.y = Math.max(SH_size.y - step.y, SH_targetSize.y);
-        }
-
-        SH_size.x = Math.max(SH_minSize.x, Math.min(SH_maxSize.x, SH_size.x));
-        SH_size.y = Math.max(SH_minSize.y, Math.min(SH_maxSize.y, SH_size.y));
-
-        if (Math.abs(SH_size.x - SH_targetSize.x) < 0.1f &&
-                Math.abs(SH_size.y - SH_targetSize.y) < 0.1f) {
-            SH_size = SH_targetSize.copy();
+        if (Math.abs(SH_currentOffset - SH_targetOffset) < 0.1f) {
+            SH_currentOffset = SH_targetOffset;
             SH_changingSize = false;
         }
 
-        transform.setScaleCentered(SH_size);
+        // Berechne die tatsächliche Größe basierend auf Basis + Offset
+        Vector2 currentSize = SH_baseSize.add(SH_currentOffset);
+
+        // Setze die Größe zentriert
+        transform.setScaleCentered(currentSize);
     }
 
     private void hovering(boolean hovering) {
@@ -291,9 +295,9 @@ public class Button extends GameObject {
     private void changeHoverState(boolean b) {
         SH_changingSize = true;
         if (b) {
-            SH_targetSize = SH_maxSize.copy();
+            SH_targetOffset = SH_sizeIncrease;
         } else {
-            SH_targetSize = SH_minSize.copy();
+            SH_targetOffset = 0f;
         }
     }
 
@@ -340,11 +344,24 @@ public class Button extends GameObject {
         this.SH_Enabled = smoothHoveringEnabled;
     }
 
+    public int getCornerRadius() {
+        return cornerRadius;
+    }
+
+    public void setCornerRadius(int radius) {
+        this.cornerRadius = Math.max(0, radius);
+    }
+
     @Override
     public void draw(Graphics2D g) {
         if (!active) return;
 
-        drawGOasFilledRect(color);
+        // Zeichne Button mit runden Ecken
+        if (cornerRadius > 0) {
+            drawGOasRoundedRect(color, cornerRadius);
+        } else {
+            drawGOasFilledRect(color);
+        }
 
         if (text != null) {
             Vector2 pos = getCenterPosition();

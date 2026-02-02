@@ -12,6 +12,7 @@ import GameEngine.Tools.SpriteEditor.SpriteManager;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.RoundRectangle2D;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -491,10 +492,34 @@ public abstract class GameObject {
 
         drawSpriteAt(centerX - spriteWidth / 2, centerY - spriteHeight / 2, transform.rotation);
     }
+
     protected void drawGOasFilledRect(Color color) {
         g.setColor(color);
         g.fillRect((int)transform.position.x, (int)transform.position.y, (int)transform.scale.x, (int)transform.scale.y);
     }
+
+    /**
+     * Zeichnet das GameObject als abgerundetes Rechteck
+     * @param color Füllfarbe
+     * @param cornerRadius Radius der Ecken
+     */
+    protected void drawGOasRoundedRect(Color color, int cornerRadius) {
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setColor(color);
+
+        RoundRectangle2D roundRect = new RoundRectangle2D.Float(
+                transform.position.x,
+                transform.position.y,
+                transform.scale.x,
+                transform.scale.y,
+                cornerRadius * 2,
+                cornerRadius * 2
+        );
+
+        g.fill(roundRect);
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+    }
+
     protected void drawGOasFilledCircle(Color color) {
         g.setColor(color);
         g.fillOval((int)transform.position.x, (int)transform.position.y, (int)transform.scale.x, (int)transform.scale.y);
