@@ -7,6 +7,11 @@ import GameEngine.Core.util.Vector2;
 
 import java.awt.*;
 
+/**
+ * A checkbox UI component for boolean on/off selection.
+ * Supports hover effects, custom colors, labels, and change callbacks.
+ * Use the Builder pattern to create instances.
+ */
 public class CheckBox extends GameObject {
     //<editor-fold desc="VARIABLES">
     private boolean checked = false;
@@ -154,6 +159,12 @@ public class CheckBox extends GameObject {
     @Override
     public void update(double deltaTime) {
         if (!active) return;
+
+        // Prüfe ob ein Dropdown offen ist - dann keine Interaktion
+        if (Dropdown.isAnyDropdownExpanded()) {
+            hovering = false;
+            return;
+        }
 
         Vector2 mousePos = Input.getMousePosition();
         hovering = isMouseInside(mousePos);

@@ -17,13 +17,24 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
+/**
+ * Base class for all game objects in the engine.
+ * Provides transform, collision, sprite rendering, animation, and input handling.
+ * Extend this class to create custom game entities.
+ */
 public abstract class GameObject {
     //<editor-fold desc="VARIABLES">
+    /** The transform component containing position, scale, and rotation. */
     public Transform transform = new Transform();
+    /** The collider component for collision detection. */
     public Collider2D collider = null;
+    /** Whether this object is active and should be updated/drawn. */
     protected boolean active = true;
+    /** The render order (higher values render on top). */
     public int renderOrder = 0;
+    /** A tag for identifying and grouping objects. */
     public String tag = "GameObject";
+    /** Reference to the object manager. */
     protected GameObjectManager objectManager;
     private Graphics2D g;
 
@@ -130,26 +141,27 @@ public abstract class GameObject {
     //<editor-fold desc="SRITE METHODS">
 
     /**
-     * Lädt ein Sprite und setzt es als Default (nur einmal laden)
-     * @param spriteName Name des Sprites im SpriteManager
+     * Loads a sprite and sets it as the default sprite (loads only once).
+     *
+     * @param spriteName The name of the sprite in the SpriteManager
      */
     protected void loadSprite(String spriteName) {
         if (spriteManager == null) {
-            Console.log(ConsoleTag.ERROR, "SpriteManager nicht initialisiert!");
+            Console.log(ConsoleTag.ERROR, "SpriteManager not initialized!");
             return;
         }
 
-        // Check ob schon im lokalen Cache
+        // Check if already in local cache
         if (!spriteCache.containsKey(spriteName)) {
             Color[][] sprite = spriteManager.loadSprite(spriteName);
             if (sprite == null) {
-                Console.log(ConsoleTag.ERROR, "Sprite nicht gefunden: " + spriteName);
+                Console.log(ConsoleTag.ERROR, "Sprite not found: " + spriteName);
                 return;
             }
             spriteCache.put(spriteName, sprite);
         }
 
-        // Setze als Default
+        // Set as default
         defaultSprite = spriteCache.get(spriteName);
         if (currentAnimation == null || !currentAnimation.isPlaying()) {
             currentFrame = defaultSprite;
@@ -157,12 +169,14 @@ public abstract class GameObject {
     }
 
     /**
-     * Lädt ein Sprite in den Cache (ohne es zu setzen)
-     * Nützlich wenn du mehrere Sprites brauchst
+     * Preloads a sprite into the cache without setting it as active.
+     * Useful when you need multiple sprites.
+     *
+     * @param spriteName The name of the sprite to preload
      */
     protected void preloadSprite(String spriteName) {
         if (spriteManager == null) {
-            Console.log(ConsoleTag.ERROR, "SpriteManager nicht initialisiert!");
+            Console.log(ConsoleTag.ERROR, "SpriteManager not initialized!");
             return;
         }
 
@@ -177,13 +191,14 @@ public abstract class GameObject {
     }
 
     /**
-     * Wechselt zum geladenen Sprite (muss vorher geladen sein!)
-     * @param spriteName Name des Sprites
+     * Switches to a previously loaded sprite (must be loaded first).
+     *
+     * @param spriteName The name of the sprite to switch to
      */
     protected void switchSprite(String spriteName) {
         Color[][] sprite = spriteCache.get(spriteName);
         if (sprite == null) {
-            Console.log(ConsoleTag.WARNING, "Sprite nicht im Cache: " + spriteName + " - Nutze preloadSprite() oder loadSprite()");
+            Console.log(ConsoleTag.WARNING, "Sprite not in cache: " + spriteName + " - Use preloadSprite() or loadSprite()");
             return;
         }
 
@@ -194,7 +209,9 @@ public abstract class GameObject {
     }
 
     /**
-     * Gibt das aktuell gesetzte Sprite zurück
+     * Returns the name of the currently set sprite.
+     *
+     * @return The sprite name, or null if not found
      */
     protected String getCurrentSpriteName() {
         for (Map.Entry<String, Color[][]> entry : spriteCache.entrySet()) {
@@ -206,7 +223,9 @@ public abstract class GameObject {
     }
 
     /**
-     * Entfernt Sprite aus dem Cache (Memory sparen)
+     * Removes a sprite from the cache to save memory.
+     *
+     * @param spriteName The name of the sprite to unload
      */
     protected void unloadSprite(String spriteName) {
         spriteCache.remove(spriteName);
@@ -214,7 +233,9 @@ public abstract class GameObject {
     }
 
     /**
-     * Setzt ein Sprite direkt (ohne SpriteManager)
+     * Sets a sprite directly without using the SpriteManager.
+     *
+     * @param pixels The pixel data array for the sprite
      */
     protected void setSprite(Color[][] pixels) {
         this.defaultSprite = pixels;
@@ -223,15 +244,26 @@ public abstract class GameObject {
         }
     }
 
+    /**
+     * Clears the current sprite.
+     */
     protected void clearSprite() {
         this.defaultSprite = null;
         this.currentFrame = null;
     }
 
+    /**
+     * Sets a custom scale for the sprite.
+     *
+     * @param scale The scale factor (minimum 0.1)
+     */
     protected void setSpriteScale(float scale) {
         this.customSpriteScale = Math.max(0.1f, scale);
     }
 
+    /**
+     * Resets sprite scaling to automatic (fits to transform scale).
+     */
     protected void setAutoSpriteScale() {
         this.customSpriteScale = null;
     }
@@ -254,10 +286,20 @@ public abstract class GameObject {
         return Math.min(scaleX, scaleY);
     }
 
+    /**
+     * Returns the current effective sprite scale.
+     *
+     * @return The sprite scale factor
+     */
     protected float getSpriteScale() {
         return getEffectiveSpriteScale();
     }
 
+    /**
+     * Checks if a sprite is currently set.
+     *
+     * @return true if a sprite is set, false otherwise
+     */
     protected boolean hasSprite() {
         return currentFrame != null;
     }
@@ -267,21 +309,22 @@ public abstract class GameObject {
     //<editor-fold desc="ANIMATION METHODS">
 
     /**
-     * Lädt und registriert eine Animation
-     * @param name Name der Animation (z.B. "walk", "jump", "attack")
-     * @param animationName Name im AnimationManager
-     * @param fps Frames pro Sekunde
-     * @param loop Soll die Animation loopen?
+     * Loads and registers an animation.
+     *
+     * @param name The local name for the animation (e.g., "walk", "jump", "attack")
+     * @param animationName The name in the AnimationManager
+     * @param fps Frames per second
+     * @param loop Whether the animation should loop
      */
     protected void loadAnimation(String name, String animationName, int fps, boolean loop) {
         if (animationManager == null) {
-            Console.log(ConsoleTag.ERROR, "AnimationManager nicht initialisiert!");
+            Console.log(ConsoleTag.ERROR, "AnimationManager not initialized!");
             return;
         }
 
         List<Color[][]> frames = animationManager.loadAllFrames(animationName);
         if (frames.isEmpty()) {
-            Console.log(ConsoleTag.ERROR, "Animation nicht gefunden: " + animationName);
+            Console.log(ConsoleTag.ERROR, "Animation not found: " + animationName);
             return;
         }
 
@@ -291,17 +334,18 @@ public abstract class GameObject {
     }
 
     /**
-     * Spielt eine Animation ab
-     * @param name Name der Animation
+     * Plays an animation by name.
+     *
+     * @param name The name of the animation to play
      */
     protected void playAnimation(String name) {
         Animation anim = animations.get(name);
         if (anim == null) {
-            Console.log(ConsoleTag.WARNING, "Animation nicht geladen: " + name);
+            Console.log(ConsoleTag.WARNING, "Animation not loaded: " + name);
             return;
         }
 
-        // Wenn gleiche Animation bereits läuft, nichts tun
+        // If same animation is already playing, do nothing
         if (currentAnimation == anim && currentAnimation.isPlaying()) {
             return;
         }
@@ -313,12 +357,14 @@ public abstract class GameObject {
     }
 
     /**
-     * Spielt eine Animation ab, auch wenn sie bereits läuft (startet von vorne)
+     * Force plays an animation, restarting even if already playing.
+     *
+     * @param name The name of the animation to play
      */
     protected void playAnimationForce(String name) {
         Animation anim = animations.get(name);
         if (anim == null) {
-            Console.log(ConsoleTag.WARNING, "Animation nicht geladen: " + name);
+            Console.log(ConsoleTag.WARNING, "Animation not loaded: " + name);
             return;
         }
 
@@ -329,7 +375,7 @@ public abstract class GameObject {
     }
 
     /**
-     * Stoppt die aktuelle Animation und kehrt zum Default-Sprite zurück
+     * Stops the current animation and returns to the default sprite.
      */
     protected void stopAnimation() {
         if (currentAnimation != null) {
@@ -340,14 +386,19 @@ public abstract class GameObject {
     }
 
     /**
-     * Prüft ob eine Animation läuft
+     * Checks if any animation is currently playing.
+     *
+     * @return true if an animation is playing
      */
     protected boolean isAnimationPlaying() {
         return currentAnimation != null && currentAnimation.isPlaying();
     }
 
     /**
-     * Prüft ob eine bestimmte Animation läuft
+     * Checks if a specific animation is currently playing.
+     *
+     * @param name The animation name to check
+     * @return true if the specified animation is playing
      */
     protected boolean isAnimationPlaying(String name) {
         return currentAnimationName != null &&
@@ -357,24 +408,28 @@ public abstract class GameObject {
     }
 
     /**
-     * Gibt den Namen der aktuell laufenden Animation zurück
+     * Returns the name of the currently playing animation.
+     *
+     * @return The animation name, or null if none is playing
      */
     protected String getCurrentAnimationName() {
         return currentAnimationName;
     }
 
     /**
-     * Update der Animation (MUSS in update() aufgerufen werden!)
+     * Updates the animation state. Must be called in update() for animations to work.
+     *
+     * @param deltaTime The time since last frame
      */
     protected void updateAnimation(float deltaTime) {
         if (currentAnimation != null) {
             currentAnimation.update(deltaTime);
 
             if (currentAnimation.isPlaying()) {
-                // Animation läuft - aktuelles Frame setzen
+                // Animation playing - set current frame
                 currentFrame = currentAnimation.getCurrentFrame();
             } else if (currentAnimation.isFinished()) {
-                // Animation fertig - zurück zum Default-Sprite
+                // Animation finished - return to default sprite
                 currentFrame = defaultSprite;
                 Console.log(ConsoleTag.ANIMATION, "Animation finished: " + currentAnimationName);
                 currentAnimation = null;
@@ -387,7 +442,7 @@ public abstract class GameObject {
 
     //<editor-fold desc="DRAW METHODS">
     /**
-     * Zeichnet das GameObject als Sprite mit Rotation
+     * Draws the GameObject as a sprite with rotation support.
      */
     protected void drawGOasSprite() {
         if (currentFrame == null) {
@@ -460,10 +515,23 @@ public abstract class GameObject {
         }
     }
 
+    /**
+     * Draws the sprite at a specific position.
+     *
+     * @param x The x position
+     * @param y The y position
+     */
     protected void drawSpriteAt(float x, float y) {
         drawSpriteAt(x, y, transform.rotation);
     }
 
+    /**
+     * Draws the sprite at a specific position with rotation.
+     *
+     * @param x The x position
+     * @param y The y position
+     * @param rotation The rotation in degrees
+     */
     protected void drawSpriteAt(float x, float y, float rotation) {
         if (currentFrame == null) return;
 
@@ -477,6 +545,9 @@ public abstract class GameObject {
         }
     }
 
+    /**
+     * Draws the GameObject as a centered sprite.
+     */
     protected void drawGOasCenteredSprite() {
         if (currentFrame == null) {
             drawGOasSprite();
@@ -493,15 +564,21 @@ public abstract class GameObject {
         drawSpriteAt(centerX - spriteWidth / 2, centerY - spriteHeight / 2, transform.rotation);
     }
 
+    /**
+     * Draws the GameObject as a filled rectangle.
+     *
+     * @param color The fill color
+     */
     protected void drawGOasFilledRect(Color color) {
         g.setColor(color);
         g.fillRect((int)transform.position.x, (int)transform.position.y, (int)transform.scale.x, (int)transform.scale.y);
     }
 
     /**
-     * Zeichnet das GameObject als abgerundetes Rechteck
-     * @param color Füllfarbe
-     * @param cornerRadius Radius der Ecken
+     * Draws the GameObject as a rounded rectangle.
+     *
+     * @param color The fill color
+     * @param cornerRadius The radius of the corners
      */
     protected void drawGOasRoundedRect(Color color, int cornerRadius) {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -520,12 +597,24 @@ public abstract class GameObject {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
     }
 
+    /**
+     * Draws the GameObject as a filled circle/ellipse.
+     *
+     * @param color The fill color
+     */
     protected void drawGOasFilledCircle(Color color) {
         g.setColor(color);
         g.fillOval((int)transform.position.x, (int)transform.position.y, (int)transform.scale.x, (int)transform.scale.y);
     }
 
-    //Draw Grid
+    /**
+     * Draws a grid over the screen by cell size.
+     *
+     * @param color The grid line color
+     * @param cellSizeX The width of each cell
+     * @param cellSizeY The height of each cell
+     * @param thickness The line thickness
+     */
     protected void drawGridbySize(Color color, int cellSizeX, int cellSizeY, int thickness) {
         g.setColor(color);
         g.setStroke(new BasicStroke(thickness));
@@ -536,11 +625,28 @@ public abstract class GameObject {
             g.drawLine(0,i,getScreenWidth(),i);
         }
     }
+
+    /**
+     * Draws a grid over the screen by cell size.
+     *
+     * @param color The grid line color
+     * @param cellSize The size of each cell as Vector2
+     * @param thickness The line thickness
+     */
     protected void drawGridbySize(Color color, Vector2 cellSize, int thickness) {
         g.setColor(color);
         g.setStroke(new BasicStroke(thickness));
         drawGrid(cellSize);
     }
+
+    /**
+     * Draws a grid over the screen by column/row count.
+     *
+     * @param color The grid line color
+     * @param columns Number of columns
+     * @param rows Number of rows
+     * @param thickness The line thickness
+     */
     protected void drawGridByCount(Color color, int columns, int rows, int thickness) {
         g.setColor(color);
         g.setStroke(new BasicStroke(thickness));
@@ -554,6 +660,10 @@ public abstract class GameObject {
             g.drawLine(0,i,getScreenWidth(),i);
         }
     }
+
+    /**
+     * Draws the collider bounds for debugging.
+     */
     public void drawCollider() {
         Color color = Color.RED;
         float alpha = 0.3f;
@@ -577,23 +687,48 @@ public abstract class GameObject {
     //</editor-fold>
 
     //<editor-fold desc="HELPER METHODS">
+    /**
+     * Shakes the camera with the specified intensity and duration.
+     *
+     * @param intensity The shake intensity
+     * @param duration The shake duration in seconds
+     */
     protected void shakeCamera(float intensity, float duration) {
         if (engine != null) {
             engine.getCamera().shake(intensity, duration);
         }
     }
+
+    /**
+     * Destroys this GameObject and removes it from the scene.
+     */
     public void destroy() {
         objectManager.remove(this);
     }
+
+    /**
+     * Clears the camera follow target.
+     */
     protected void clearCameraFollowTarget() {
         engine.getCamera().clearFollowTarget();
     }
+
+    /**
+     * Clamps the object's position to stay within screen bounds.
+     */
     protected void clampPositionToScreen() {
         transform.position = transform.position.clamp(
                 0, getScreenWidth() - transform.scale.x,
                 0, getScreenHeight() - transform.scale.y
         );
     }
+
+    /**
+     * Checks if this object collides with another GameObject.
+     *
+     * @param gameObject The other GameObject to check collision with
+     * @return true if the objects collide
+     */
     public boolean collidesWith(GameObject gameObject) {
         if (collider != null && gameObject.collider != null) {
             return collider.intersects(gameObject.collider);
@@ -603,6 +738,13 @@ public abstract class GameObject {
                 gameObject.transform.position.y >= transform.position.y &&
                 gameObject.transform.position.y <= transform.position.y + transform.scale.y;
     }
+
+    /**
+     * Checks if this object collides with a point.
+     *
+     * @param point The point to check collision with
+     * @return true if the point is inside the object
+     */
     public boolean collidesWith(Vector2 point) {
         if (collider != null) {
             return collider.collidesWithPoint(point);
@@ -617,12 +759,33 @@ public abstract class GameObject {
     public String toString() {
         return this.getClass().getSimpleName();
     }
+
+    /**
+     * Checks if this object's class equals another class.
+     *
+     * @param other The class to compare with
+     * @return true if classes are equal
+     */
     public boolean equalsClassOf(Class<?> other) {
         return this.getClass().equals(other);
     }
+
+    /**
+     * Checks if this object's tag equals another object's tag.
+     *
+     * @param other The object to compare tags with
+     * @return true if tags are equal
+     */
     public boolean equalsTagOf(GameObject other) {
         return tag.equals(other.tag);
     }
+
+    /**
+     * Makes this object draggable with the specified mouse button.
+     * Call this method in update() to enable dragging.
+     *
+     * @param mouseButton The mouse button to use for dragging
+     */
     public void draggable(Input.MouseCode mouseButton) {
         boolean mousePressed = Input.getMouseButton(mouseButton);
         Vector2 mousePos = Input.getMousePosition();
@@ -642,19 +805,63 @@ public abstract class GameObject {
 
         wasMousePressedLastFrame = mousePressed;
     }
+
+    /**
+     * Checks if the mouse button was just released.
+     *
+     * @param mouseButton The mouse button to check
+     * @return true if the button was just released
+     */
     protected boolean wasJustReleased(Input.MouseCode mouseButton) {
         return !Input.getMouseButton(mouseButton) && wasMousePressedLastFrame;
     }
     //</editor-fold>
 
     //<editor-fold desc="EVENT METHODS">
+    /**
+     * Called when a key is pressed. Override to handle keyboard input.
+     *
+     * @param keyCode The key code of the pressed key
+     */
     public void onKeyPressed(int keyCode) {}
+
+    /**
+     * Called when a key is released. Override to handle keyboard input.
+     *
+     * @param keyCode The key code of the released key
+     */
     public void onKeyReleased(int keyCode) {}
+
+    /**
+     * Called when a mouse button is pressed. Override to handle mouse input.
+     *
+     * @param x The x position of the mouse
+     * @param y The y position of the mouse
+     * @param button The mouse button that was pressed
+     */
     public void onMousePressed(int x, int y, int button) {}
 
+    /**
+     * Called when the window is closing.
+     */
     public void onWindowClosing() {}
+
+    /**
+     * Called when the window is minimized.
+     */
     public void onWindowMinimized() {}
+
+    /**
+     * Called when the window is restored from minimized state.
+     */
     public void onWindowRestored() {}
+
+    /**
+     * Called when the window is resized.
+     *
+     * @param width The new window width
+     * @param height The new window height
+     */
     public void onWindowResized(int width, int height) {}
     //</editor-fold>
 }

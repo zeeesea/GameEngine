@@ -9,6 +9,12 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A radio button UI component for single-selection within a group.
+ * Multiple radio buttons with the same group name allow only one selection.
+ * Supports hover effects, custom colors, labels, and selection callbacks.
+ * Use the Builder pattern to create instances.
+ */
 public class RadioButton extends GameObject {
     //<editor-fold desc="VARIABLES">
     private static List<RadioButtonGroup> groups = new ArrayList<>();
@@ -157,6 +163,13 @@ public class RadioButton extends GameObject {
     @Override
     public void update(double deltaTime) {
         if (!active) return;
+
+        // Prüfe ob ein Dropdown offen ist - dann kein Hover
+        if (Dropdown.isAnyDropdownExpanded()) {
+            hovering = false;
+            return;
+        }
+
         hovering = isMouseInsideCircle(Input.getMousePosition());
     }
 
@@ -192,7 +205,8 @@ public class RadioButton extends GameObject {
 
     @Override
     public void onMousePressed(int x, int y, int button) {
-        //if (button != Input.MouseCode.LEFT) return;
+        // Prüfe ob ein Dropdown offen ist - dann keine Interaktion
+        if (Dropdown.isAnyDropdownExpanded()) return;
 
         Vector2 mousePos = new Vector2(x, y);
         if (isMouseInsideCircle(mousePos)) {

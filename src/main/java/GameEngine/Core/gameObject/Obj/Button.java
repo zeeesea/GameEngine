@@ -9,6 +9,11 @@ import GameEngine.Core.util.Vector2;
 
 import java.awt.*;
 
+/**
+ * A clickable button UI component with hover effects and callbacks.
+ * Supports smooth hover animations, rounded corners, and multiple callback types.
+ * Use the Builder pattern to create instances.
+ */
 public class Button extends GameObject {
     //<editor-fold desc="VARIABLES">
     private Color color;
@@ -228,6 +233,15 @@ public class Button extends GameObject {
     }
 
     private void updateState(double deltaTime) {
+        // Prüfe ob ein Dropdown offen ist - dann keine Interaktion
+        if (Dropdown.isAnyDropdownExpanded()) {
+            if (lastHoverState) {
+                hovering(false);
+                lastHoverState = false;
+            }
+            return;
+        }
+
         boolean hovering = collider.collidesWithPoint(Input.getMousePosition());
         if (hovering != lastHoverState) {
             hovering(hovering);

@@ -12,8 +12,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * A dropdown/select UI component that displays a list of selectable options.
+ * When clicked, it expands to show all available options and allows the user to select one.
+ * Supports rounded corners, custom colors, and various callback events.
+ */
 public class Dropdown extends GameObject {
     //<editor-fold desc="VARIABLES">
+    // Statische Variable um zu tracken welches Dropdown gerade offen ist
+    private static Dropdown expandedDropdown = null;
+
     private List<String> options = new ArrayList<>();
     private int selectedIndex = 0;
     private boolean expanded = false;
@@ -35,6 +43,39 @@ public class Dropdown extends GameObject {
     private FuncIntOne<Integer> onIndexChanged;
     private FuncIntOne<String> onSelectionChanged;
     private FuncIntTwo<Integer, String> onItemSelected;
+    //</editor-fold>
+
+    //<editor-fold desc="STATIC INPUT BLOCKING">
+    /**
+     * Checks if input events should be blocked for other UI elements.
+     * Returns true when a dropdown is open, preventing elements behind it from receiving input.
+     *
+     * @param point The position to check (currently unused, blocks all input when any dropdown is open)
+     * @return true if input should be blocked, false otherwise
+     */
+    public static boolean isInputBlocked(Vector2 point) {
+        if (expandedDropdown == null) return false;
+        // Blockiere alle Inputs solange ein Dropdown offen ist
+        return true;
+    }
+
+    /**
+     * Checks if any dropdown is currently expanded/open.
+     *
+     * @return true if a dropdown is expanded, false otherwise
+     */
+    public static boolean isAnyDropdownExpanded() {
+        return expandedDropdown != null;
+    }
+
+    /**
+     * Returns the currently expanded dropdown instance.
+     *
+     * @return The expanded Dropdown, or null if none is open
+     */
+    public static Dropdown getExpandedDropdown() {
+        return expandedDropdown;
+    }
     //</editor-fold>
 
     //<editor-fold desc="CONSTRUCTOR/BUILDER">
@@ -127,6 +168,7 @@ public class Dropdown extends GameObject {
 
         if (isOver && mousePressed && !lastMouseState) {
             expanded = true;
+            expandedDropdown = this;
             hoveredIndex = -1;
         }
     }
@@ -137,6 +179,7 @@ public class Dropdown extends GameObject {
         // Schließe Dropdown wenn außerhalb geklickt wurde
         if (!isOverDropdown && mousePressed && !lastMouseState) {
             expanded = false;
+            expandedDropdown = null;
             hoveredIndex = -1;
             return;
         }
@@ -148,6 +191,7 @@ public class Dropdown extends GameObject {
         if (hoveredIndex >= 0 && mousePressed && !lastMouseState) {
             selectItem(hoveredIndex);
             expanded = false;
+            expandedDropdown = null;
         }
     }
     //</editor-fold>
@@ -200,9 +244,25 @@ public class Dropdown extends GameObject {
         if (onItemSelected != null) onItemSelected.call(index, options.get(index));
     }
 
+    /**
+     * Sets the currently selected option by index.
+     *
+     * @param index The index of the option to select
+     */
     public void setSelectedIndex(int index) { selectItem(index); }
+
+    /**
+     * Returns the index of the currently selected option.
+     *
+     * @return The selected index
+     */
     public int getSelectedIndex() { return selectedIndex; }
 
+    /**
+     * Returns the text of the currently selected option.
+     *
+     * @return The selected option text, or empty string if no valid selection
+     */
     public String getSelectedItem() {
         if (selectedIndex >= 0 && selectedIndex < options.size()) {
             return options.get(selectedIndex);
@@ -210,25 +270,74 @@ public class Dropdown extends GameObject {
         return "";
     }
 
+    /**
+     * Replaces all options with new ones.
+     *
+     * @param newOptions The new options to set
+     */
     public void setOptions(String... newOptions) {
         options = new ArrayList<>(Arrays.asList(newOptions));
         selectedIndex = Math.min(selectedIndex, options.size() - 1);
     }
 
+    /**
+     * Adds a new option to the dropdown.
+     *
+     * @param option The option text to add
+     */
     public void addOption(String option) { options.add(option); }
+
+    /**
+     * Removes an option at the specified index.
+     *
+     * @param index The index of the option to remove
+     */
     public void removeOption(int index) {
         if (index >= 0 && index < options.size()) {
             options.remove(index);
             selectedIndex = Math.min(selectedIndex, options.size() - 1);
         }
     }
+
+    /**
+     * Removes all options from the dropdown.
+     */
     public void clearOptions() { options.clear(); selectedIndex = 0; }
 
+    /**
+     * Returns the corner radius for rounded corners.
+     *
+     * @return The corner radius in pixels
+     */
     public int getCornerRadius() { return cornerRadius; }
+
+    /**
+     * Sets the corner radius for rounded corners.
+     *
+     * @param radius The corner radius in pixels (minimum 0)
+     */
     public void setCornerRadius(int radius) { this.cornerRadius = Math.max(0, radius); }
 
+    /**
+     * Checks if the dropdown is currently expanded.
+     *
+     * @return true if expanded, false otherwise
+     */
     public boolean isExpanded() { return expanded; }
-    public void setExpanded(boolean expanded) { this.expanded = expanded; }
+
+    /**
+     * Sets the expanded state of the dropdown.
+     *
+     * @param expanded true to expand, false to collapse
+     */
+    public void setExpanded(boolean expanded) {
+        this.expanded = expanded;
+        if (expanded) {
+            expandedDropdown = this;
+        } else if (expandedDropdown == this) {
+            expandedDropdown = null;
+        }
+    }
     //</editor-fold>
 
     //<editor-fold desc="DRAW">

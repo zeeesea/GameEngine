@@ -26,7 +26,6 @@ public class CircleCollider2D extends Collider2D {
         }
         return false;
     }
-    /** Prüft Kollision mit Box */
     public boolean wouldCollideAtBox(java.awt.Rectangle box) {
         Vector2 closest = new Vector2(
                 clamp(getCenter().x, box.x, box.x + box.width),

@@ -5,6 +5,11 @@ import GameEngine.Core.util.Vector2;
 
 import java.awt.*;
 
+/**
+ * A text rendering UI component for displaying strings on screen.
+ * Supports different fonts, colors, and text alignment options.
+ * Use the Builder pattern to create instances.
+ */
 public class Text extends GameObject {
     //<editor-fold desc="VARIABLES">
     private String text;
@@ -12,7 +17,9 @@ public class Text extends GameObject {
     private Font font;
     private TextAlignment alignment;
 
-    // Text-Alignment
+    /**
+     * Text alignment options for positioning text relative to its anchor point.
+     */
     public enum TextAlignment {
         LEFT, CENTER, RIGHT
     }

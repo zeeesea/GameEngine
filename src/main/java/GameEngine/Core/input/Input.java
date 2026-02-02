@@ -2,11 +2,18 @@ package GameEngine.Core.input;
 
 import GameEngine.Core.util.Vector2;
 
+/**
+ * Static class for handling keyboard and mouse input.
+ * Provides methods to check key/button states, get mouse position, and handle smooth input.
+ */
 public class Input {
 
     static boolean[] currentKeys = new boolean[KeyCode.values().length];
     static boolean[] lastKeys    = new boolean[KeyCode.values().length];
 
+    /**
+     * Enum representing all supported keyboard keys.
+     */
     public enum KeyCode {
         // Movement
         W(0), A(1), S(2), D(3),
@@ -85,6 +92,11 @@ public class Input {
             this.index = idx;
         }
 
+        /**
+         * Returns the internal index of this key code.
+         *
+         * @return The key index
+         */
         public int getIndex() {
             return index;
         }
@@ -94,6 +106,10 @@ public class Input {
     private static int mouseX, mouseY;
     static boolean[] currentMouse = new boolean[MouseCode.values().length];
     static boolean[] lastMouse    = new boolean[MouseCode.values().length];
+
+    /**
+     * Enum representing mouse buttons.
+     */
     public enum MouseCode {
         LEFT(0),
         RIGHT(1),
@@ -112,34 +128,81 @@ public class Input {
     private static final float INPUT_SMOOTHING = 10f;  // Acceleration speed
     private static final float INPUT_GRAVITY = 15f;    // Deceleration speed
 
+    /**
+     * Updates the input state. Called internally by the engine each frame.
+     */
     public static void update() {
         System.arraycopy(currentKeys, 0, lastKeys, 0, currentKeys.length);
         System.arraycopy(currentMouse, 0, lastMouse, 0, currentMouse.length);
     }
 
+    /**
+     * Checks if a key is currently being held down.
+     *
+     * @param c The key code to check
+     * @return true if the key is pressed
+     */
     public static boolean getKey(KeyCode c) {
         return currentKeys[c.index];
     }
+
+    /**
+     * Checks if a key was just pressed this frame.
+     *
+     * @param c The key code to check
+     * @return true if the key was pressed this frame
+     */
     public static boolean getKeyDown(KeyCode c) {
         int i = c.getIndex();
         return currentKeys[i] && !lastKeys[i];
     }
+
+    /**
+     * Checks if a key was just released this frame.
+     *
+     * @param c The key code to check
+     * @return true if the key was released this frame
+     */
     public static boolean getKeyUp(KeyCode c) {
         int i = c.getIndex();
         return !currentKeys[i] && lastKeys[i];
     }
+
+    /**
+     * Checks if a key was pressed in the last frame.
+     *
+     * @param c The key code to check
+     * @return true if the key was pressed last frame
+     */
     public static boolean getKeyLast(KeyCode c) {
         return lastKeys[c.index];
     }
 
+    /**
+     * Sets the state of a key. Used internally by the input system.
+     *
+     * @param c The key code
+     * @param b The pressed state
+     */
     public static void setKey(KeyCode c, boolean b) {
         currentKeys[c.index] = b;
     }
 
-
+    /**
+     * Returns the current mouse position.
+     *
+     * @return The mouse position as Vector2
+     */
     public static Vector2 getMousePosition() {
         return new Vector2(mouseX, mouseY);
     }
+
+    /**
+     * Checks if a mouse button is currently being held down.
+     *
+     * @param c The mouse button to check
+     * @return true if the button is pressed
+     */
     public static boolean getMouseButton(MouseCode c) {
         if (c == MouseCode.LEFT) {
             return currentMouse[MouseCode.LEFT.index];
@@ -150,22 +213,56 @@ public class Input {
         }
         return false;
     }
+
+    /**
+     * Checks if a mouse button was just pressed this frame.
+     *
+     * @param c The mouse button to check
+     * @return true if the button was pressed this frame
+     */
     public static boolean getMouseButtonDown(MouseCode c) {
         int i = c.index;
         return currentMouse[i] && !lastMouse[i];
     }
+
+    /**
+     * Checks if a mouse button was pressed in the last frame.
+     *
+     * @param c The mouse button to check
+     * @return true if the button was pressed last frame
+     */
     public static boolean getMouseLast(MouseCode c) {
         return lastMouse[c.index];
     }
 
+    /**
+     * Checks if a mouse button was just released this frame.
+     *
+     * @param c The mouse button to check
+     * @return true if the button was released this frame
+     */
     public static boolean getMouseButtonUp(MouseCode c) {
         int i = c.index;
         return !currentMouse[i] && lastMouse[i];
     }
+
+    /**
+     * Sets the mouse position. Used internally by the input system.
+     *
+     * @param x The x position
+     * @param y The y position
+     */
     public static void setMousePosition(int x, int y) {
         mouseX = x;
         mouseY = y;
     }
+
+    /**
+     * Sets the state of a mouse button. Used internally by the input system.
+     *
+     * @param c The mouse button
+     * @param pressed The pressed state
+     */
     public static void setMouseButton(MouseCode c, boolean pressed) {
         if (c == MouseCode.LEFT) currentMouse[MouseCode.LEFT.index] = pressed;
         else if (c == MouseCode.RIGHT) currentMouse[MouseCode.RIGHT.index] = pressed;
@@ -175,7 +272,11 @@ public class Input {
     // === AXIS INPUT ===
 
     /**
-     * Raw Input (-1, 0, oder 1) - INSTANT, kein Smoothing
+     * Returns raw input for the specified axis (-1, 0, or 1).
+     * Instant response without smoothing.
+     *
+     * @param axisName The axis name ("horizontal" or "vertical")
+     * @return The raw axis value
      */
     public static float getAxisRaw(String axisName) {
         switch (axisName.toLowerCase()) {
@@ -197,8 +298,11 @@ public class Input {
     }
 
     /**
-     * Smooth Input (0 bis 1 oder -1) - mit Acceleration/Deceleration
-     * Wie Unity's Input.GetAxis()
+     * Returns smooth input for the specified axis.
+     * Similar to Unity's Input.GetAxis() with acceleration/deceleration.
+     *
+     * @param axisName The axis name ("horizontal" or "vertical")
+     * @return The smooth axis value (-1 to 1)
      */
     public static float getAxis(String axisName) {
         switch (axisName.toLowerCase()) {
@@ -212,7 +316,10 @@ public class Input {
     }
 
     /**
-     * Raw Input als Vector2 - INSTANT
+     * Returns raw input as a Vector2.
+     * Instant response without smoothing.
+     *
+     * @return The input direction as Vector2
      */
     public static Vector2 getInputRaw() {
         return new Vector2(
@@ -222,7 +329,9 @@ public class Input {
     }
 
     /**
-     * Smooth Input als Vector2 - mit Smoothing
+     * Returns smooth input as a Vector2.
+     *
+     * @return The smooth input direction as Vector2
      */
     public static Vector2 getInput() {
         return new Vector2(
@@ -232,7 +341,9 @@ public class Input {
     }
 
     /**
-     * Update smooth input values - MUSS jeden Frame aufgerufen werden!
+     * Updates smooth input values. Must be called every frame for smooth input to work.
+     *
+     * @param deltaTime The time since last frame
      */
     public static void updateSmoothInput(float deltaTime) {
         // Horizontal

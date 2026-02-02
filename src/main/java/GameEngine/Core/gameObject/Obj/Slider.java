@@ -8,6 +8,11 @@ import GameEngine.Core.util.Vector2;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 
+/**
+ * A slider UI component for selecting values within a range.
+ * Supports horizontal dragging, value callbacks, and customizable appearance.
+ * Use the Builder pattern to create instances.
+ */
 public class Slider extends GameObject {
     //<editor-fold desc="VARIABLES">
     // Position und Größe
@@ -31,6 +36,8 @@ public class Slider extends GameObject {
     // Verhalten
     private boolean dragging = false;
     private FuncIntOne<Float> onValueChanged;
+    private FuncInt onDragStart;
+    private FuncInt onDragEnd;
 
     // Text
     private boolean showValue = false;
@@ -78,6 +85,8 @@ public class Slider extends GameObject {
         private Font font = new Font("Arial", Font.PLAIN, 12);
         private int cornerRadius = 0;
         private FuncIntOne<Float> onValueChanged;
+        private FuncInt onDragStart;
+        private FuncInt onDragEnd;
 
         public Builder() {}
 
@@ -156,6 +165,16 @@ public class Slider extends GameObject {
             return this;
         }
 
+        public Builder onDragStart(FuncInt callback) {
+            this.onDragStart = callback;
+            return this;
+        }
+
+        public Builder onDragEnd(FuncInt callback) {
+            this.onDragEnd = callback;
+            return this;
+        }
+
         public Slider build() {
             Slider slider = new Slider(x, y, width, height, minValue, maxValue, startValue);
             slider.backgroundColor = backgroundColor;
@@ -170,32 +189,65 @@ public class Slider extends GameObject {
             slider.font = font;
             slider.cornerRadius = cornerRadius;
             slider.onValueChanged = onValueChanged;
+            slider.onDragStart = onDragStart;
+            slider.onDragEnd = onDragEnd;
             return slider;
         }
     }
     //</editor-fold>
 
     //<editor-fold desc="SETTER">
+    /**
+     * Sets the background color of the slider track.
+     *
+     * @param color The background color
+     * @return This slider for chaining
+     */
     public Slider setBackgroundColor(Color color) {
         this.backgroundColor = color;
         return this;
     }
 
+    /**
+     * Sets the fill color of the slider (the filled portion).
+     *
+     * @param color The fill color
+     * @return This slider for chaining
+     */
     public Slider setFillColor(Color color) {
         this.fillColor = color;
         return this;
     }
 
+    /**
+     * Sets the handle/knob color.
+     *
+     * @param color The handle color
+     * @return This slider for chaining
+     */
     public Slider setHandleColor(Color color) {
         this.handleColor = color;
         return this;
     }
 
+    /**
+     * Sets the border color.
+     *
+     * @param color The border color
+     * @return This slider for chaining
+     */
     public Slider setBorderColor(Color color) {
         this.borderColor = color;
         return this;
     }
 
+    /**
+     * Enables gradient fill and sets the gradient colors.
+     *
+     * @param startColor The start color of the gradient
+     * @param endColor The end color of the gradient
+     * @return This slider for chaining
+     */
     public Slider setGradient(Color startColor, Color endColor) {
         this.showGradient = true;
         this.gradientStartColor = startColor;
@@ -203,31 +255,88 @@ public class Slider extends GameObject {
         return this;
     }
 
+    /**
+     * Disables gradient fill.
+     *
+     * @return This slider for chaining
+     */
     public Slider removeGradient() {
         this.showGradient = false;
         return this;
     }
 
+    /**
+     * Sets whether to show the current value as text.
+     *
+     * @param show true to show the value
+     * @return This slider for chaining
+     */
     public Slider setShowValue(boolean show) {
         this.showValue = show;
         return this;
     }
 
+    /**
+     * Sets the label text displayed next to the slider.
+     *
+     * @param label The label text
+     * @return This slider for chaining
+     */
     public Slider setLabel(String label) {
         this.label = label;
         return this;
     }
 
+    /**
+     * Sets the font for label and value text.
+     *
+     * @param font The font to use
+     * @return This slider for chaining
+     */
     public Slider setFont(Font font) {
         this.font = font;
         return this;
     }
 
+    /**
+     * Sets the callback for when the value changes.
+     *
+     * @param callback The callback receiving the new value
+     * @return This slider for chaining
+     */
     public Slider setOnValueChanged(FuncIntOne<Float> callback) {
         this.onValueChanged = callback;
         return this;
     }
 
+    /**
+     * Sets the callback for when dragging starts.
+     *
+     * @param callback The callback to execute
+     * @return This slider for chaining
+     */
+    public Slider setOnDragStart(FuncInt callback) {
+        this.onDragStart = callback;
+        return this;
+    }
+
+    /**
+     * Sets the callback for when dragging ends.
+     *
+     * @param callback The callback to execute
+     * @return This slider for chaining
+     */
+    public Slider setOnDragEnd(FuncInt callback) {
+        this.onDragEnd = callback;
+        return this;
+    }
+
+    /**
+     * Sets the current value of the slider.
+     *
+     * @param value The new value (will be clamped to min/max range)
+     * @return This slider for chaining
+     */
     public Slider setValue(float value) {
         float oldValue = this.value;
         this.value = Math.max(minValue, Math.min(maxValue, value));
@@ -237,18 +346,37 @@ public class Slider extends GameObject {
         return this;
     }
 
+    /**
+     * Sets the minimum value of the slider range.
+     *
+     * @param min The minimum value
+     * @return This slider for chaining
+     */
     public Slider setMinValue(float min) {
         this.minValue = min;
         if (value < min) setValue(min);
         return this;
     }
 
+    /**
+     * Sets the maximum value of the slider range.
+     *
+     * @param max The maximum value
+     * @return This slider for chaining
+     */
     public Slider setMaxValue(float max) {
         this.maxValue = max;
         if (value > max) setValue(max);
         return this;
     }
 
+    /**
+     * Sets both minimum and maximum values.
+     *
+     * @param min The minimum value
+     * @param max The maximum value
+     * @return This slider for chaining
+     */
     public Slider setRange(float min, float max) {
         this.minValue = min;
         this.maxValue = max;
@@ -256,53 +384,113 @@ public class Slider extends GameObject {
         return this;
     }
 
+    /**
+     * Sets the position of the slider.
+     *
+     * @param x The x position
+     * @param y The y position
+     * @return This slider for chaining
+     */
     public Slider setPosition(int x, int y) {
         this.x = x;
         this.y = y;
         return this;
     }
 
+    /**
+     * Sets the size of the slider.
+     *
+     * @param width The width
+     * @param height The height
+     * @return This slider for chaining
+     */
     public Slider setSize(int width, int height) {
         this.width = width;
         this.height = height;
         return this;
     }
 
+    /**
+     * Sets the corner radius for rounded corners.
+     *
+     * @param radius The corner radius (minimum 0)
+     * @return This slider for chaining
+     */
     public Slider setCornerRadius(int radius) {
         this.cornerRadius = Math.max(0, radius);
         return this;
     }
 
+    /**
+     * Returns the corner radius.
+     *
+     * @return The corner radius
+     */
     public int getCornerRadius() {
         return cornerRadius;
     }
     //</editor-fold>
 
     //<editor-fold desc="GETTER METHODS">
+    /**
+     * Returns the current value of the slider.
+     *
+     * @return The current value
+     */
     public float getValue() {
         return value;
     }
 
+    /**
+     * Returns the minimum value of the range.
+     *
+     * @return The minimum value
+     */
     public float getMinValue() {
         return minValue;
     }
 
+    /**
+     * Returns the maximum value of the range.
+     *
+     * @return The maximum value
+     */
     public float getMaxValue() {
         return maxValue;
     }
 
+    /**
+     * Returns the normalized value (0 to 1).
+     *
+     * @return The normalized value
+     */
     public float getNormalizedValue() {
         return (value - minValue) / (maxValue - minValue);
     }
 
+    /**
+     * Returns the value as an integer (rounded).
+     *
+     * @return The value as int
+     */
     public int getValueAsInt() {
         return Math.round(value);
     }
 
+    /**
+     * Returns the value as a percentage (0 to 100).
+     *
+     * @return The value as percent
+     */
     public int getValueAsPercent() {
         return (int)(getNormalizedValue() * 100);
     }
 
+    /**
+     * Checks if the slider is currently being dragged.
+     *
+     * @return true if dragging
+     */
     public boolean isDragging() {
         return dragging;
     }
@@ -316,6 +504,11 @@ public class Slider extends GameObject {
 
     @Override
     public void update(double deltaTime) {
+        // Prüfe ob ein Dropdown offen ist - dann keine Interaktion (außer wenn bereits dragging)
+        if (Dropdown.isAnyDropdownExpanded() && !dragging) {
+            return;
+        }
+
         Vector2 mousePos = Input.getMousePosition();
         boolean mousePressed = Input.getMouseButton(Input.MouseCode.LEFT);
         boolean wasPressed = Input.getMouseLast(Input.MouseCode.LEFT);
@@ -323,13 +516,21 @@ public class Slider extends GameObject {
         if (mousePressed) {
             if (!dragging && isMouseOver(mousePos) && !wasPressed) {
                 dragging = true;
+                if (onDragStart != null) {
+                    onDragStart.call();
+                }
             }
 
             if (dragging) {
                 updateValueFromMouse(mousePos);
             }
         } else {
-            dragging = false;
+            if (dragging) {
+                dragging = false;
+                if (onDragEnd != null) {
+                    onDragEnd.call();
+                }
+            }
         }
     }
 

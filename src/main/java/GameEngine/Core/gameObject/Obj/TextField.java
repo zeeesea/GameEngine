@@ -212,6 +212,11 @@ public class TextField extends GameObject {
 
         // Focus handling
         if (Input.getMouseButtonDown(Input.MouseCode.LEFT)) {
+            // Prüfe ob ein Dropdown offen ist - dann keine Interaktion
+            if (Dropdown.isAnyDropdownExpanded()) {
+                return;
+            }
+
             Vector2 mousePos = Input.getMousePosition();
             boolean wasInside = isMouseInside(mousePos);
 
