@@ -338,6 +338,15 @@ Draw debug info:
 ```java
 drawCollider();
 ```
+<h2>Images</h2>
+
+<img width="1538" height="896" alt="image" src="https://github.com/user-attachments/assets/e0db0530-4295-4b8d-bc1e-b67199d4b32f" />
+
+<img width="1538" height="896" alt="image" src="https://github.com/user-attachments/assets/8dc21b7f-9523-4961-9fe6-95c858734ab1" />
+
+<img width="1538" height="896" alt="image" src="https://github.com/user-attachments/assets/fd31a059-313d-486b-bb84-1ef38145e25e" />
+
+
 
 
 ---- © Repositiory created on Oct 26, 2025 by zeeesea ----
