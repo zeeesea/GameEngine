@@ -33,6 +33,11 @@ public class Button extends GameObject {
     //Round Corners
     private int cornerRadius = 0;
 
+    //Border/Outline
+    private boolean borderEnabled = false;
+    private Color borderColor = Color.WHITE;
+    private int borderThickness = 1;
+
     //Functional Interfaces
     private FuncInt onClick;
     private FuncIntOne<Button> onClickOne;
@@ -81,6 +86,11 @@ public class Button extends GameObject {
         private Color textColor = Color.BLACK;
         private String tag = "Button";
         private int cornerRadius = 0;
+
+        // Border/Outline
+        private boolean borderEnabled = false;
+        private Color borderColor = Color.WHITE;
+        private int borderThickness = 1;
 
         boolean SH_Enabled = false;
         float SH_sizeIncrease;
@@ -141,6 +151,27 @@ public class Button extends GameObject {
             return this;
         }
 
+        /**
+         * Enables a border/outline with the specified color and thickness.
+         * Works with smoothHover and cornerRadius.
+         * @param color The border color
+         * @param thickness The border thickness in pixels (minimum 1)
+         */
+        public Builder border(Color color, int thickness) {
+            this.borderEnabled = true;
+            this.borderColor = color != null ? color : Color.WHITE;
+            this.borderThickness = Math.max(1, thickness);
+            return this;
+        }
+
+        /**
+         * Enables a border/outline with the specified color and default thickness (1).
+         * @param color The border color
+         */
+        public Builder border(Color color) {
+            return border(color, 1);
+        }
+
         public Builder smoothHover(float SH_sizeIncrease, float SH_speed) {
             this.SH_sizeIncrease = SH_sizeIncrease;
             this.SH_speed = SH_speed;
@@ -194,6 +225,11 @@ public class Button extends GameObject {
             b.color = color;
             b.tag = tag;
             b.cornerRadius = cornerRadius;
+
+            // Border
+            b.borderEnabled = borderEnabled;
+            b.borderColor = borderColor;
+            b.borderThickness = borderThickness;
 
             // Speichere die Basis-Größe für SmoothHover
             b.SH_baseSize = new Vector2(rect.width, rect.height);
@@ -366,6 +402,62 @@ public class Button extends GameObject {
         this.cornerRadius = Math.max(0, radius);
     }
 
+    /**
+     * Enables or disables the border.
+     * @param enabled true to show border
+     */
+    public void setBorderEnabled(boolean enabled) {
+        this.borderEnabled = enabled;
+    }
+
+    /**
+     * Sets the border color.
+     * @param color The border color
+     */
+    public void setBorderColor(Color color) {
+        if (color != null) {
+            this.borderColor = color;
+        }
+    }
+
+    /**
+     * Sets the border thickness.
+     * @param thickness The thickness in pixels (minimum 1)
+     */
+    public void setBorderThickness(int thickness) {
+        this.borderThickness = Math.max(1, thickness);
+    }
+
+    /**
+     * Enables border with the specified color and thickness.
+     * @param color The border color
+     * @param thickness The thickness in pixels
+     */
+    public void setBorder(Color color, int thickness) {
+        this.borderEnabled = true;
+        setBorderColor(color);
+        setBorderThickness(thickness);
+    }
+
+    /**
+     * Disables the border.
+     */
+    public void removeBorder() {
+        this.borderEnabled = false;
+    }
+
+    public boolean isBorderEnabled() {
+        return borderEnabled;
+    }
+
+    public Color getBorderColor() {
+        return borderColor;
+    }
+
+    public int getBorderThickness() {
+        return borderThickness;
+    }
+
     @Override
     public void draw(Graphics2D g) {
         if (!active) return;
@@ -377,6 +469,11 @@ public class Button extends GameObject {
             drawGOasFilledRect(color);
         }
 
+        // Zeichne Border/Outline wenn aktiviert
+        if (borderEnabled) {
+            drawBorder(g);
+        }
+
         if (text != null) {
             Vector2 pos = getCenterPosition();
             float yOffset = (float) text.getTextHeight(g) / 4;
@@ -384,6 +481,32 @@ public class Button extends GameObject {
             text.setPosition(pos);
             text.draw(g);
         }
+    }
+
+    private void drawBorder(Graphics2D g) {
+        g.setColor(borderColor);
+        Stroke oldStroke = g.getStroke();
+        g.setStroke(new BasicStroke(borderThickness));
+
+        int rx = (int) transform.position.x;
+        int ry = (int) transform.position.y;
+        int rw = (int) transform.scale.x;
+        int rh = (int) transform.scale.y;
+
+        if (cornerRadius > 0) {
+            // Runde Ecken mit Anti-Aliasing
+            Object oldHint = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            g.drawRoundRect(rx, ry, rw, rh, cornerRadius * 2, cornerRadius * 2);
+
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    oldHint != null ? oldHint : RenderingHints.VALUE_ANTIALIAS_DEFAULT);
+        } else {
+            g.drawRect(rx, ry, rw, rh);
+        }
+
+        g.setStroke(oldStroke);
     }
 
     @Override

@@ -87,6 +87,17 @@ public class SpriteEditor extends GameEngine {
             null
     };
 
+    // === Colors (Modern Dark Theme) ===
+    private static final Color BG_COLOR = new Color(25, 25, 30);
+    private static final Color SIDEBAR_COLOR = new Color(35, 35, 40);
+    private static final Color TOOL_COLOR = new Color(50, 50, 55);
+    private static final Color ACCENT_COLOR = new Color(0, 150, 255);
+    private static final Color TEXT_COLOR = Color.WHITE;
+    private static final Color TEXT_SECONDARY = new Color(180, 180, 180);
+    private static final Color BORDER_COLOR = new Color(60, 60, 65);
+    private static final Color BUTTON_COLOR = new Color(80, 80, 85);
+
+
     // UI
     private ColorButton[] colorButtons;
     private int paletteX = 800;
@@ -145,6 +156,7 @@ public class SpriteEditor extends GameEngine {
         animationManager = new AnimationManager(spriteManager);
 
         setTitle("Sprite Editor");
+        setBackground(BG_COLOR);
 
         clearSprite();
         setupToolButtons();
@@ -165,20 +177,24 @@ public class SpriteEditor extends GameEngine {
 
         spriteModeButton = new Button.Builder()
                 .rect(new Rectangle(palette2X, modeY, modeWidth, modeHeight))
-                .color(new Color(100, 150, 255))
+                .color(ACCENT_COLOR)
                 .text("Sprite Mode")
                 .font(new Font("Arial", Font.BOLD, 14))
-                .textColor(Color.WHITE)
+                .textColor(TEXT_COLOR)
+                .cornerRadius(6)
+                .border(BORDER_COLOR, 1)
                 .onClick(() -> switchMode(EditorMode.SPRITE))
                 .build();
         objectManager.add(spriteModeButton);
 
         animationModeButton = new Button.Builder()
                 .rect(new Rectangle(palette2X + modeWidth + 10, modeY, modeWidth, modeHeight))
-                .color(new Color(150, 100, 255))
+                .color(TOOL_COLOR)
                 .text("Animation")
                 .font(new Font("Arial", Font.BOLD, 14))
-                .textColor(Color.WHITE)
+                .textColor(TEXT_COLOR)
+                .cornerRadius(6)
+                .border(BORDER_COLOR, 1)
                 .onClick(() -> switchMode(EditorMode.ANIMATION))
                 .build();
         objectManager.add(animationModeButton);
@@ -199,15 +215,15 @@ public class SpriteEditor extends GameEngine {
 
         if (mode == EditorMode.SPRITE) {
             currentSpriteName = "untitled";
-            spriteModeButton.setColor(new Color(100, 150, 255));
-            animationModeButton.setColor(new Color(80, 60, 150));
+            spriteModeButton.setColor(ACCENT_COLOR);
+            animationModeButton.setColor(TOOL_COLOR);
         } else {
             currentAnimationName = "untitled";
             currentFrame = 0;
             totalFrames = 1;
             isPlaying = false;
-            animationModeButton.setColor(new Color(150, 100, 255));
-            spriteModeButton.setColor(new Color(60, 90, 150));
+            animationModeButton.setColor(ACCENT_COLOR);
+            spriteModeButton.setColor(TOOL_COLOR);
         }
 
         updateUIVisibility();
@@ -250,7 +266,7 @@ public class SpriteEditor extends GameEngine {
 
         brushButton = new ToolButton(
                 new Rectangle(palette2X, toolY, toolSize, toolSize),
-                new Color(100, 150, 255),
+                ACCENT_COLOR,
                 () -> selectTool(Tool.BRUSH),
                 "B"
         );
@@ -258,7 +274,7 @@ public class SpriteEditor extends GameEngine {
 
         eraserButton = new ToolButton(
                 new Rectangle(palette2X + toolSize + toolSpacing, toolY, toolSize, toolSize),
-                new Color(255, 100, 100),
+                new Color(200, 80, 80),
                 () -> selectTool(Tool.ERASER),
                 "E"
         );
@@ -266,7 +282,7 @@ public class SpriteEditor extends GameEngine {
 
         bucketButton = new ToolButton(
                 new Rectangle(palette2X + (toolSize + toolSpacing) * 2, toolY, toolSize, toolSize),
-                new Color(100, 255, 100),
+                new Color(80, 200, 80),
                 () -> selectTool(Tool.BUCKET),
                 "F"
         );
@@ -397,8 +413,8 @@ public class SpriteEditor extends GameEngine {
                 .range(0f, 2f)
                 .startValue(1f)
                 .gradient(Color.BLACK, Color.WHITE)
-                .handleColor(Color.YELLOW)
-                .borderColor(Color.WHITE)
+                .handleColor(ACCENT_COLOR)
+                .borderColor(BORDER_COLOR)
                 .onValueChanged(this::onBrightnessChanged)
                 .build();
         objectManager.add(brightnessSlider);
@@ -412,30 +428,36 @@ public class SpriteEditor extends GameEngine {
         // Sprite Mode Buttons
         saveButton = new Button.Builder()
                 .rect(new Rectangle(paletteX, btnY, btnWidth, btnHeight))
-                .color(Color.GREEN)
+                .color(new Color(60, 150, 80))
                 .text("Save")
                 .font(new Font("Arial", Font.BOLD, 20))
-                .textColor(Color.BLACK)
+                .textColor(TEXT_COLOR)
+                .cornerRadius(6)
+                .border(BORDER_COLOR, 1)
                 .onClick(this::saveSprite)
                 .build();
         objectManager.add(saveButton);
 
         loadButton = new Button.Builder()
                 .rect(new Rectangle(paletteX, btnY + 50, btnWidth, btnHeight))
-                .color(Color.BLUE)
+                .color(ACCENT_COLOR)
                 .text("Load")
                 .font(new Font("Arial", Font.BOLD, 20))
-                .textColor(Color.WHITE)
+                .textColor(TEXT_COLOR)
+                .cornerRadius(6)
+                .border(BORDER_COLOR, 1)
                 .onClick(this::loadSprite)
                 .build();
         objectManager.add(loadButton);
 
         newButton = new Button.Builder()
                 .rect(new Rectangle(paletteX, btnY + 100, btnWidth, btnHeight))
-                .color(Color.ORANGE)
+                .color(new Color(200, 150, 50))
                 .text("New")
                 .font(new Font("Arial", Font.BOLD, 20))
-                .textColor(Color.BLACK)
+                .textColor(TEXT_COLOR)
+                .cornerRadius(6)
+                .border(BORDER_COLOR, 1)
                 .onClick(this::newSprite)
                 .build();
         objectManager.add(newButton);
@@ -450,30 +472,36 @@ public class SpriteEditor extends GameEngine {
         // Animation Mode Buttons
         saveAnimationButton = new Button.Builder()
                 .rect(new Rectangle(paletteX, btnY, btnWidth, btnHeight))
-                .color(Color.GREEN)
+                .color(new Color(60, 150, 80))
                 .text("Save Anim")
                 .font(new Font("Arial", Font.BOLD, 16))
-                .textColor(Color.BLACK)
+                .textColor(TEXT_COLOR)
+                .cornerRadius(6)
+                .border(BORDER_COLOR, 1)
                 .onClick(this::saveAnimation)
                 .build();
         objectManager.add(saveAnimationButton);
 
         loadAnimationButton = new Button.Builder()
                 .rect(new Rectangle(paletteX, btnY + 50, btnWidth, btnHeight))
-                .color(Color.BLUE)
+                .color(ACCENT_COLOR)
                 .text("Load Anim")
                 .font(new Font("Arial", Font.BOLD, 16))
-                .textColor(Color.WHITE)
+                .textColor(TEXT_COLOR)
+                .cornerRadius(6)
+                .border(BORDER_COLOR, 1)
                 .onClick(this::loadAnimation)
                 .build();
         objectManager.add(loadAnimationButton);
 
         newAnimationButton = new Button.Builder()
                 .rect(new Rectangle(paletteX, btnY + 100, btnWidth, btnHeight))
-                .color(Color.ORANGE)
+                .color(new Color(200, 150, 50))
                 .text("New Anim")
                 .font(new Font("Arial", Font.BOLD, 16))
-                .textColor(Color.BLACK)
+                .textColor(TEXT_COLOR)
+                .cornerRadius(6)
+                .border(BORDER_COLOR, 1)
                 .onClick(this::newAnimation)
                 .build();
         objectManager.add(newAnimationButton);
@@ -482,20 +510,24 @@ public class SpriteEditor extends GameEngine {
         int frameY = btnY + 150;
         newFrameButton = new Button.Builder()
                 .rect(new Rectangle(paletteX, frameY, btnWidth, 35))
-                .color(new Color(100, 200, 100))
+                .color(new Color(60, 150, 80))
                 .text("New Frame")
                 .font(new Font("Arial", Font.BOLD, 14))
-                .textColor(Color.BLACK)
+                .textColor(TEXT_COLOR)
+                .cornerRadius(6)
+                .border(BORDER_COLOR, 1)
                 .onClick(this::newFrame)
                 .build();
         objectManager.add(newFrameButton);
 
         deleteFrameButton = new Button.Builder()
                 .rect(new Rectangle(paletteX, frameY + 40, btnWidth, 35))
-                .color(new Color(200, 100, 100))
+                .color(new Color(180, 60, 60))
                 .text("Delete Frame")
                 .font(new Font("Arial", Font.BOLD, 14))
-                .textColor(Color.WHITE)
+                .textColor(TEXT_COLOR)
+                .cornerRadius(6)
+                .border(BORDER_COLOR, 1)
                 .onClick(this::deleteFrame)
                 .build();
         objectManager.add(deleteFrameButton);
@@ -504,20 +536,24 @@ public class SpriteEditor extends GameEngine {
         int navY = frameY + 85;
         prevFrameButton = new Button.Builder()
                 .rect(new Rectangle(paletteX, navY, smallBtnWidth, 35))
-                .color(new Color(150, 150, 200))
+                .color(TOOL_COLOR)
                 .text("<<")
                 .font(new Font("Arial", Font.BOLD, 18))
-                .textColor(Color.WHITE)
+                .textColor(TEXT_COLOR)
+                .cornerRadius(6)
+                .border(BORDER_COLOR, 1)
                 .onClick(this::prevFrame)
                 .build();
         objectManager.add(prevFrameButton);
 
         nextFrameButton = new Button.Builder()
                 .rect(new Rectangle(paletteX + smallBtnWidth + 10, navY, smallBtnWidth, 35))
-                .color(new Color(150, 150, 200))
+                .color(TOOL_COLOR)
                 .text(">>")
                 .font(new Font("Arial", Font.BOLD, 18))
-                .textColor(Color.WHITE)
+                .textColor(TEXT_COLOR)
+                .cornerRadius(6)
+                .border(BORDER_COLOR, 1)
                 .onClick(this::nextFrame)
                 .build();
         objectManager.add(nextFrameButton);
@@ -525,10 +561,12 @@ public class SpriteEditor extends GameEngine {
         // Play Button
         playAnimationButton = new Button.Builder()
                 .rect(new Rectangle(paletteX, navY + 45, btnWidth, 35))
-                .color(new Color(100, 255, 100))
+                .color(new Color(60, 150, 80))
                 .text("Play")
                 .font(new Font("Arial", Font.BOLD, 14))
-                .textColor(Color.BLACK)
+                .textColor(TEXT_COLOR)
+                .cornerRadius(6)
+                .border(BORDER_COLOR, 1)
                 .onClick(this::togglePlayAnimation)
                 .build();
         objectManager.add(playAnimationButton);
@@ -540,9 +578,9 @@ public class SpriteEditor extends GameEngine {
                 .size(150, 20)
                 .range(1f, 30f)
                 .startValue(10f)
-                .gradient(Color.DARK_GRAY, Color.GREEN)
-                .handleColor(Color.ORANGE)
-                .borderColor(Color.WHITE)
+                .gradient(Color.DARK_GRAY, new Color(60, 150, 80))
+                .handleColor(ACCENT_COLOR)
+                .borderColor(BORDER_COLOR)
                 .onValueChanged(this::onFPSChanged)
                 .build();
         objectManager.add(fpsSlider);

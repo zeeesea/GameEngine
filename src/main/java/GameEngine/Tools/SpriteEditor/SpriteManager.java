@@ -13,12 +13,12 @@ import java.util.Map;
 /**
  * Verwaltet gespeicherte Sprites
  * Speichert als .sprite Datei mit Color[][]
- * Neue Struktur: src/Game/sprites/single/ für einzelne Sprites
+ * Struktur: assets/sprites/single/ für einzelne Sprites
  */
 public class SpriteManager {
 
     private List<SavedSprite> sprites;
-    private String saveDirectory = "sprites/single/";
+    private String saveDirectory = "assets/sprites/single/";
     private Map<String, Color[][]> loadedSpriteCache = new java.util.HashMap<>();
 
     public SpriteManager() {

@@ -17,7 +17,7 @@ target/
 
 # Ignore specific source/test folder
 /src/main/java/TEST_IGNORE/
-/sprites/
+/assets/
 
 ############################
 # Eclipse

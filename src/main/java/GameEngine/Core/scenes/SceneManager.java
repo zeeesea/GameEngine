@@ -2,6 +2,7 @@ package GameEngine.Core.scenes;
 
 import GameEngine.Core.GameEngine;
 import GameEngine.Core.GameEngineFrame;
+import GameEngine.Core.input.Input;
 import GameEngine.Core.util.Console.Console;
 import GameEngine.Core.util.Console.ConsoleTag;
 
@@ -119,6 +120,9 @@ public class SceneManager {
             frame.repaint();
 
             newScene.requestFocusInWindow();
+
+            // Reset input states to prevent stale clicks from affecting the new scene
+            Input.reset();
 
             newScene.init();
 

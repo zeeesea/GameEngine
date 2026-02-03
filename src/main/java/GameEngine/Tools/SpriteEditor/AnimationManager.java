@@ -10,11 +10,11 @@ import java.util.List;
 
 /**
  * Verwaltet Animationen als Ordner mit mehreren Frames
- * Struktur: src/Game/sprites/animations/{animName}/{animName}_0.sprite, {animName}_1.sprite, ...
+ * Struktur: assets/sprites/animations/{animName}/{animName}_0.sprite, {animName}_1.sprite, ...
  */
 public class AnimationManager {
 
-    private String animationsDirectory = "sprites/animations/";
+    private String animationsDirectory = "assets/sprites/animations/";
     private SpriteManager spriteManager;
 
     public AnimationManager(SpriteManager spriteManager) {

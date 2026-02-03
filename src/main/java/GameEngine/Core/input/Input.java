@@ -137,6 +137,26 @@ public class Input {
     }
 
     /**
+     * Resets all input states. Called when loading a new scene to prevent
+     * stale input states from affecting the new scene.
+     */
+    public static void reset() {
+        // Reset all key states
+        for (int i = 0; i < currentKeys.length; i++) {
+            currentKeys[i] = false;
+            lastKeys[i] = false;
+        }
+        // Reset all mouse states
+        for (int i = 0; i < currentMouse.length; i++) {
+            currentMouse[i] = false;
+            lastMouse[i] = false;
+        }
+        // Reset smooth input
+        horizontalSmooth = 0f;
+        verticalSmooth = 0f;
+    }
+
+    /**
      * Checks if a key is currently being held down.
      *
      * @param c The key code to check
