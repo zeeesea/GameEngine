@@ -8,10 +8,20 @@ import GameEngine.Tools.SpriteEditor.SpriteManager;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.InputStream;
 
 public class GameEngineFrame extends JFrame {
 
-    private String defaultIconpath = "src/main/java/GameEngine/Assets/Sprites/Logo/";
+    /**
+     * When the engine is used as a Maven dependency, we must load assets from the classpath.
+     * This path points to the default icon sprite packaged with the engine.
+     */
+    private static final String DEFAULT_ICON_RESOURCE = "/GameEngine/Assets/Sprites/Logo/defaultIcon.sprite";
+
+    /**
+     * Dev fallback (running from repo / IDE) - keeps old behavior working.
+     */
+    private final String defaultIconpath = "src/main/java/GameEngine/Assets/Sprites/Logo/";
 
 
     public GameEngineFrame(GameEngine panel, String title, boolean fullscreen) {
@@ -32,7 +42,7 @@ public class GameEngineFrame extends JFrame {
         panel.setParentFrame(this);
         SceneManager.setFrame(this);
 
-        //setIconFromPixels(panel.spriteManager.loadSpriteFromPath("defaultIcon", defaultIconpath));
+        setDefaultIcon(panel);
 
         SceneManager.startGameLoop();
 
@@ -55,13 +65,44 @@ public class GameEngineFrame extends JFrame {
         panel.setParentFrame(this);
         SceneManager.setFrame(this);
 
-        //setIconFromPixels(panel.spriteManager.loadSpriteFromPath("defaultIcon", defaultIconpath));
+        setDefaultIcon(panel);
         SceneManager.startGameLoop();
 
         // Lade die erste Scene
         SceneManager.loadScene(panel);
 
         Console.log(ConsoleTag.SYSTEM,"Game Engine Frame setup complete");
+    }
+
+    private void setDefaultIcon(GameEngine panel) {
+        // 1) Classpath (works when imported as a Maven library)
+        try (InputStream is = GameEngineFrame.class.getResourceAsStream(DEFAULT_ICON_RESOURCE)) {
+            if (is != null) {
+                // Sprite files are serialized objects (Color[][]) created by SpriteEditor.
+                // We reuse SpriteManager's serialization format.
+                try (java.io.ObjectInputStream ois = new java.io.ObjectInputStream(is)) {
+                    Object obj = ois.readObject();
+                    if (obj instanceof SpriteManager.SavedSprite saved) {
+                        setIconFromPixels(saved.pixels);
+                        return;
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+            // Fall back below
+        }
+
+        // 2) Filesystem fallback (running from repo)
+        try {
+            if (panel != null && panel.spriteManager != null) {
+                setIconFromPixels(panel.spriteManager.loadSpriteFromPath("defaultIcon", defaultIconpath));
+                return;
+            }
+        } catch (Exception ignored) {
+            // Fall through
+        }
+
+        Console.log(ConsoleTag.ERROR, "Failed to load default icon (classpath + filesystem fallback)");
     }
 
     /**
@@ -93,6 +134,10 @@ public class GameEngineFrame extends JFrame {
     }
 
     public void setIconFromPixels(Color[][] pixels) {
+        if (pixels == null || pixels.length == 0 || pixels[0] == null || pixels[0].length == 0) {
+            Console.log(ConsoleTag.ERROR, "Failed to set icon: pixel array is null/empty");
+            return;
+        }
         BufferedImage icon = createImageFromPixels(pixels);
         this.setIconImage(icon);
         Console.log(ConsoleTag.SYSTEM, "Icon set from pixel array");
