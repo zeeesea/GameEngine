@@ -18,13 +18,25 @@ public class CheckBoxDescriptor {
     public Color labelColor = Color.WHITE;
     public int fontSize = 14;
 
+    // For relative position calculation
+    public Vector2 canvasOffset = new Vector2(0, 0);
+    public Vector2 canvasSize = new Vector2(1, 1);
+    public int targetWidth = 1536;
+    public int targetHeight = 864;
+
     /**
-     * Generates the Builder code for this checkbox.
+     * Generates the Builder code for this checkbox with relative positioning.
      */
     public String toBuilderCode() {
+        // Calculate relative position within canvas
+        float relX = (pos.x - canvasOffset.x) / canvasSize.x;
+        float relY = (pos.y - canvasOffset.y) / canvasSize.y;
+        int targetX = (int)(relX * targetWidth);
+        int targetY = (int)(relY * targetHeight);
+
         StringBuilder sb = new StringBuilder();
         sb.append("CheckBox ").append(varName).append(" = new CheckBox.Builder()\n");
-        sb.append("        .pos(new Vector2(").append((int)pos.x).append(", ").append((int)pos.y).append("))\n");
+        sb.append("        .pos(new Vector2(").append(targetX).append(", ").append(targetY).append("))\n");
         sb.append("        .label(\"").append(label).append("\")\n");
         if (checked) {
             sb.append("        .checked(true)\n");

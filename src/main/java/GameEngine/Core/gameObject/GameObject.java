@@ -755,6 +755,23 @@ public abstract class GameObject {
                 point.y <= transform.position.y + transform.scale.y;
     }
 
+    /**
+     * Checks if this object collides with a point using an expanded bounds offset.
+     * The bounds are grown by the offset in all directions.
+     *
+     * @param point The point to check collision with
+     * @param offset The number of pixels to expand the bounds on each side
+     * @return true if the point is inside the expanded bounds
+     */
+    public boolean collidesWith(Vector2 point, int offset) {
+        float minX = transform.position.x - offset;
+        float minY = transform.position.y - offset;
+        float maxX = transform.position.x + transform.scale.x + offset;
+        float maxY = transform.position.y + transform.scale.y + offset;
+
+        return point.x >= minX && point.x <= maxX && point.y >= minY && point.y <= maxY;
+    }
+
     @Override
     public String toString() {
         return this.getClass().getSimpleName();

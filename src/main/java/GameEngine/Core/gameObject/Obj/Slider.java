@@ -6,6 +6,7 @@ import GameEngine.Core.input.Input;
 import GameEngine.Core.util.Vector2;
 
 import java.awt.*;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.RoundRectangle2D;
 
 /**
@@ -33,11 +34,23 @@ public class Slider extends GameObject {
     private Color gradientEndColor = Color.WHITE;
     private int cornerRadius = 0;
 
+    /**
+     * Determines how the slider handle is drawn.
+     */
+    public enum HandleShape {
+        RECTANGLE,
+        CIRCLE
+    }
+
+    private HandleShape handleShape = HandleShape.RECTANGLE;
+
     // Verhalten
     private boolean dragging = false;
     private FuncIntOne<Float> onValueChanged;
     private FuncInt onDragStart;
     private FuncInt onDragEnd;
+    private FuncIntOne<Float> onDragStartValue;
+    private FuncIntOne<Float> onDragEndValue;
 
     // Text
     private boolean showValue = false;
@@ -84,15 +97,18 @@ public class Slider extends GameObject {
         private String label = "";
         private Font font = new Font("Arial", Font.PLAIN, 12);
         private int cornerRadius = 0;
+        private HandleShape handleShape = HandleShape.RECTANGLE;
         private FuncIntOne<Float> onValueChanged;
         private FuncInt onDragStart;
+        private FuncIntOne<Float> onDragStartValue;
         private FuncInt onDragEnd;
+        private FuncIntOne<Float> onDragEndValue;
 
-        public Builder() {}
+        public  Builder() {}
 
-        public Builder position(int x, int y) {
-            this.x = x;
-            this.y = y;
+        public Builder pos(Vector2 position) {
+            this.x = position.xToInt();
+            this.y = position.yToInt();
             return this;
         }
 
@@ -160,6 +176,18 @@ public class Slider extends GameObject {
             return this;
         }
 
+        /**
+         * Sets the shape of the slider handle.
+         * - RECTANGLE: current default look
+         * - CIRCLE: a circle that fits exactly inside the slider track height
+         */
+        public Builder handleShape(HandleShape shape) {
+            if (shape != null) {
+                this.handleShape = shape;
+            }
+            return this;
+        }
+
         public Builder onValueChanged(FuncIntOne<Float> callback) {
             this.onValueChanged = callback;
             return this;
@@ -170,8 +198,18 @@ public class Slider extends GameObject {
             return this;
         }
 
+        public Builder onDragStartValue(FuncIntOne<Float> callback) {
+            this.onDragStartValue = callback;
+            return this;
+        }
+
         public Builder onDragEnd(FuncInt callback) {
             this.onDragEnd = callback;
+            return this;
+        }
+
+        public Builder onDragEndValue(FuncIntOne<Float> callback) {
+            this.onDragEndValue = callback;
             return this;
         }
 
@@ -188,9 +226,12 @@ public class Slider extends GameObject {
             slider.label = label;
             slider.font = font;
             slider.cornerRadius = cornerRadius;
+            slider.handleShape = handleShape;
             slider.onValueChanged = onValueChanged;
             slider.onDragStart = onDragStart;
+            slider.onDragStartValue = onDragStartValue;
             slider.onDragEnd = onDragEnd;
+            slider.onDragEndValue = onDragEndValue;
             return slider;
         }
     }
@@ -429,6 +470,18 @@ public class Slider extends GameObject {
     public int getCornerRadius() {
         return cornerRadius;
     }
+
+    /**
+     * Sets the shape of the handle.
+     * - RECTANGLE: current default look
+     * - CIRCLE: a circle that fits exactly inside the slider track height
+     */
+    public Slider setHandleShape(HandleShape shape) {
+        if (shape != null) {
+            this.handleShape = shape;
+        }
+        return this;
+    }
     //</editor-fold>
 
     //<editor-fold desc="GETTER METHODS">
@@ -519,6 +572,9 @@ public class Slider extends GameObject {
                 if (onDragStart != null) {
                     onDragStart.call();
                 }
+                if (onDragStartValue != null) {
+                    onDragStartValue.call(value);
+                }
             }
 
             if (dragging) {
@@ -529,6 +585,9 @@ public class Slider extends GameObject {
                 dragging = false;
                 if (onDragEnd != null) {
                     onDragEnd.call();
+                }
+                if (onDragEndValue != null) {
+                    onDragEndValue.call(value);
                 }
             }
         }
@@ -550,7 +609,7 @@ public class Slider extends GameObject {
     @Override
     public void draw(Graphics2D g) {
         // Anti-Aliasing für runde Ecken
-        if (cornerRadius > 0) {
+        if (cornerRadius > 0 || handleShape == HandleShape.CIRCLE) {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         }
 
@@ -567,7 +626,7 @@ public class Slider extends GameObject {
                 g.fill(bgRect);
 
                 // Fill (bis zum aktuellen Wert) mit runden Ecken
-                int fillWidth = (int)(getNormalizedValue() * width);
+                int fillWidth = (int) (getNormalizedValue() * width);
                 if (fillWidth > 0) {
                     g.setColor(fillColor);
                     // Clip auf den Fill-Bereich für saubere runde Ecken
@@ -582,7 +641,7 @@ public class Slider extends GameObject {
                 g.fillRect(x, y, width, height);
 
                 // Fill (bis zum aktuellen Wert)
-                int fillWidth = (int)(getNormalizedValue() * width);
+                int fillWidth = (int) (getNormalizedValue() * width);
                 g.setColor(fillColor);
                 g.fillRect(x, y, fillWidth, height);
             }
@@ -599,18 +658,41 @@ public class Slider extends GameObject {
             g.drawRect(x, y, width, height);
         }
 
-        // Handle (Regler) - immer rechteckig
-        int handleX = x + (int)(getNormalizedValue() * width);
-        int handleWidth = 6;
-        int handleHeight = height + 4;
+        // Handle (Regler)
+        int handleCenterX = x + (int) (getNormalizedValue() * width);
 
-        g.setColor(handleColor);
-        g.fillRect(handleX - handleWidth/2, y - 2, handleWidth, handleHeight);
-        g.setColor(borderColor);
-        g.drawRect(handleX - handleWidth/2, y - 2, handleWidth, handleHeight);
+        if (handleShape == HandleShape.CIRCLE) {
+            // Circle fits exactly inside the track height.
+            int diameter = Math.max(1, height);
+            int radius = diameter / 2;
+
+            // Clamp the *center* so the circle doesn't stick out beyond the track bounds.
+            // This keeps value/range math unchanged (only rendering is clamped).
+            int minCenterX = x + radius;
+            int maxCenterX = x + width - radius;
+            int clampedCenterX = Math.max(minCenterX, Math.min(maxCenterX, handleCenterX));
+
+            int topY = y + (height - diameter) / 2; // usually 0
+            int leftX = clampedCenterX - radius;
+
+            Shape circle = new Ellipse2D.Float(leftX, topY, diameter, diameter);
+            g.setColor(handleColor);
+            g.fill(circle);
+            g.setColor(borderColor);
+            g.draw(circle);
+        } else {
+            // Rectangle (legacy look)
+            int handleWidth = 6;
+            int handleHeight = height + 4;
+
+            g.setColor(handleColor);
+            g.fillRect(handleCenterX - handleWidth / 2, y - 2, handleWidth, handleHeight);
+            g.setColor(borderColor);
+            g.drawRect(handleCenterX - handleWidth / 2, y - 2, handleWidth, handleHeight);
+        }
 
         // Anti-Aliasing wieder ausschalten
-        if (cornerRadius > 0) {
+        if (cornerRadius > 0 || handleShape == HandleShape.CIRCLE) {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
         }
 
@@ -628,7 +710,7 @@ public class Slider extends GameObject {
             String valueText = String.format("%.2f", value);
             FontMetrics fm = g.getFontMetrics();
             int textWidth = fm.stringWidth(valueText);
-            g.drawString(valueText, x + width + 10, y + height/2 + fm.getAscent()/2);
+            g.drawString(valueText, x + width + 10, y + height / 2 + fm.getAscent() / 2);
         }
     }
 

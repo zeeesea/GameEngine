@@ -21,14 +21,32 @@ public class SliderDescriptor {
     public boolean showValue = false;
     public String label = "";
 
+    // For relative position calculation
+    public Vector2 canvasOffset = new Vector2(0, 0);
+    public Vector2 canvasSize = new Vector2(1, 1);
+    public int targetWidth = 1536;
+    public int targetHeight = 864;
+
     /**
-     * Generates the Builder code for this slider.
+     * Generates the Builder code for this slider with relative positioning.
      */
     public String toBuilderCode() {
+        // Calculate relative position within canvas
+        float relX = (pos.x - canvasOffset.x) / canvasSize.x;
+        float relY = (pos.y - canvasOffset.y) / canvasSize.y;
+        int targetX = (int)(relX * targetWidth);
+        int targetY = (int)(relY * targetHeight);
+
+        // Scale size proportionally
+        float scaleX = targetWidth / canvasSize.x;
+        float scaleY = targetHeight / canvasSize.y;
+        int targetW = (int)(size.x * scaleX);
+        int targetH = (int)(size.y * scaleY);
+
         StringBuilder sb = new StringBuilder();
         sb.append("Slider ").append(varName).append(" = new Slider.Builder()\n");
-        sb.append("        .position(").append((int)pos.x).append(", ").append((int)pos.y).append(")\n");
-        sb.append("        .size(").append((int)size.x).append(", ").append((int)size.y).append(")\n");
+        sb.append("        .position(").append(targetX).append(", ").append(targetY).append(")\n");
+        sb.append("        .size(").append(targetW).append(", ").append(targetH).append(")\n");
         sb.append("        .range(").append(minValue).append("f, ").append(maxValue).append("f)\n");
         sb.append("        .startValue(").append(startValue).append("f)\n");
         sb.append("        .backgroundColor(new Color(").append(backgroundColor.getRed()).append(", ")

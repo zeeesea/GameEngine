@@ -1,5 +1,6 @@
 package GameEngine.Core.gameObject;
 
+import GameEngine.Core.gameObject.Obj.Dropdown;
 import GameEngine.Core.util.Timer.TimerSystem;
 import GameEngine.Core.util.Vector2;
 
@@ -47,6 +48,9 @@ public class GameObjectManager {
      * @param dt The delta time since last frame
      */
     public void update(float dt) {
+        // Update dropdown input blocking frame counter
+        Dropdown.updateBlockInputFrames();
+
         if (!toAdd.isEmpty()) {
             gameObjects.addAll(toAdd);
             toAdd.clear();

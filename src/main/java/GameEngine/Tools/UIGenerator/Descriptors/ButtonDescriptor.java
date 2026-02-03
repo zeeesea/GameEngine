@@ -22,14 +22,32 @@ public class ButtonDescriptor {
     public float smoothHoverSize = 10f;
     public float smoothHoverSpeed = 150f;
 
+    // For relative position calculation
+    public Vector2 canvasOffset = new Vector2(0, 0);
+    public Vector2 canvasSize = new Vector2(1, 1);
+    public int targetWidth = 1536;
+    public int targetHeight = 864;
+
     /**
-     * Generates the Builder code for this button.
+     * Generates the Builder code for this button with relative positioning.
      */
     public String toBuilderCode() {
+        // Calculate relative position within canvas
+        float relX = (pos.x - canvasOffset.x) / canvasSize.x;
+        float relY = (pos.y - canvasOffset.y) / canvasSize.y;
+        int targetX = (int)(relX * targetWidth);
+        int targetY = (int)(relY * targetHeight);
+
+        // Scale size proportionally
+        float scaleX = targetWidth / canvasSize.x;
+        float scaleY = targetHeight / canvasSize.y;
+        int targetW = (int)(size.x * scaleX);
+        int targetH = (int)(size.y * scaleY);
+
         StringBuilder sb = new StringBuilder();
         sb.append("Button ").append(varName).append(" = new Button.Builder()\n");
-        sb.append("        .rect(new Rectangle(").append((int)pos.x).append(", ").append((int)pos.y)
-          .append(", ").append((int)size.x).append(", ").append((int)size.y).append("))\n");
+        sb.append("        .rect(new Rectangle(").append(targetX).append(", ").append(targetY)
+          .append(", ").append(targetW).append(", ").append(targetH).append("))\n");
         sb.append("        .color(new Color(").append(color.getRed()).append(", ")
           .append(color.getGreen()).append(", ").append(color.getBlue()).append("))\n");
         sb.append("        .text(\"").append(text).append("\")\n");

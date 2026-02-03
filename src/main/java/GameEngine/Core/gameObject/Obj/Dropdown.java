@@ -43,29 +43,50 @@ public class Dropdown extends GameObject {
     private FuncIntOne<Integer> onIndexChanged;
     private FuncIntOne<String> onSelectionChanged;
     private FuncIntTwo<Integer, String> onItemSelected;
+
+    // Frame counter to prevent click-through when dropdown closes
+    private static int blockInputFrames = 0;
     //</editor-fold>
 
     //<editor-fold desc="STATIC INPUT BLOCKING">
     /**
      * Checks if input events should be blocked for other UI elements.
-     * Returns true when a dropdown is open, preventing elements behind it from receiving input.
+     * Returns true when a dropdown is open or just closed (for 1 frame),
+     * preventing elements behind it from receiving input.
      *
      * @param point The position to check (currently unused, blocks all input when any dropdown is open)
      * @return true if input should be blocked, false otherwise
      */
     public static boolean isInputBlocked(Vector2 point) {
-        if (expandedDropdown == null) return false;
-        // Blockiere alle Inputs solange ein Dropdown offen ist
-        return true;
+        if (expandedDropdown != null || blockInputFrames > 0) return true;
+        return false;
     }
 
     /**
-     * Checks if any dropdown is currently expanded/open.
+     * Checks if any dropdown is currently expanded/open or was just closed.
+     * This prevents click-through issues when selecting an item from a dropdown.
      *
-     * @return true if a dropdown is expanded, false otherwise
+     * @return true if a dropdown is expanded or input should be blocked, false otherwise
      */
     public static boolean isAnyDropdownExpanded() {
-        return expandedDropdown != null;
+        return expandedDropdown != null || blockInputFrames > 0;
+    }
+
+    /**
+     * Called internally to update the block input frame counter.
+     * Should be called once per frame by the dropdown system.
+     */
+    public static void updateBlockInputFrames() {
+        if (blockInputFrames > 0) {
+            blockInputFrames--;
+        }
+    }
+
+    /**
+     * Sets input blocking for a number of frames after dropdown closes.
+     */
+    private static void setBlockInputFrames(int frames) {
+        blockInputFrames = frames;
     }
 
     /**
@@ -81,7 +102,7 @@ public class Dropdown extends GameObject {
     //<editor-fold desc="CONSTRUCTOR/BUILDER">
     private Dropdown(Rectangle rect) {
         transform = new Transform(rect);
-        renderOrder = 100;
+        renderOrder = 101;
     }
 
     public static class Builder {
@@ -180,6 +201,7 @@ public class Dropdown extends GameObject {
         if (!isOverDropdown && mousePressed && !lastMouseState) {
             expanded = false;
             expandedDropdown = null;
+            setBlockInputFrames(2); // Block input for 2 frames to prevent click-through
             hoveredIndex = -1;
             return;
         }
@@ -192,6 +214,7 @@ public class Dropdown extends GameObject {
             selectItem(hoveredIndex);
             expanded = false;
             expandedDropdown = null;
+            setBlockInputFrames(2); // Block input for 2 frames to prevent click-through
         }
     }
     //</editor-fold>

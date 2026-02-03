@@ -392,7 +392,7 @@ public class SpriteEditor extends GameEngine {
     private void setupBrightnessSlider() {
         int sliderY = paletteY + 290;
         brightnessSlider = new Slider.Builder()
-                .position(paletteX, sliderY)
+                .pos(new Vector2(paletteX, sliderY))
                 .size(200, 20)
                 .range(0f, 2f)
                 .startValue(1f)
@@ -536,7 +536,7 @@ public class SpriteEditor extends GameEngine {
         // FPS Slider
         int fpsY = paletteY + 175;
         fpsSlider = new Slider.Builder()
-                .position(palette2X, fpsY)
+                .pos(new Vector2(palette2X, fpsY))
                 .size(150, 20)
                 .range(1f, 30f)
                 .startValue(10f)

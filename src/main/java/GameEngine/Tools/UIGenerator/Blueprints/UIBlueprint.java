@@ -40,4 +40,9 @@ public interface UIBlueprint {
      * Destroys this blueprint and its children (like resize handles).
      */
     void destroyBlueprint();
+
+    /**
+     * Sets the target resolution for code generation.
+     */
+    void setTargetResolution(int width, int height);
 }

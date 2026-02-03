@@ -1,45 +1,37 @@
 package GameEngine.Tools.UIGenerator.Blueprints;
 
 import GameEngine.Core.gameObject.GameObject;
-import GameEngine.Core.gameObject.Obj.Text;
 import GameEngine.Core.input.Input;
 import GameEngine.Core.util.Vector2;
-import GameEngine.Tools.UIGenerator.Descriptors.ButtonDescriptor;
+import GameEngine.Tools.UIGenerator.Descriptors.UIRectDescriptor;
 
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 
 /**
- * Blueprint for Button elements in the UI Generator.
+ * Blueprint for UIRect elements in the UI Generator.
  * Can be dragged, resized, and configured.
  */
-public class ButtonBP extends GameObject implements UIBlueprint {
+public class UIRectBP extends GameObject implements UIBlueprint {
 
-    // Descriptor holds all the data
-    private ButtonDescriptor descriptor = new ButtonDescriptor();
+    private UIRectDescriptor descriptor = new UIRectDescriptor();
 
-    // Visual settings for the editor
     private Color borderColor = new Color(100, 100, 100);
     private Color selectedBorderColor = new Color(0, 150, 255);
     private int cornerHandleSize = 12;
-    private Vector2 minSize = new Vector2(50, 30);
+    private Vector2 minSize = new Vector2(30, 30);
 
-    // State
     private boolean selected = false;
     private ResizeHandle[] handles;
-
-    // Canvas bounds (to constrain movement)
     private Rectangle canvasBounds;
 
-    private ButtonBP() {}
+    private UIRectBP() {}
 
     public static class Builder {
         private Vector2 pos = new Vector2(100, 100);
-        private Vector2 size = new Vector2(150, 50);
+        private Vector2 size = new Vector2(150, 100);
         private Rectangle canvasBounds;
-        private String varName = "button";
-
-        public Builder() {}
+        private String varName = "rect";
 
         public Builder pos(Vector2 pos) {
             this.pos = pos;
@@ -61,8 +53,8 @@ public class ButtonBP extends GameObject implements UIBlueprint {
             return this;
         }
 
-        public ButtonBP build() {
-            ButtonBP bp = new ButtonBP();
+        public UIRectBP build() {
+            UIRectBP bp = new UIRectBP();
             bp.transform.position = pos.copy();
             bp.transform.scale = size.copy();
             bp.canvasBounds = canvasBounds;
@@ -79,9 +71,7 @@ public class ButtonBP extends GameObject implements UIBlueprint {
 
     @Override
     public void init() {
-        renderOrder = 10;
-
-        // Create resize handles
+        renderOrder = 5; // Lower than other elements (buttons are 10)
         handles = new ResizeHandle[4];
         handles[0] = new ResizeHandle(ResizeHandle.Position.TOP_LEFT, this);
         handles[1] = new ResizeHandle(ResizeHandle.Position.TOP_RIGHT, this);
@@ -95,7 +85,6 @@ public class ButtonBP extends GameObject implements UIBlueprint {
 
     @Override
     public void update(double deltaTime) {
-        // Check if any handle is being dragged
         boolean handleDragging = false;
         for (ResizeHandle h : handles) {
             if (h.isDragging()) {
@@ -104,12 +93,10 @@ public class ButtonBP extends GameObject implements UIBlueprint {
             }
         }
 
-        // Only allow dragging if no handle is active
         if (!handleDragging && selected) {
             draggable(Input.MouseCode.LEFT);
         }
 
-        // Constrain to canvas
         if (canvasBounds != null) {
             transform.position.x = Math.max(canvasBounds.x,
                 Math.min(canvasBounds.x + canvasBounds.width - transform.scale.x, transform.position.x));
@@ -117,11 +104,9 @@ public class ButtonBP extends GameObject implements UIBlueprint {
                 Math.min(canvasBounds.y + canvasBounds.height - transform.scale.y, transform.position.y));
         }
 
-        // Update descriptor
         descriptor.pos = transform.position.copy();
         descriptor.size = transform.scale.copy();
 
-        // Update handle visibility
         for (ResizeHandle h : handles) {
             h.setActive(selected);
         }
@@ -134,33 +119,38 @@ public class ButtonBP extends GameObject implements UIBlueprint {
         int w = transform.scale.xToInt();
         int h = transform.scale.yToInt();
 
-        // Enable antialiasing
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // Draw button background
-        RoundRectangle2D roundRect = new RoundRectangle2D.Float(
-            x, y, w, h, descriptor.cornerRadius * 2, descriptor.cornerRadius * 2
-        );
-        g.setColor(descriptor.color);
-        g.fill(roundRect);
+        // Draw rect background
+        if (descriptor.cornerRadius > 0) {
+            RoundRectangle2D roundRect = new RoundRectangle2D.Float(
+                x, y, w, h, descriptor.cornerRadius * 2, descriptor.cornerRadius * 2
+            );
 
-        // Draw border
-        g.setColor(selected ? selectedBorderColor : borderColor);
-        g.setStroke(new BasicStroke(selected ? 2 : 1));
-        g.draw(roundRect);
+            if (descriptor.hasFill) {
+                g.setColor(descriptor.fillColor);
+                g.fill(roundRect);
+            }
 
-        // Draw text
-        g.setColor(descriptor.textColor);
-        g.setFont(new Font(descriptor.fontName, Font.BOLD, descriptor.fontSize));
-        FontMetrics fm = g.getFontMetrics();
-        int textX = x + (w - fm.stringWidth(descriptor.text)) / 2;
-        int textY = y + (h + fm.getAscent() - fm.getDescent()) / 2;
-        g.drawString(descriptor.text, textX, textY);
+            // Draw border
+            g.setColor(selected ? selectedBorderColor : (descriptor.hasBorder ? descriptor.borderColor : borderColor));
+            g.setStroke(new BasicStroke(selected ? 2 : descriptor.borderWidth));
+            g.draw(roundRect);
+        } else {
+            if (descriptor.hasFill) {
+                g.setColor(descriptor.fillColor);
+                g.fillRect(x, y, w, h);
+            }
 
-        // Draw type label above element
+            g.setColor(selected ? selectedBorderColor : (descriptor.hasBorder ? descriptor.borderColor : borderColor));
+            g.setStroke(new BasicStroke(selected ? 2 : descriptor.borderWidth));
+            g.drawRect(x, y, w, h);
+        }
+
+        // Draw type label
         g.setColor(new Color(150, 150, 150));
         g.setFont(new Font("Arial", Font.PLAIN, 10));
-        g.drawString("Button - " + descriptor.varName, x, y - 5);
+        g.drawString("UIRect - " + descriptor.varName, x, y - 5);
 
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
     }
@@ -171,7 +161,7 @@ public class ButtonBP extends GameObject implements UIBlueprint {
     // === UIBlueprint Interface ===
 
     @Override
-    public String getTypeName() { return "Button"; }
+    public String getTypeName() { return "UIRect"; }
 
     @Override
     public String getVarName() { return descriptor.varName; }
@@ -202,27 +192,27 @@ public class ButtonBP extends GameObject implements UIBlueprint {
         descriptor.targetHeight = height;
     }
 
-    // === Getters/Setters for Descriptor ===
+    // === Getters/Setters ===
 
-    public ButtonDescriptor getDescriptor() { return descriptor; }
+    public UIRectDescriptor getDescriptor() { return descriptor; }
 
-    public void setColor(Color c) { descriptor.color = c; }
-    public Color getColor() { return descriptor.color; }
+    public void setFillColor(Color c) { descriptor.fillColor = c; }
+    public Color getFillColor() { return descriptor.fillColor; }
 
-    public void setTextColor(Color c) { descriptor.textColor = c; }
-    public Color getTextColor() { return descriptor.textColor; }
+    public void setBorderColor(Color c) { descriptor.borderColor = c; }
+    public Color getBorderColorValue() { return descriptor.borderColor; }
 
-    public void setText(String text) { descriptor.text = text; }
-    public String getText() { return descriptor.text; }
-
-    public void setTag(String tag) { descriptor.tag = tag; }
-    public String getTag() { return descriptor.tag; }
-
-    public void setFontSize(int size) { descriptor.fontSize = size; }
-    public int getFontSize() { return descriptor.fontSize; }
-
-    public void setCornerRadius(int radius) { descriptor.cornerRadius = radius; }
+    public void setCornerRadius(int r) { descriptor.cornerRadius = r; }
     public int getCornerRadius() { return descriptor.cornerRadius; }
+
+    public void setBorderWidth(int w) { descriptor.borderWidth = w; }
+    public int getBorderWidth() { return descriptor.borderWidth; }
+
+    public void setHasBorder(boolean has) { descriptor.hasBorder = has; }
+    public boolean getHasBorder() { return descriptor.hasBorder; }
+
+    public void setHasFill(boolean has) { descriptor.hasFill = has; }
+    public boolean getHasFill() { return descriptor.hasFill; }
 
     public Vector2 getMinSize() { return minSize; }
     public Rectangle getCanvasBounds() { return canvasBounds; }
@@ -233,12 +223,12 @@ public class ButtonBP extends GameObject implements UIBlueprint {
         enum Position { TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT }
 
         private final Position pos;
-        private final ButtonBP owner;
+        private final UIRectBP owner;
         private Color normalColor = new Color(0, 150, 255);
         private Color hoverColor = new Color(50, 200, 255);
         private boolean hovering = false;
 
-        public ResizeHandle(Position pos, ButtonBP owner) {
+        public ResizeHandle(Position pos, UIRectBP owner) {
             this.pos = pos;
             this.owner = owner;
             transform.scale = new Vector2(cornerHandleSize, cornerHandleSize);
@@ -251,15 +241,12 @@ public class ButtonBP extends GameObject implements UIBlueprint {
 
         @Override
         public void update(double deltaTime) {
-            // Update position based on owner
             Vector2 cornerPos = getCornerPosition();
             transform.setPositionCentered(cornerPos);
 
-            // Check hover using distance-based detection (larger hit area)
             Vector2 mousePos = Input.getMousePosition();
             hovering = mousePos.distance(cornerPos) < cornerHandleSize;
 
-            // Handle dragging - allow if hovering or already dragging
             if (hovering || isDragging()) {
                 draggable(Input.MouseCode.LEFT);
             }
