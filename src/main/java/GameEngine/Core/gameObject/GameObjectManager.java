@@ -29,7 +29,6 @@ public class GameObjectManager {
     public void add(GameObject obj) {
         obj.setObjectManager(this);
         toAdd.add(obj);
-        obj.init();
     }
 
     /**
@@ -52,13 +51,19 @@ public class GameObjectManager {
         Dropdown.updateBlockInputFrames();
 
         if (!toAdd.isEmpty()) {
-            gameObjects.addAll(toAdd);
+            List<GameObject> adding = new ArrayList<>(toAdd);
             toAdd.clear();
+
+            gameObjects.addAll(adding);
+
+            for (GameObject obj : adding) {
+                obj.init();
+            }
         }
 
         checkCollisions();
 
-        for (GameObject obj : gameObjects) {
+        for (GameObject obj : new ArrayList<>(gameObjects)) {
             if (obj.active) {
                 obj.update(dt);
             }
