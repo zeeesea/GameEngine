@@ -3,6 +3,7 @@ package GameEngine.Core.util.Console;
 import GameEngine.Core.gameObject.GameObject;
 import GameEngine.Core.util.Vector2;
 
+import java.awt.*;
 import java.time.LocalDateTime;
 
 public class Console {
@@ -82,6 +83,10 @@ public class Console {
 
     public static void log(Vector2 vec) {
         log(vec.toString());
+    }
+
+    public static void log (Object o) {
+        log(o.toString());
     }
 
     //================ TAGGED OVERLOADS =================//

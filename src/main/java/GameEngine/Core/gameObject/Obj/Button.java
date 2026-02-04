@@ -5,6 +5,8 @@ import GameEngine.Core.gameObject.GameObject;
 import GameEngine.Core.gameObject.Transform;
 import GameEngine.Core.gameObject.collider.BoxCollider2D;
 import GameEngine.Core.input.*;
+import GameEngine.Core.util.Console.Console;
+import GameEngine.Core.util.MathUtils;
 import GameEngine.Core.util.Vector2;
 
 import java.awt.*;
@@ -24,11 +26,15 @@ public class Button extends GameObject {
     //Smooth Hover (SH)
     private boolean SH_Enabled = false;
     private Vector2 SH_baseSize; // Basis-Größe (unveränderlich)
-    private float SH_sizeIncrease;
+    private float SH_sizeIncrease; // Max Size Increase
     private float SH_currentOffset = 0f; // Aktueller Offset
     private float SH_targetOffset = 0f; // Ziel-Offset
     private float SH_speed;
     private boolean SH_changingSize = false;
+    private Color SH_color;
+    private Color defaultColor;
+    private Color SH_textColor;
+    private Color defaultTextColor;
 
     //Round Corners
     private int cornerRadius = 0;
@@ -84,6 +90,8 @@ public class Button extends GameObject {
         private String text = "";
         private Font font = new Font("Arial", Font.BOLD, 30);
         private Color textColor = Color.BLACK;
+        private Color hoverColor;
+        private Color hoverTextColor;
         private String tag = "Button";
         private int cornerRadius = 0;
 
@@ -178,6 +186,19 @@ public class Button extends GameObject {
             SH_Enabled = true;
             return this;
         }
+        public Builder hoverColor(Color color) {
+            this.hoverColor = color;
+            return this;
+        }
+
+        /**
+         * Sets the text color when hovering (smooth transition if smoothHover is enabled).
+         * @param color The hover text color
+         */
+        public Builder hoverTextColor(Color color) {
+            this.hoverTextColor = color;
+            return this;
+        }
 
         public Builder onClick(FuncInt onClick) {
             this.onClick = onClick;
@@ -223,6 +244,7 @@ public class Button extends GameObject {
         public Button build() {
             Button b = new Button(rect);
             b.color = color;
+            b.defaultColor = color;
             b.tag = tag;
             b.cornerRadius = cornerRadius;
 
@@ -231,13 +253,16 @@ public class Button extends GameObject {
             b.borderColor = borderColor;
             b.borderThickness = borderThickness;
 
-            // Speichere die Basis-Größe für SmoothHover
+            // SmoothHover
             b.SH_baseSize = new Vector2(rect.width, rect.height);
             b.SH_sizeIncrease = SH_sizeIncrease;
             b.SH_Enabled = SH_Enabled;
             b.SH_speed = SH_speed;
             b.SH_currentOffset = 0f;
             b.SH_targetOffset = 0f;
+            b.SH_color = hoverColor;
+            b.SH_textColor = hoverTextColor;
+            b.defaultTextColor = textColor;
 
             b.onClick = onClick;
             b.onClickOne = onClickOne;
@@ -312,12 +337,27 @@ public class Button extends GameObject {
         // Berechne die tatsächliche Größe basierend auf Basis + Offset
         Vector2 currentSize = SH_baseSize.add(SH_currentOffset);
 
+        // Berechne ratio für Color-Lerp (0 = default, 1 = hover)
+        float ratio = (SH_sizeIncrease > 0.0001f) ? (SH_currentOffset / SH_sizeIncrease) : 0f;
+
+        // Smooth Button Color
+        if (SH_color != null) {
+            this.color = MathUtils.lerpColor(defaultColor, SH_color, ratio);
+        }
+
+        // Smooth Text Color
+        if (SH_textColor != null && text != null) {
+            text.setColor(MathUtils.lerpColor(defaultTextColor, SH_textColor, ratio));
+        }
+
         // Setze die Größe zentriert
         transform.setScaleCentered(currentSize);
     }
 
     private void hovering(boolean hovering) {
-        if (SH_Enabled) changeHoverState(hovering);
+        if (SH_Enabled) {
+            changeHoverState(hovering);
+        } else changeHoverColorHard(hovering);
         if (onHover != null) onHover.call();
         if (onHoverOne != null) onHoverOne.call(this);
         if (onHoverTwo != null) onHoverTwo.call(this, hovering);
@@ -348,6 +388,16 @@ public class Button extends GameObject {
             SH_targetOffset = SH_sizeIncrease;
         } else {
             SH_targetOffset = 0f;
+        }
+    }
+
+    private void changeHoverColorHard(boolean b) {
+        if (b) {
+            if (SH_color != null) this.color = SH_color;
+            if (SH_textColor != null && text != null) text.setColor(SH_textColor);
+        } else {
+            this.color = defaultColor;
+            if (text != null && defaultTextColor != null) text.setColor(defaultTextColor);
         }
     }
 

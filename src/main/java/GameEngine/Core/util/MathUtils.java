@@ -70,6 +70,29 @@ public final class MathUtils {
     }
 
     /**
+     * Linearly interpolates between two colors
+     *
+     * @param start The start color
+     * @param end The end color
+     * @param ratio The interpolation factor (0-1)
+     * @return The interpolated color
+     */
+    public static Color lerpColor(Color start, Color end, float ratio) {
+        //Colors
+        Color from = start != null ? start : Color.WHITE;
+        Color to = end != null ? end : from;
+
+        if (Float.isNaN(ratio) || Float.isInfinite(ratio)) ratio = 0f;
+        ratio = MathUtils.clamp(ratio, 0f, 1f);
+
+        int r = (int) MathUtils.clamp(MathUtils.lerp(from.getRed(), to.getRed(), ratio), 0f, 255f);
+        int g = (int) MathUtils.clamp(MathUtils.lerp(from.getGreen(), to.getGreen(), ratio), 0f, 255f);
+        int b = (int) MathUtils.clamp(MathUtils.lerp(from.getBlue(), to.getBlue(), ratio), 0f, 255f);
+
+        return new Color(r, g, b);
+    }
+
+    /**
      * Returns the shortest difference between two angles.
      *
      * @param current The current angle in degrees
