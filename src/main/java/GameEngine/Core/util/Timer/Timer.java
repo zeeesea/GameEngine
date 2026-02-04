@@ -87,4 +87,13 @@ public class Timer {
     public boolean isActive() {
         return active;
     }
+    public boolean isCounting() {
+        return counting;
+    }
+    public float getInterval() {
+        return interval;
+    }
+    public boolean isRepeating() {
+        return repeating;
+    }
 }
