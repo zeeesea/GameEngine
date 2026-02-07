@@ -143,27 +143,32 @@ public abstract class GameEngine extends JPanel implements ActionListener {
 
     protected void setFullScreen(boolean fullScreen) {
         if (parentFrame == null) return;
+        if (this.fullscreen == fullScreen) return;
 
         Console.log(ConsoleTag.SYSTEM, "Setting Fullscreen to " + fullScreen);
 
-        if (!fullScreen) {
-            parentFrame.setExtendedState(JFrame.NORMAL);
+        GraphicsDevice device = GraphicsEnvironment
+                .getLocalGraphicsEnvironment()
+                .getDefaultScreenDevice();
+
+        if (fullScreen) {
+            parentFrame.dispose();
+            parentFrame.setUndecorated(true);
+            parentFrame.setVisible(true);
+            device.setFullScreenWindow(parentFrame);
         } else {
-            parentFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            device.setFullScreenWindow(null);
+            parentFrame.dispose();
+            parentFrame.setUndecorated(false);
+            parentFrame.setVisible(true);
+            parentFrame.pack();
+            parentFrame.setLocationRelativeTo(null);
         }
         this.fullscreen = fullScreen;
     }
 
     protected void toggleFullscreen() {
-        if (parentFrame == null) return;
-
-        fullscreen = !fullscreen;
-        if (!fullscreen) {
-            parentFrame.setExtendedState(JFrame.NORMAL);
-        } else {
-            parentFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        }
-        Console.log(ConsoleTag.SYSTEM, "Setting Fullscreen to " + fullscreen);
+        setFullScreen(!fullscreen);
     }
 
     protected void setFPS(int fps) {
