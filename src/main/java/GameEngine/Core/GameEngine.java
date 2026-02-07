@@ -178,7 +178,6 @@ public abstract class GameEngine extends JPanel implements ActionListener {
     public void callWindowResized(int width, int height) {
         SCREEN_WIDTH = getWidth();
         SCREEN_HEIGHT = getHeight();
-        Console.log(ConsoleTag.SYSTEM, "Window resized to " + width + "," + height);
         onWindowResized(width, height);
     }
 
@@ -263,46 +262,65 @@ public abstract class GameEngine extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
     }
 
-    public void onKeyPressed(int keyCode) {
+    // === Event Methods ===
+
+    public final void onKeyPressed(int keyCode) {
         if (objectManager != null) {
             objectManager.onKeyPressed(keyCode);
         }
+        keyPressed(keyCode);
     }
 
-    public void onKeyReleased(int keyCode) {
+    public final void onKeyReleased(int keyCode) {
         if (objectManager != null) {
             objectManager.onKeyReleased(keyCode);
         }
+        keyReleased(keyCode);
     }
 
-    public void onMousePressed(int x, int y, int button) {
+    public final void onMousePressed(int x, int y, int button) {
         if (objectManager != null) {
             objectManager.onMousePressed(x, y, button);
         }
+        mousePressed(x, y, button);
     }
 
-    public void onWindowClosing() {
+    public final void onWindowClosing() {
         if (objectManager != null) {
             objectManager.onWindowClosing();
         }
+        windowClosing();
     }
 
-    public void onWindowMinimized() {
+    public final void onWindowMinimized() {
         if (objectManager != null) {
             objectManager.onWindowMinimized();
         }
+        windowMinimized();
     }
 
-    public void onWindowRestored() {
+    public final void onWindowRestored() {
         if (objectManager != null) {
             objectManager.onWindowRestored();
         }
+        windowRestored();
     }
 
-    public void onWindowResized(int width, int height) {
+    public final void onWindowResized(int width, int height) {
         if (objectManager != null) {
             objectManager.onWindowResized(width, height);
         }
+        windowResized(width, height);
     }
+
+    // === Overridable Event Hooks ===
+
+    protected void keyPressed(int keyCode) {}
+    protected void keyReleased(int keyCode) {}
+    protected void mousePressed(int x, int y, int button) {}
+    protected void windowClosing() {}
+    protected void windowMinimized() {}
+    protected void windowRestored() {}
+    protected void windowResized(int width, int height) {}
     //</editor-fold>
 }
