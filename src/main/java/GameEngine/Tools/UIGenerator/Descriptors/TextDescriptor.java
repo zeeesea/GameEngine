@@ -45,7 +45,7 @@ public class TextDescriptor {
         int targetY = (int) (relBaselineY * targetHeight);
 
         StringBuilder sb = new StringBuilder();
-        sb.append("Text ").append(varName).append(" = new Text.Builder(\"").append(text).append("\")\n");
+        sb.append(varName).append(" = new Text.Builder(\"").append(text).append("\")\n");
         sb.append("        .position(new Vector2(").append(targetX).append(", ").append(targetY).append("))\n");
         sb.append("        .color(new Color(").append(color.getRed()).append(", ")
                 .append(color.getGreen()).append(", ").append(color.getBlue()).append("))\n");

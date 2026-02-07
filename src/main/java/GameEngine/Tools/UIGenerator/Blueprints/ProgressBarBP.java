@@ -1,36 +1,37 @@
 package GameEngine.Tools.UIGenerator.Blueprints;
 
 import GameEngine.Core.gameObject.GameObject;
+import GameEngine.Core.gameObject.Obj.Slider;
 import GameEngine.Core.input.Input;
 import GameEngine.Core.util.Vector2;
-import GameEngine.Tools.UIGenerator.Descriptors.SliderDescriptor;
+import GameEngine.Tools.UIGenerator.Descriptors.ProgressBarDescriptor;
 
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 
 /**
- * Blueprint for Slider elements in the UI Generator.
+ * Blueprint for ProgressBar elements in the UI Generator.
  * Can be dragged, resized, and configured.
  */
-public class SliderBP extends GameObject implements UIBlueprint, Resizable {
+public class ProgressBarBP extends GameObject implements UIBlueprint, Resizable {
 
-    private SliderDescriptor descriptor = new SliderDescriptor();
+    private ProgressBarDescriptor descriptor = new ProgressBarDescriptor();
 
     private Color borderColor = new Color(100, 100, 100);
     private Color selectedBorderColor = new Color(0, 150, 255);
-    private Vector2 minSize = new Vector2(80, 15);
+    private Vector2 minSize = new Vector2(60, 10);
 
     private boolean selected = false;
     private ResizeHandle[] handles;
     private Rectangle canvasBounds;
 
-    private SliderBP() {}
+    private ProgressBarBP() {}
 
     public static class Builder {
         private Vector2 pos = new Vector2(100, 100);
         private Vector2 size = new Vector2(200, 20);
         private Rectangle canvasBounds;
-        private String varName = "slider";
+        private String varName = "progressBar";
 
         public Builder pos(Vector2 pos) {
             this.pos = pos;
@@ -52,8 +53,8 @@ public class SliderBP extends GameObject implements UIBlueprint, Resizable {
             return this;
         }
 
-        public SliderBP build() {
-            SliderBP bp = new SliderBP();
+        public ProgressBarBP build() {
+            ProgressBarBP bp = new ProgressBarBP();
             bp.transform.position = pos.copy();
             bp.transform.scale = size.copy();
             bp.canvasBounds = canvasBounds;
@@ -71,6 +72,7 @@ public class SliderBP extends GameObject implements UIBlueprint, Resizable {
     @Override
     public void init() {
         renderOrder = 10;
+
         handles = new ResizeHandle[4];
         handles[0] = new ResizeHandle(ResizeHandle.Position.TOP_LEFT, this);
         handles[1] = new ResizeHandle(ResizeHandle.Position.TOP_RIGHT, this);
@@ -103,6 +105,9 @@ public class SliderBP extends GameObject implements UIBlueprint, Resizable {
                 Math.min(canvasBounds.y + canvasBounds.height - transform.scale.y, transform.position.y));
         }
 
+        transform.scale.x = Math.max(minSize.x, transform.scale.x);
+        transform.scale.y = Math.max(minSize.y, transform.scale.y);
+
         descriptor.pos = transform.position.copy();
         descriptor.size = transform.scale.copy();
 
@@ -120,35 +125,35 @@ public class SliderBP extends GameObject implements UIBlueprint, Resizable {
 
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // Draw slider track background
-        RoundRectangle2D track = new RoundRectangle2D.Float(
-            x, y, w, h, descriptor.cornerRadius * 2, descriptor.cornerRadius * 2
-        );
+        // Draw background
         g.setColor(descriptor.backgroundColor);
-        g.fill(track);
+        g.fillRoundRect(x, y, w, h, 4, 4);
 
-        // Draw filled portion (50% for preview)
-        int fillWidth = w / 2;
-        RoundRectangle2D fill = new RoundRectangle2D.Float(
-            x, y, fillWidth, h, descriptor.cornerRadius * 2, descriptor.cornerRadius * 2
-        );
+        // Draw fill (50% for preview)
+        int fillWidth = (int)(w * descriptor.value);
         g.setColor(descriptor.fillColor);
-        g.fill(fill);
+        g.fillRoundRect(x, y, fillWidth, h, 4, 4);
 
-        // Draw handle
-        int handleX = x + fillWidth - h / 2;
-        g.setColor(descriptor.handleColor);
-        g.fillOval(handleX, y, h, h);
+        // Draw percentage text if enabled
+        if (descriptor.showPercentage) {
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("Arial", Font.BOLD, Math.min(h - 4, 12)));
+            FontMetrics fm = g.getFontMetrics();
+            String text = (int)(descriptor.value * 100) + "%";
+            int textX = x + (w - fm.stringWidth(text)) / 2;
+            int textY = y + (h - fm.getHeight()) / 2 + fm.getAscent();
+            g.drawString(text, textX, textY);
+        }
 
         // Draw border
-        g.setColor(selected ? selectedBorderColor : borderColor);
+        g.setColor(selected ? selectedBorderColor : descriptor.borderColor);
         g.setStroke(new BasicStroke(selected ? 2 : 1));
-        g.draw(track);
+        g.drawRoundRect(x, y, w, h, 4, 4);
 
         // Draw type label
         g.setColor(new Color(150, 150, 150));
         g.setFont(new Font("Arial", Font.PLAIN, 10));
-        g.drawString("Slider - " + descriptor.varName, x, y - 5);
+        g.drawString("ProgressBar - " + descriptor.varName, x, y - 5);
 
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
     }
@@ -159,7 +164,7 @@ public class SliderBP extends GameObject implements UIBlueprint, Resizable {
     // === UIBlueprint Interface ===
 
     @Override
-    public String getTypeName() { return "Slider"; }
+    public String getTypeName() { return "ProgressBar"; }
 
     @Override
     public String getVarName() { return descriptor.varName; }
@@ -192,16 +197,10 @@ public class SliderBP extends GameObject implements UIBlueprint, Resizable {
 
     // === Getters/Setters ===
 
-    public SliderDescriptor getDescriptor() { return descriptor; }
+    public ProgressBarDescriptor getDescriptor() { return descriptor; }
 
-    public void setMinValue(float val) { descriptor.minValue = val; }
-    public float getMinValue() { return descriptor.minValue; }
-
-    public void setMaxValue(float val) { descriptor.maxValue = val; }
-    public float getMaxValue() { return descriptor.maxValue; }
-
-    public void setStartValue(float val) { descriptor.startValue = val; }
-    public float getStartValue() { return descriptor.startValue; }
+    public void setValue(float value) { descriptor.value = Math.max(0, Math.min(1, value)); }
+    public float getValue() { return descriptor.value; }
 
     public void setBackgroundColor(Color c) { descriptor.backgroundColor = c; }
     public Color getBackgroundColor() { return descriptor.backgroundColor; }
@@ -209,17 +208,14 @@ public class SliderBP extends GameObject implements UIBlueprint, Resizable {
     public void setFillColor(Color c) { descriptor.fillColor = c; }
     public Color getFillColor() { return descriptor.fillColor; }
 
-    public void setHandleColor(Color c) { descriptor.handleColor = c; }
-    public Color getHandleColor() { return descriptor.handleColor; }
+    public void setBorderColor(Color c) { descriptor.borderColor = c; }
+    public Color getBorderColorValue() { return descriptor.borderColor; }
 
-    public void setCornerRadius(int r) { descriptor.cornerRadius = r; }
-    public int getCornerRadius() { return descriptor.cornerRadius; }
+    public void setShowPercentage(boolean show) { descriptor.showPercentage = show; }
+    public boolean getShowPercentage() { return descriptor.showPercentage; }
 
-    public void setShowValue(boolean show) { descriptor.showValue = show; }
-    public boolean getShowValue() { return descriptor.showValue; }
-
-    public void setLabel(String label) { descriptor.label = label; }
-    public String getLabel() { return descriptor.label; }
+    public void setAnimated(boolean animated) { descriptor.animated = animated; }
+    public boolean getAnimated() { return descriptor.animated; }
 
     @Override
     public Vector2 getMinSize() { return minSize; }

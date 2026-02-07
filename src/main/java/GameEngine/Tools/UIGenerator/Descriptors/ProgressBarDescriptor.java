@@ -5,21 +5,18 @@ import GameEngine.Core.util.Vector2;
 import java.awt.*;
 
 /**
- * Descriptor containing all data needed to generate Slider builder code.
+ * Descriptor containing all data needed to generate ProgressBar builder code.
  */
-public class SliderDescriptor {
-    public String varName = "slider";
+public class ProgressBarDescriptor {
+    public String varName = "progressBar";
     public Vector2 pos = new Vector2(0, 0);
     public Vector2 size = new Vector2(200, 20);
-    public float minValue = 0f;
-    public float maxValue = 100f;
-    public float startValue = 50f;
-    public Color backgroundColor = new Color(60, 60, 60);
-    public Color fillColor = new Color(100, 150, 255);
-    public Color handleColor = Color.WHITE;
-    public int cornerRadius = 5;
-    public boolean showValue = false;
-    public String label = "";
+    public float value = 0.5f;
+    public Color backgroundColor = new Color(40, 40, 40);
+    public Color fillColor = new Color(100, 200, 100);
+    public Color borderColor = Color.GRAY;
+    public boolean showPercentage = true;
+    public boolean animated = true;
 
     // For relative position calculation
     public Vector2 canvasOffset = new Vector2(0, 0);
@@ -28,7 +25,7 @@ public class SliderDescriptor {
     public int targetHeight = 864;
 
     /**
-     * Generates the Builder code for this slider with relative positioning.
+     * Generates the Builder code for this ProgressBar with relative positioning.
      */
     public String toBuilderCode() {
         // Calculate relative position within canvas
@@ -44,26 +41,18 @@ public class SliderDescriptor {
         int targetH = (int)(size.y * scaleY);
 
         StringBuilder sb = new StringBuilder();
-        sb.append(varName).append(" = new Slider.Builder()\n");
+        sb.append(varName).append(" = new ProgressBar.Builder()\n");
         sb.append("        .pos(new Vector2(").append(targetX).append(", ").append(targetY).append("))\n");
-        sb.append("        .size(").append(targetW).append(", ").append(targetH).append(")\n");
-        sb.append("        .range(").append(minValue).append("f, ").append(maxValue).append("f)\n");
-        sb.append("        .startValue(").append(startValue).append("f)\n");
+        sb.append("        .size(new Vector2(").append(targetW).append(", ").append(targetH).append("))\n");
+        sb.append("        .value(").append(value).append("f)\n");
         sb.append("        .backgroundColor(new Color(").append(backgroundColor.getRed()).append(", ")
           .append(backgroundColor.getGreen()).append(", ").append(backgroundColor.getBlue()).append("))\n");
         sb.append("        .fillColor(new Color(").append(fillColor.getRed()).append(", ")
           .append(fillColor.getGreen()).append(", ").append(fillColor.getBlue()).append("))\n");
-        sb.append("        .handleColor(new Color(").append(handleColor.getRed()).append(", ")
-          .append(handleColor.getGreen()).append(", ").append(handleColor.getBlue()).append("))\n");
-        if (cornerRadius > 0) {
-            sb.append("        .cornerRadius(").append(cornerRadius).append(")\n");
-        }
-        if (showValue) {
-            sb.append("        .showValue(true)\n");
-        }
-        if (!label.isEmpty()) {
-            sb.append("        .label(\"").append(label).append("\")\n");
-        }
+        sb.append("        .borderColor(new Color(").append(borderColor.getRed()).append(", ")
+          .append(borderColor.getGreen()).append(", ").append(borderColor.getBlue()).append("))\n");
+        sb.append("        .showPercentage(").append(showPercentage).append(")\n");
+        sb.append("        .animated(").append(animated).append(")\n");
         sb.append("        .build();");
         return sb.toString();
     }

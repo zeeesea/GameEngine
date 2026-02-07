@@ -12,13 +12,12 @@ import java.awt.geom.RoundRectangle2D;
  * Blueprint for UIRect elements in the UI Generator.
  * Can be dragged, resized, and configured.
  */
-public class UIRectBP extends GameObject implements UIBlueprint {
+public class UIRectBP extends GameObject implements UIBlueprint, Resizable {
 
     private UIRectDescriptor descriptor = new UIRectDescriptor();
 
     private Color borderColor = new Color(100, 100, 100);
     private Color selectedBorderColor = new Color(0, 150, 255);
-    private int cornerHandleSize = 12;
     private Vector2 minSize = new Vector2(30, 30);
 
     private boolean selected = false;
@@ -214,138 +213,9 @@ public class UIRectBP extends GameObject implements UIBlueprint {
     public void setHasFill(boolean has) { descriptor.hasFill = has; }
     public boolean getHasFill() { return descriptor.hasFill; }
 
+    @Override
     public Vector2 getMinSize() { return minSize; }
+
+    @Override
     public Rectangle getCanvasBounds() { return canvasBounds; }
-
-    // === Resize Handle Inner Class ===
-
-    private class ResizeHandle extends GameObject {
-        enum Position { TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT }
-
-        private final Position pos;
-        private final UIRectBP owner;
-        private Color normalColor = new Color(0, 150, 255);
-        private Color hoverColor = new Color(50, 200, 255);
-        private boolean hovering = false;
-
-        public ResizeHandle(Position pos, UIRectBP owner) {
-            this.pos = pos;
-            this.owner = owner;
-            transform.scale = new Vector2(cornerHandleSize, cornerHandleSize);
-        }
-
-        @Override
-        public void init() {
-            renderOrder = 15;
-        }
-
-        @Override
-        public void update(double deltaTime) {
-            Vector2 cornerPos = getCornerPosition();
-            transform.setPositionCentered(cornerPos);
-
-            Vector2 mousePos = Input.getMousePosition();
-            hovering = mousePos.distance(cornerPos) < cornerHandleSize;
-
-            if (hovering || isDragging()) {
-                draggable(Input.MouseCode.LEFT);
-            }
-
-            if (isDragging()) {
-                resize();
-            }
-        }
-
-        private Vector2 getCornerPosition() {
-            Vector2 ownerPos = owner.transform.position;
-            Vector2 ownerSize = owner.transform.scale;
-
-            switch (pos) {
-                case TOP_LEFT: return ownerPos.copy();
-                case TOP_RIGHT: return new Vector2(ownerPos.x + ownerSize.x, ownerPos.y);
-                case BOTTOM_LEFT: return new Vector2(ownerPos.x, ownerPos.y + ownerSize.y);
-                case BOTTOM_RIGHT: return ownerPos.add(ownerSize);
-                default: return ownerPos;
-            }
-        }
-
-        private void resize() {
-            Vector2 mousePos = Input.getMousePosition();
-            Vector2 ownerPos = owner.transform.position;
-            Vector2 ownerSize = owner.transform.scale;
-            Vector2 minSize = owner.getMinSize();
-            Rectangle bounds = owner.getCanvasBounds();
-
-            switch (pos) {
-                case TOP_LEFT: {
-                    float newW = (ownerPos.x + ownerSize.x) - mousePos.x;
-                    float newH = (ownerPos.y + ownerSize.y) - mousePos.y;
-
-                    if (newW >= minSize.x && (bounds == null || mousePos.x >= bounds.x)) {
-                        owner.transform.position.x = mousePos.x;
-                        owner.transform.scale.x = newW;
-                    }
-                    if (newH >= minSize.y && (bounds == null || mousePos.y >= bounds.y)) {
-                        owner.transform.position.y = mousePos.y;
-                        owner.transform.scale.y = newH;
-                    }
-                    break;
-                }
-                case TOP_RIGHT: {
-                    float newW = mousePos.x - ownerPos.x;
-                    float newH = (ownerPos.y + ownerSize.y) - mousePos.y;
-
-                    if (newW >= minSize.x && (bounds == null || mousePos.x <= bounds.x + bounds.width)) {
-                        owner.transform.scale.x = newW;
-                    }
-                    if (newH >= minSize.y && (bounds == null || mousePos.y >= bounds.y)) {
-                        owner.transform.position.y = mousePos.y;
-                        owner.transform.scale.y = newH;
-                    }
-                    break;
-                }
-                case BOTTOM_LEFT: {
-                    float newW = (ownerPos.x + ownerSize.x) - mousePos.x;
-                    float newH = mousePos.y - ownerPos.y;
-
-                    if (newW >= minSize.x && (bounds == null || mousePos.x >= bounds.x)) {
-                        owner.transform.position.x = mousePos.x;
-                        owner.transform.scale.x = newW;
-                    }
-                    if (newH >= minSize.y && (bounds == null || mousePos.y <= bounds.y + bounds.height)) {
-                        owner.transform.scale.y = newH;
-                    }
-                    break;
-                }
-                case BOTTOM_RIGHT: {
-                    float newW = mousePos.x - ownerPos.x;
-                    float newH = mousePos.y - ownerPos.y;
-
-                    if (newW >= minSize.x && (bounds == null || mousePos.x <= bounds.x + bounds.width)) {
-                        owner.transform.scale.x = newW;
-                    }
-                    if (newH >= minSize.y && (bounds == null || mousePos.y <= bounds.y + bounds.height)) {
-                        owner.transform.scale.y = newH;
-                    }
-                    break;
-                }
-            }
-        }
-
-        @Override
-        public void draw(Graphics2D g) {
-            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g.setColor(hovering || isDragging() ? hoverColor : normalColor);
-            g.fillOval(
-                transform.position.xToInt(),
-                transform.position.yToInt(),
-                transform.scale.xToInt(),
-                transform.scale.yToInt()
-            );
-            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-        }
-
-        @Override
-        public void onCollision(GameObject collider) {}
-    }
 }

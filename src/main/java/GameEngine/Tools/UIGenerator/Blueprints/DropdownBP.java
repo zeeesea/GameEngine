@@ -3,34 +3,34 @@ package GameEngine.Tools.UIGenerator.Blueprints;
 import GameEngine.Core.gameObject.GameObject;
 import GameEngine.Core.input.Input;
 import GameEngine.Core.util.Vector2;
-import GameEngine.Tools.UIGenerator.Descriptors.SliderDescriptor;
+import GameEngine.Tools.UIGenerator.Descriptors.DropdownDescriptor;
 
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 
 /**
- * Blueprint for Slider elements in the UI Generator.
+ * Blueprint for Dropdown elements in the UI Generator.
  * Can be dragged, resized, and configured.
  */
-public class SliderBP extends GameObject implements UIBlueprint, Resizable {
+public class DropdownBP extends GameObject implements UIBlueprint, Resizable {
 
-    private SliderDescriptor descriptor = new SliderDescriptor();
+    private DropdownDescriptor descriptor = new DropdownDescriptor();
 
     private Color borderColor = new Color(100, 100, 100);
     private Color selectedBorderColor = new Color(0, 150, 255);
-    private Vector2 minSize = new Vector2(80, 15);
+    private Vector2 minSize = new Vector2(80, 25);
 
     private boolean selected = false;
     private ResizeHandle[] handles;
     private Rectangle canvasBounds;
 
-    private SliderBP() {}
+    private DropdownBP() {}
 
     public static class Builder {
         private Vector2 pos = new Vector2(100, 100);
-        private Vector2 size = new Vector2(200, 20);
+        private Vector2 size = new Vector2(200, 30);
         private Rectangle canvasBounds;
-        private String varName = "slider";
+        private String varName = "dropdown";
 
         public Builder pos(Vector2 pos) {
             this.pos = pos;
@@ -52,8 +52,8 @@ public class SliderBP extends GameObject implements UIBlueprint, Resizable {
             return this;
         }
 
-        public SliderBP build() {
-            SliderBP bp = new SliderBP();
+        public DropdownBP build() {
+            DropdownBP bp = new DropdownBP();
             bp.transform.position = pos.copy();
             bp.transform.scale = size.copy();
             bp.canvasBounds = canvasBounds;
@@ -71,6 +71,7 @@ public class SliderBP extends GameObject implements UIBlueprint, Resizable {
     @Override
     public void init() {
         renderOrder = 10;
+
         handles = new ResizeHandle[4];
         handles[0] = new ResizeHandle(ResizeHandle.Position.TOP_LEFT, this);
         handles[1] = new ResizeHandle(ResizeHandle.Position.TOP_RIGHT, this);
@@ -103,6 +104,9 @@ public class SliderBP extends GameObject implements UIBlueprint, Resizable {
                 Math.min(canvasBounds.y + canvasBounds.height - transform.scale.y, transform.position.y));
         }
 
+        transform.scale.x = Math.max(minSize.x, transform.scale.x);
+        transform.scale.y = Math.max(minSize.y, transform.scale.y);
+
         descriptor.pos = transform.position.copy();
         descriptor.size = transform.scale.copy();
 
@@ -120,35 +124,41 @@ public class SliderBP extends GameObject implements UIBlueprint, Resizable {
 
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // Draw slider track background
-        RoundRectangle2D track = new RoundRectangle2D.Float(
+        // Draw background
+        RoundRectangle2D roundRect = new RoundRectangle2D.Float(
             x, y, w, h, descriptor.cornerRadius * 2, descriptor.cornerRadius * 2
         );
         g.setColor(descriptor.backgroundColor);
-        g.fill(track);
+        g.fill(roundRect);
 
-        // Draw filled portion (50% for preview)
-        int fillWidth = w / 2;
-        RoundRectangle2D fill = new RoundRectangle2D.Float(
-            x, y, fillWidth, h, descriptor.cornerRadius * 2, descriptor.cornerRadius * 2
+        // Draw selected option text
+        g.setColor(descriptor.textColor);
+        Font font = new Font("Arial", Font.PLAIN, descriptor.fontSize);
+        g.setFont(font);
+        FontMetrics fm = g.getFontMetrics();
+        String displayText = descriptor.options.isEmpty() ? "Select..." : descriptor.options.get(0);
+        int textY = y + (h - fm.getHeight()) / 2 + fm.getAscent();
+        g.drawString(displayText, x + 10, textY);
+
+        // Draw dropdown arrow
+        int arrowSize = 8;
+        int arrowX = x + w - 20;
+        int arrowY = y + h / 2 - 2;
+        g.fillPolygon(
+            new int[]{arrowX, arrowX + arrowSize, arrowX + arrowSize / 2},
+            new int[]{arrowY, arrowY, arrowY + arrowSize / 2},
+            3
         );
-        g.setColor(descriptor.fillColor);
-        g.fill(fill);
-
-        // Draw handle
-        int handleX = x + fillWidth - h / 2;
-        g.setColor(descriptor.handleColor);
-        g.fillOval(handleX, y, h, h);
 
         // Draw border
-        g.setColor(selected ? selectedBorderColor : borderColor);
+        g.setColor(selected ? selectedBorderColor : descriptor.borderColor);
         g.setStroke(new BasicStroke(selected ? 2 : 1));
-        g.draw(track);
+        g.draw(roundRect);
 
         // Draw type label
         g.setColor(new Color(150, 150, 150));
         g.setFont(new Font("Arial", Font.PLAIN, 10));
-        g.drawString("Slider - " + descriptor.varName, x, y - 5);
+        g.drawString("Dropdown - " + descriptor.varName, x, y - 5);
 
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
     }
@@ -159,7 +169,7 @@ public class SliderBP extends GameObject implements UIBlueprint, Resizable {
     // === UIBlueprint Interface ===
 
     @Override
-    public String getTypeName() { return "Slider"; }
+    public String getTypeName() { return "Dropdown"; }
 
     @Override
     public String getVarName() { return descriptor.varName; }
@@ -192,34 +202,22 @@ public class SliderBP extends GameObject implements UIBlueprint, Resizable {
 
     // === Getters/Setters ===
 
-    public SliderDescriptor getDescriptor() { return descriptor; }
-
-    public void setMinValue(float val) { descriptor.minValue = val; }
-    public float getMinValue() { return descriptor.minValue; }
-
-    public void setMaxValue(float val) { descriptor.maxValue = val; }
-    public float getMaxValue() { return descriptor.maxValue; }
-
-    public void setStartValue(float val) { descriptor.startValue = val; }
-    public float getStartValue() { return descriptor.startValue; }
+    public DropdownDescriptor getDescriptor() { return descriptor; }
 
     public void setBackgroundColor(Color c) { descriptor.backgroundColor = c; }
     public Color getBackgroundColor() { return descriptor.backgroundColor; }
 
-    public void setFillColor(Color c) { descriptor.fillColor = c; }
-    public Color getFillColor() { return descriptor.fillColor; }
+    public void setTextColor(Color c) { descriptor.textColor = c; }
+    public Color getTextColor() { return descriptor.textColor; }
 
-    public void setHandleColor(Color c) { descriptor.handleColor = c; }
-    public Color getHandleColor() { return descriptor.handleColor; }
+    public void setBorderColor(Color c) { descriptor.borderColor = c; }
+    public Color getBorderColorValue() { return descriptor.borderColor; }
 
-    public void setCornerRadius(int r) { descriptor.cornerRadius = r; }
+    public void setCornerRadius(int radius) { descriptor.cornerRadius = radius; }
     public int getCornerRadius() { return descriptor.cornerRadius; }
 
-    public void setShowValue(boolean show) { descriptor.showValue = show; }
-    public boolean getShowValue() { return descriptor.showValue; }
-
-    public void setLabel(String label) { descriptor.label = label; }
-    public String getLabel() { return descriptor.label; }
+    public void setFontSize(int size) { descriptor.fontSize = size; }
+    public int getFontSize() { return descriptor.fontSize; }
 
     @Override
     public Vector2 getMinSize() { return minSize; }

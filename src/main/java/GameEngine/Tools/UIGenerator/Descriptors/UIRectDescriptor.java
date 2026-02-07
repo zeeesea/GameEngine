@@ -41,7 +41,7 @@ public class UIRectDescriptor {
         int targetH = (int)(size.y * scaleY);
 
         StringBuilder sb = new StringBuilder();
-        sb.append("UIRect ").append(varName).append(" = new UIRect.Builder()\n");
+        sb.append(varName).append(" = new UIRect.Builder()\n");
         sb.append("        .rect(new Rectangle(").append(targetX).append(", ").append(targetY)
           .append(", ").append(targetW).append(", ").append(targetH).append("))\n");
         sb.append("        .fillColor(new Color(").append(fillColor.getRed()).append(", ")

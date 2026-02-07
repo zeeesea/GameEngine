@@ -5,16 +5,16 @@ import GameEngine.Core.util.Vector2;
 import java.awt.*;
 
 /**
- * Descriptor containing all data needed to generate CheckBox builder code.
+ * Descriptor containing all data needed to generate RadioButton builder code.
  */
-public class CheckBoxDescriptor {
-    public String varName = "checkBox";
+public class RadioButtonDescriptor {
+    public String varName = "radioButton";
     public Vector2 pos = new Vector2(0, 0);
-    public String label = "CheckBox";
-    public boolean checked = false;
-    public int boxSize = 20;
-    public Color boxColor = new Color(40, 40, 40);
-    public Color checkedColor = new Color(100, 200, 100);
+    public String label = "Radio Button";
+    public String groupName = "default";
+    public int circleSize = 20;
+    public Color circleColor = new Color(40, 40, 40);
+    public Color selectedColor = new Color(100, 200, 100);
     public Color labelColor = Color.WHITE;
     public int fontSize = 14;
 
@@ -25,7 +25,7 @@ public class CheckBoxDescriptor {
     public int targetHeight = 864;
 
     /**
-     * Generates the Builder code for this checkbox with relative positioning.
+     * Generates the Builder code for this RadioButton with relative positioning.
      */
     public String toBuilderCode() {
         // Calculate relative position within canvas
@@ -35,17 +35,15 @@ public class CheckBoxDescriptor {
         int targetY = (int)(relY * targetHeight);
 
         StringBuilder sb = new StringBuilder();
-        sb.append(varName).append(" = new CheckBox.Builder()\n");
+        sb.append(varName).append(" = new RadioButton.Builder()\n");
         sb.append("        .pos(new Vector2(").append(targetX).append(", ").append(targetY).append("))\n");
         sb.append("        .label(\"").append(label).append("\")\n");
-        if (checked) {
-            sb.append("        .checked(true)\n");
-        }
-        sb.append("        .boxSize(").append(boxSize).append(")\n");
-        sb.append("        .boxColor(new Color(").append(boxColor.getRed()).append(", ")
-          .append(boxColor.getGreen()).append(", ").append(boxColor.getBlue()).append("))\n");
-        sb.append("        .checkedColor(new Color(").append(checkedColor.getRed()).append(", ")
-          .append(checkedColor.getGreen()).append(", ").append(checkedColor.getBlue()).append("))\n");
+        sb.append("        .group(\"").append(groupName).append("\")\n");
+        sb.append("        .circleSize(").append(circleSize).append(")\n");
+        sb.append("        .circleColor(new Color(").append(circleColor.getRed()).append(", ")
+          .append(circleColor.getGreen()).append(", ").append(circleColor.getBlue()).append("))\n");
+        sb.append("        .selectedColor(new Color(").append(selectedColor.getRed()).append(", ")
+          .append(selectedColor.getGreen()).append(", ").append(selectedColor.getBlue()).append("))\n");
         sb.append("        .labelColor(new Color(").append(labelColor.getRed()).append(", ")
           .append(labelColor.getGreen()).append(", ").append(labelColor.getBlue()).append("))\n");
         sb.append("        .labelFont(new Font(\"Arial\", Font.PLAIN, ").append(fontSize).append("))\n");

@@ -97,7 +97,11 @@ public class UIGenerator extends GameEngine {
         UIRECT("UIRect"),
         SLIDER("Slider"),
         TEXT("Text"),
-        CHECKBOX("CheckBox");
+        CHECKBOX("CheckBox"),
+        TEXTFIELD("TextField"),
+        DROPDOWN("Dropdown"),
+        PROGRESSBAR("ProgressBar"),
+        RADIOBUTTON("RadioButton");
 
         private final String name;
         ElementType(String name) { this.name = name; }
@@ -184,7 +188,7 @@ public class UIGenerator extends GameEngine {
         objectManager.add(addButton);
 
         // Element Type Dropdown (renders on top)
-        String[] typeOptions = {"Button", "UIRect", "Slider", "Text", "CheckBox"};
+        String[] typeOptions = {"Button", "UIRect", "Slider", "Text", "CheckBox", "TextField", "Dropdown", "ProgressBar", "RadioButton"};
         Dropdown dropdown = new Dropdown.Builder()
                 .rect(new Rectangle(PADDING, y, fieldWidth - 70, ELEMENT_HEIGHT))
                 .options(typeOptions)
@@ -192,6 +196,7 @@ public class UIGenerator extends GameEngine {
                 .backgroundColor(new Color(50, 50, 55))
                 .borderColor(BORDER_COLOR)
                 .textColor(TEXT_COLOR)
+                .maxVisibleItems(100)
                 .cornerRadius(CORNER_RADIUS)
                 .onSelectionChanged(name -> currentElementType = ElementType.fromName(name))
                 .build();
@@ -643,6 +648,81 @@ public class UIGenerator extends GameEngine {
                 row3Label.setText("Box Size: 20");
                 row3Slider.setActive(true);
                 break;
+
+            case "TextField":
+                // Placeholder
+                row1Label.setActive(true);
+                row1Label.setText("Placeholder");
+                row1Field1.setActive(true);
+                row1Field1.setPlaceholder("Placeholder text");
+                // Colors: Background, Text
+                colorsLabel.setActive(true);
+                colorButton.setActive(true);
+                colorButton.setText("Background");
+                colorButton2.setActive(true);
+                colorButton2.setText("Text");
+                // Font Size
+                row2Label.setActive(true);
+                row2Label.setText("Font Size: 16");
+                row2Slider.setActive(true);
+                // Corner Radius
+                cornerRadiusLabel.setActive(true);
+                cornerRadiusSlider.setActive(true);
+                break;
+
+            case "Dropdown":
+                // Colors: Background, Text
+                colorsLabel.setActive(true);
+                colorButton.setActive(true);
+                colorButton.setText("Background");
+                colorButton2.setActive(true);
+                colorButton2.setText("Text");
+                // Font Size
+                row2Label.setActive(true);
+                row2Label.setText("Font Size: 14");
+                row2Slider.setActive(true);
+                // Corner Radius
+                cornerRadiusLabel.setActive(true);
+                cornerRadiusSlider.setActive(true);
+                break;
+
+            case "ProgressBar":
+                // Colors: Background, Fill
+                colorsLabel.setActive(true);
+                colorButton.setActive(true);
+                colorButton.setText("Background");
+                colorButton2.setActive(true);
+                colorButton2.setText("Fill");
+                // Options: Show Percentage
+                row3Label.setActive(true);
+                row3Label.setText("Options");
+                row3Checkbox2.setActive(true);
+                row3Checkbox2.setLabel("Show %");
+                break;
+
+            case "RadioButton":
+                // Label, Group
+                row1Label.setActive(true);
+                row1Label.setText("Label / Group");
+                row1Field1.setActive(true);
+                row1Field1.setPlaceholder("Label");
+                row1Field2.setActive(true);
+                row1Field2.setPlaceholder("Group Name");
+                // Colors: Circle, Selected
+                colorsLabel.setActive(true);
+                colorButton.setActive(true);
+                colorButton.setText("Circle");
+                colorButton2.setActive(true);
+                colorButton2.setText("Selected");
+                // Font Size
+                row2Label.setActive(true);
+                row2Label.setText("Font Size: 14");
+                row2Slider.setActive(true);
+                // Circle Size
+                row3Label.setActive(true);
+                row3Label.setText("Circle Size: 20");
+                row3Slider.setActive(true);
+                break;
         }
     }
 
@@ -693,6 +773,37 @@ public class UIGenerator extends GameEngine {
                 break;
             case CHECKBOX:
                 newBp = new CheckBoxBP.Builder()
+                        .pos(pos)
+                        .canvasBounds(canvasBounds)
+                        .varName(varName)
+                        .build();
+                break;
+            case TEXTFIELD:
+                newBp = new TextFieldBP.Builder()
+                        .pos(pos)
+                        .size(new Vector2(200, 40))
+                        .canvasBounds(canvasBounds)
+                        .varName(varName)
+                        .build();
+                break;
+            case DROPDOWN:
+                newBp = new DropdownBP.Builder()
+                        .pos(pos)
+                        .size(new Vector2(200, 30))
+                        .canvasBounds(canvasBounds)
+                        .varName(varName)
+                        .build();
+                break;
+            case PROGRESSBAR:
+                newBp = new ProgressBarBP.Builder()
+                        .pos(pos)
+                        .size(new Vector2(200, 20))
+                        .canvasBounds(canvasBounds)
+                        .varName(varName)
+                        .build();
+                break;
+            case RADIOBUTTON:
+                newBp = new RadioButtonBP.Builder()
                         .pos(pos)
                         .canvasBounds(canvasBounds)
                         .varName(varName)
@@ -781,6 +892,44 @@ public class UIGenerator extends GameEngine {
             row3Slider.setValue(cb.getBoxSize());
             updateButtonTextColor(colorButton, cb.getBoxColor());
             updateButtonTextColor(colorButton2, cb.getCheckedColor());
+
+        } else if (selectedBlueprint instanceof TextFieldBP) {
+            TextFieldBP tf = (TextFieldBP) selectedBlueprint;
+            row1Field1.setText(tf.getPlaceholder());
+            colorButton.setColor(tf.getBackgroundColor());
+            colorButton2.setColor(tf.getTextColor());
+            row2Slider.setValue(tf.getFontSize());
+            cornerRadiusSlider.setValue(tf.getCornerRadius());
+            updateButtonTextColor(colorButton, tf.getBackgroundColor());
+            updateButtonTextColor(colorButton2, tf.getTextColor());
+
+        } else if (selectedBlueprint instanceof DropdownBP) {
+            DropdownBP dd = (DropdownBP) selectedBlueprint;
+            colorButton.setColor(dd.getBackgroundColor());
+            colorButton2.setColor(dd.getTextColor());
+            row2Slider.setValue(dd.getFontSize());
+            cornerRadiusSlider.setValue(dd.getCornerRadius());
+            updateButtonTextColor(colorButton, dd.getBackgroundColor());
+            updateButtonTextColor(colorButton2, dd.getTextColor());
+
+        } else if (selectedBlueprint instanceof ProgressBarBP) {
+            ProgressBarBP pb = (ProgressBarBP) selectedBlueprint;
+            colorButton.setColor(pb.getBackgroundColor());
+            colorButton2.setColor(pb.getFillColor());
+            row3Checkbox2.setChecked(pb.getShowPercentage());
+            updateButtonTextColor(colorButton, pb.getBackgroundColor());
+            updateButtonTextColor(colorButton2, pb.getFillColor());
+
+        } else if (selectedBlueprint instanceof RadioButtonBP) {
+            RadioButtonBP rb = (RadioButtonBP) selectedBlueprint;
+            row1Field1.setText(rb.getLabel());
+            row1Field2.setText(rb.getGroupName());
+            colorButton.setColor(rb.getCircleColor());
+            colorButton2.setColor(rb.getSelectedColor());
+            row2Slider.setValue(rb.getFontSize());
+            row3Slider.setValue(rb.getCircleSize());
+            updateButtonTextColor(colorButton, rb.getCircleColor());
+            updateButtonTextColor(colorButton2, rb.getSelectedColor());
         }
     }
 
@@ -808,6 +957,10 @@ public class UIGenerator extends GameEngine {
             ((TextBP) selectedBlueprint).setText(value);
         } else if (selectedBlueprint instanceof CheckBoxBP) {
             ((CheckBoxBP) selectedBlueprint).setLabel(value);
+        } else if (selectedBlueprint instanceof TextFieldBP) {
+            ((TextFieldBP) selectedBlueprint).setPlaceholder(value);
+        } else if (selectedBlueprint instanceof RadioButtonBP) {
+            ((RadioButtonBP) selectedBlueprint).setLabel(value);
         }
     }
 
@@ -818,6 +971,8 @@ public class UIGenerator extends GameEngine {
             ((ButtonBP) selectedBlueprint).setText(value);
         } else if (selectedBlueprint instanceof SliderBP) {
             try { ((SliderBP) selectedBlueprint).setMaxValue(Float.parseFloat(value)); } catch (NumberFormatException ignored) {}
+        } else if (selectedBlueprint instanceof RadioButtonBP) {
+            ((RadioButtonBP) selectedBlueprint).setGroupName(value);
         }
     }
 
@@ -839,6 +994,14 @@ public class UIGenerator extends GameEngine {
                 ((TextBP) selectedBlueprint).setColor(color);
             } else if (selectedBlueprint instanceof CheckBoxBP) {
                 ((CheckBoxBP) selectedBlueprint).setBoxColor(color);
+            } else if (selectedBlueprint instanceof TextFieldBP) {
+                ((TextFieldBP) selectedBlueprint).setBackgroundColor(color);
+            } else if (selectedBlueprint instanceof DropdownBP) {
+                ((DropdownBP) selectedBlueprint).setBackgroundColor(color);
+            } else if (selectedBlueprint instanceof ProgressBarBP) {
+                ((ProgressBarBP) selectedBlueprint).setBackgroundColor(color);
+            } else if (selectedBlueprint instanceof RadioButtonBP) {
+                ((RadioButtonBP) selectedBlueprint).setCircleColor(color);
             }
             colorButton.setColor(color);
             updateButtonTextColor(colorButton, color);
@@ -855,6 +1018,14 @@ public class UIGenerator extends GameEngine {
                 ((SliderBP) selectedBlueprint).setHandleColor(color);
             } else if (selectedBlueprint instanceof CheckBoxBP) {
                 ((CheckBoxBP) selectedBlueprint).setCheckedColor(color);
+            } else if (selectedBlueprint instanceof TextFieldBP) {
+                ((TextFieldBP) selectedBlueprint).setTextColor(color);
+            } else if (selectedBlueprint instanceof DropdownBP) {
+                ((DropdownBP) selectedBlueprint).setTextColor(color);
+            } else if (selectedBlueprint instanceof ProgressBarBP) {
+                ((ProgressBarBP) selectedBlueprint).setFillColor(color);
+            } else if (selectedBlueprint instanceof RadioButtonBP) {
+                ((RadioButtonBP) selectedBlueprint).setSelectedColor(color);
             }
             colorButton2.setColor(color);
             updateButtonTextColor(colorButton2, color);
@@ -871,6 +1042,15 @@ public class UIGenerator extends GameEngine {
         } else if (selectedBlueprint instanceof CheckBoxBP) {
             row2Label.setText("Font Size: " + (int) value);
             ((CheckBoxBP) selectedBlueprint).setFontSize((int) value);
+        } else if (selectedBlueprint instanceof TextFieldBP) {
+            row2Label.setText("Font Size: " + (int) value);
+            ((TextFieldBP) selectedBlueprint).setFontSize((int) value);
+        } else if (selectedBlueprint instanceof DropdownBP) {
+            row2Label.setText("Font Size: " + (int) value);
+            ((DropdownBP) selectedBlueprint).setFontSize((int) value);
+        } else if (selectedBlueprint instanceof RadioButtonBP) {
+            row2Label.setText("Font Size: " + (int) value);
+            ((RadioButtonBP) selectedBlueprint).setFontSize((int) value);
         }
     }
 
@@ -897,6 +1077,10 @@ public class UIGenerator extends GameEngine {
             ((ButtonBP) selectedBlueprint).setCornerRadius((int) value);
         } else if (selectedBlueprint instanceof SliderBP) {
             ((SliderBP) selectedBlueprint).setCornerRadius((int) value);
+        } else if (selectedBlueprint instanceof TextFieldBP) {
+            ((TextFieldBP) selectedBlueprint).setCornerRadius((int) value);
+        } else if (selectedBlueprint instanceof DropdownBP) {
+            ((DropdownBP) selectedBlueprint).setCornerRadius((int) value);
         }
     }
 
@@ -908,12 +1092,18 @@ public class UIGenerator extends GameEngine {
             row3Label.setText("Box Size: " + (int) value);
             value = MathUtils.map(value, 0, 40, 10, 40);
             ((CheckBoxBP) selectedBlueprint).setBoxSize((int) value);
+        } else if (selectedBlueprint instanceof RadioButtonBP) {
+            row3Label.setText("Circle Size: " + (int) value);
+            value = MathUtils.map(value, 0, 40, 10, 40);
+            ((RadioButtonBP) selectedBlueprint).setCircleSize((int) value);
         }
     }
 
     private void updateRow3Checkbox2(boolean checked) {
         if (selectedBlueprint instanceof SliderBP) {
             ((SliderBP) selectedBlueprint).setShowValue(checked);
+        } else if (selectedBlueprint instanceof ProgressBarBP) {
+            ((ProgressBarBP) selectedBlueprint).setShowPercentage(checked);
         }
     }
 

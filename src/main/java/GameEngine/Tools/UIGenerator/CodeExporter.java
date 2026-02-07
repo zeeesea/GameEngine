@@ -24,6 +24,7 @@ public class CodeExporter {
 
     /**
      * Generates Java code for all blueprints.
+     * Outputs declarations first, then initializations.
      *
      * @param blueprints List of UI blueprints
      * @return Generated code as string
@@ -34,9 +35,17 @@ public class CodeExporter {
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append("// === Generated UI Code ===\n");
+        sb.append("// === Generated UI Code ===\n\n");
 
-        // Generate code for each blueprint
+        // First: Generate all declarations
+        sb.append("// --- Declarations ---\n");
+        for (UIBlueprint bp : blueprints) {
+            sb.append(bp.getTypeName()).append(" ").append(bp.getVarName()).append(";\n");
+        }
+        sb.append("\n");
+
+        // Second: Generate all initializations
+        sb.append("// --- Initializations ---\n");
         for (int i = 0; i < blueprints.size(); i++) {
             UIBlueprint bp = blueprints.get(i);
             sb.append("// ").append(bp.getTypeName()).append(": ").append(bp.getVarName()).append("\n");
@@ -64,6 +73,7 @@ public class CodeExporter {
         if (blueprint == null) {
             return "";
         }
-        return blueprint.toBuilderCode() + "\nobjectManager.add(" + blueprint.getVarName() + ");";
+        return blueprint.getTypeName() + " " + blueprint.getVarName() + ";\n\n" +
+               blueprint.toBuilderCode() + "\nobjectManager.add(" + blueprint.getVarName() + ");";
     }
 }

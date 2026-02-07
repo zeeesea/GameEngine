@@ -45,7 +45,7 @@ public class ButtonDescriptor {
         int targetH = (int)(size.y * scaleY);
 
         StringBuilder sb = new StringBuilder();
-        sb.append("Button ").append(varName).append(" = new Button.Builder()\n");
+        sb.append(varName).append(" = new Button.Builder()\n");
         sb.append("        .rect(new Rectangle(").append(targetX).append(", ").append(targetY)
           .append(", ").append(targetW).append(", ").append(targetH).append("))\n");
         sb.append("        .color(new Color(").append(color.getRed()).append(", ")
