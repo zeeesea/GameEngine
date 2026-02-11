@@ -70,6 +70,47 @@ public class StyledString {
     }
     //</editor-fold>
 
+    //<editor-fold desc="APPEND/CLEAR METHODS">
+    /**
+     * Appends text with the specified color.
+     * @return this StyledString for chaining
+     */
+    public StyledString append(String text, Color color) {
+        if (text != null && !text.isEmpty()) {
+            segments.add(new StyledSegment(text, color));
+        }
+        return this;
+    }
+
+    /**
+     * Appends text with white color (default).
+     * @return this StyledString for chaining
+     */
+    public StyledString append(String text) {
+        return append(text, Color.WHITE);
+    }
+
+    /**
+     * Appends another styled string.
+     * @return this StyledString for chaining
+     */
+    public StyledString append(StyledString styledString) {
+        if (styledString != null) {
+            segments.addAll(styledString.segments);
+        }
+        return this;
+    }
+
+    /**
+     * Clears all segments from this styled string.
+     * @return this StyledString for chaining
+     */
+    public StyledString clear() {
+        segments.clear();
+        return this;
+    }
+    //</editor-fold>
+
     //<editor-fold desc="BUILDER">
     /**
      * Builder for creating styled strings with multiple colored segments.
